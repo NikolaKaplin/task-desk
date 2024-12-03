@@ -48,6 +48,27 @@ export async function Applications() {
   }
 }
 
+export async function updateProfile(
+  body: Prisma.UserUncheckedUpdateInput
+): Promise<ProfileEdited> {
+  try {
+    await prisma.user.update({
+      where: {
+        id: body.id as number,
+      },
+      data: {
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+      },
+    });
+    return { edit: true };
+  } catch (err) {
+    console.error(err);
+    return { edit: false };
+  }
+}
+
 export async function confirmUser(
   body: Prisma.UserUpdateInput,
   isDelete: boolean
@@ -72,6 +93,10 @@ export async function confirmUser(
 
 type RegisterResult = {
   success: boolean;
+};
+
+type ProfileEdited = {
+  edit: boolean;
 };
 
 export async function countUnverifiedUsers() {

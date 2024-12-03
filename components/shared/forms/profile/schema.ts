@@ -17,18 +17,7 @@ export const profileSchema = z.object({
     .max(15, {
       message: "Фамилия пользователя должна содержать максимум 15 символов",
     }),
-  password: z
-    .string()
-    .min(6, {
-      message: "Пароль должен содержать минимум 6 символов",
-    })
-    .refine((str) => /[A-Z]/.test(str), {
-      message: "Пароль должен содержать хотя бы одну заглавную букву",
-    })
-    .refine((str) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(str), {
-      message: "Пароль должен содержать хотя бы один специальный символ",
-    })
-    .refine((str) => /[0-9]/.test(str), {
-      message: "Пароль должен содержать хотя бы одну цифру",
-    }),
+  email: z.string().email({ message: "Введите корректную почту" }),
 });
+
+export type TFormProfileValues = z.infer<typeof profileSchema>;

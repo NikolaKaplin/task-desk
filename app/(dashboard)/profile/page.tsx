@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getUserSession } from "@/lib/get-session-server";
 import { useState } from "react";
 import { ProfileForm } from "@/components/shared/forms/profile/form-profile";
+import { ProfileDialog } from "@/components/shared/profile-dialog";
 
 export default async function Home() {
   const user = await getUserSession();
@@ -42,7 +43,9 @@ export default async function Home() {
                 />
               </div>
             </div>
-            <ProfileForm />
+            <ProfileDialog>
+              <ProfileForm />
+            </ProfileDialog>
             <h1>Email</h1>
             <Input size={20} className="min-h-10" placeholder="email" />
             <h1>About</h1>
