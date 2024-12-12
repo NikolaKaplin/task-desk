@@ -4,8 +4,11 @@ import { Prisma } from "@prisma/client";
 import React, { use } from "react";
 import { ButtonApprove } from "@/components/shared/buttonApprove";
 import { useRouter } from "next/router";
+import { getUserSession } from "@/lib/get-session-server";
 
 export default async function Home() {
+  const user = await getUserSession();
+  if (user?.role != "ADMIN") return null;
   const applications = await Applications();
   console.log({ applications });
   return (

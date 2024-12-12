@@ -63,6 +63,7 @@ export const RegisterForm: React.FC = ({}) => {
       >
         <FormInput name="firstName" label="Имя" required />
         <FormInput name="lastName" label="Фамилия" required />
+        <FormInput name="subName" label="Отчество" required />
         <FormInput name="email" label="E-Mail" required />
         <FormInput name="password" label="Пароль" type="password" required />
 

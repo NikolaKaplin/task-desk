@@ -1,4 +1,5 @@
 import {
+  Brain,
   FolderKanban,
   House,
   Icon,
@@ -36,6 +37,11 @@ export const navItems: NavItems[] = [
     title: "Projects",
     icon: <FolderKanban />,
     path: "projects",
+  },
+  {
+    title: "AI Tools",
+    icon: <Brain />,
+    path: "ai-tools",
   },
   {
     title: "Applications",
