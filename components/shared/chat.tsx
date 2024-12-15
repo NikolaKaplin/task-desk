@@ -23,18 +23,21 @@ const STORAGE_KEY = "chatMessages";
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const storedMessages = localStorage.getItem(STORAGE_KEY);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
+    setMounted(true);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    if (mounted) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    }
   }, [messages]);
 
   const scrollToBottom = () => {
