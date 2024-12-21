@@ -1,12 +1,14 @@
 "use client";
-import { CodeXml, LogOut } from "lucide-react";
-import React from "react";
+import { CircleUserRound, CodeXml, LoaderCircle, LogOut } from "lucide-react";
+import React, { useEffect } from "react";
 import { navItems } from "@/app/constants";
 import { Title } from "./title";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import NavbarItem from "./navbar-item";
+import { AvatarImage } from "../ui/avatar";
+import { Avatar } from "@radix-ui/react-avatar";
 interface Props {
   SetNumber?: number;
   className?: string;
@@ -33,6 +35,7 @@ export const Navbar: React.FC<Props> = ({
     return children;
   }
   const [indicatorsVersion, setIndicatorsVersion] = React.useState(0);
+  const { data: session, status } = useSession();
 
   return (
     <div className="flex">
@@ -60,7 +63,28 @@ export const Navbar: React.FC<Props> = ({
               ></NavbarItem>
             ))}
             <div className="grow"></div>
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center px-5">
+              {status == "loading" ? (
+                <div>
+                  <div>
+                    <LoaderCircle className="animate-spin" />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-evenly items-center w-full">
+                  {session?.user?.avatar ? (
+                    <Avatar>
+                      <AvatarImage
+                        src={session?.user.avatar}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    </Avatar>
+                  ) : (
+                    <CircleUserRound className="w-10 h-10 rounded-full" />
+                  )}
+                  <h2>{session?.user?.name}</h2>
+                </div>
+              )}
               <Button
                 className=" border border-primary bg-transparent max-w-fit items-center gap-4 m-2 p-4 cursor-pointer rounded-2xl text-primary-foreground hover:bg-stone-700 hover:text-red-500"
                 onClick={() => signOut()}

@@ -88,6 +88,7 @@ export const authOptions: AuthOptions = {
         token.id = findUser.id;
         token.email = findUser.email;
         token.name = findUser.firstName;
+        token.picture = findUser.avatar;
         token.role = findUser.role;
       }
 

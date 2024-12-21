@@ -51,7 +51,7 @@ export const FormInput: React.FC<Props> = ({
           {...register(name)}
           {...props}
         />
-        0{value && <ClearButton onClick={onClickClear} />}
+        {value && <ClearButton onClick={onClickClear} />}
       </div>
 
       {errorText && <ErrorText text={errorText} className="mt-2" />}
