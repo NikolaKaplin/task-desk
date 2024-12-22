@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import * as THREE from "three";
 import { PromptPanel } from "./promt-panel";
 import { LoaderCircle } from "lucide-react";
+import { set } from "zod";
 
 function Model({ url }: { url: string }) {
   const { scene } = useGLTF(url);
@@ -29,34 +30,34 @@ function LoadingSpinner() {
 }
 
 export default function ModelViewer() {
-  const [modelUrl, setModelUrl] = useState("");
+  const [modelUrl, setModelUrl] = useState(
+    "https://cdn-luma.com/blender_convert/114128e1-b8a3-4d62-b6e6-e020c7ec8801/a6d925ab6a96_39312cfca241_iridescent_small_al.glb"
+  );
   const [error, setError] = useState<string | null>(null);
   const [background, setBackground] = useState<string>("sunset");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => {
-    const fetchModel = async () => {
-      try {
-        const response = await fetch(
-          "https://cdn-luma.com/blender_convert/114128e1-b8a3-4d62-b6e6-e020c7ec8801/a6d925ab6a96_39312cfca241_iridescent_small_al.glb"
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setModelUrl(url);
-      } catch (error) {
-        console.error("Error fetching model:", error);
-        setError(
-          `Failed to fetch model: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-    };
-    fetchModel();
-  }, []);
+  // useEffect(() => {
+  //   const fetchModel = async () => {
+  //     try {
+  //       const response = await fetch(modelUrl);
+  //       if (!response.ok) {
+  //         throw new Error(`HTTP error! status: ${response.status}`);
+  //       }
+  //       const blob = await response.blob();
+  //       const url = URL.createObjectURL(blob);
+  //       setModelUrl(url);
+  //     } catch (error) {
+  //       console.error("Error fetching model:", error);
+  //       setError(
+  //         `Failed to fetch model: ${
+  //           error instanceof Error ? error.message : String(error)
+  //         }`
+  //       );
+  //     }
+  //   };
+  //   fetchModel();
+  // }, [modelUrl]);
 
   const handleDownload = () => {
     if (modelUrl) {
@@ -75,11 +76,28 @@ export default function ModelViewer() {
 
   const handleGenerate = async (prompt: string) => {
     setIsGenerating(true);
-    // В будущем здесь будет логика для генерации 3D модели
-    console.log("Generating model with prompt:", prompt);
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Имитация задержки генерации
-    setIsGenerating(false);
-    // После реальной генерации, здесь нужно будет обновить modelUrl
+    // api для генерации
+    const response = await fetch("/api/get3dModels", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    });
+    let dataUids = await response.json();
+    const timeout = setInterval(async () => {
+      const result = await fetch(
+        `https://webapp.engineeringlumalabs.com/api/v3/creations/uuid/${dataUids.response[0]}`
+      ).then((response) => response.json());
+      if (result.response.status !== "completed") return;
+      let model = result.response.output.filter(
+        (item: any) => item.metadata.file_extension === ".glb"
+      )[0].file_url;
+      // обновить url модели
+      setModelUrl(model);
+      setIsGenerating(false);
+      clearInterval(timeout);
+    }, 1000);
   };
 
   if (error) {
@@ -88,7 +106,7 @@ export default function ModelViewer() {
 
   return (
     <div className="w-full h-[800px] flex gap-4">
-      <PromptPanel onGenerate={handleGenerate} />
+      <PromptPanel onGenerate={handleGenerate} />0
       <div className="flex-grow  relative">
         <Canvas className="rounded-3xl" camera={{ position: [0, 1, 1] }}>
           <Suspense fallback={<LoadingSpinner />}>
@@ -106,19 +124,19 @@ export default function ModelViewer() {
             onClick={() => handleBackgroundChange("sunset")}
             className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
           >
-            Sunset
+            Утро
           </Button>
           <Button
             onClick={() => handleBackgroundChange("dawn")}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
-            Dawn
+            День
           </Button>
           <Button
             onClick={() => handleBackgroundChange("night")}
             className="bg-indigo-900 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
           >
-            Night
+            Ночь
           </Button>
         </div>
         {modelUrl && (
@@ -126,7 +144,7 @@ export default function ModelViewer() {
             onClick={handleDownload}
             className="absolute bottom-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
-            Download Model
+            Скачать
           </Button>
         )}
         {isGenerating && (

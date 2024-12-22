@@ -17,25 +17,25 @@ export function PromptPanel({ onGenerate }: PromptPanelProps) {
 
   return (
     <div className="w-64 bg-gray-100 p-4 h-full overflow-y-auto">
-      <h2 className="text-lg font-bold mb-4">Generate 3D Model</h2>
+      <h2 className="text-lg font-bold mb-4">Генерировать 3D модель </h2>
       <form onSubmit={handleSubmit}>
         <Textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe the 3D model you want to generate..."
+          placeholder="Опишите 3D-модель, которую вы хотите создать..."
           className="w-full mb-4"
           rows={4}
         />
         <Button type="submit" className="w-full">
-          Generate
+          Генерировать
         </Button>
       </form>
       <div className="mt-4">
-        <h3 className="text-md font-semibold mb-2">Recent Prompts:</h3>
+        <h3 className="text-md font-semibold mb-2">Прошлые промпты:</h3>
         <ul className="list-disc pl-5">
-          <li>A futuristic spaceship</li>
-          <li>A medieval castle</li>
-          <li>An underwater coral reef</li>
+          <li>хуй</li>
+          <li>пенис</li>
+          <li>drizzle my balls</li>
         </ul>
       </div>
     </div>
