@@ -3,10 +3,12 @@ import Chat from "@/components/shared/chat";
 import ModelViewer from "@/components/shared/model-viewer";
 import { Button } from "@/components/ui/button";
 import { Brain } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [chatType, setChatType] = useState("text");
+  const router = useRouter();
   useEffect(() => {}, [chatType]);
   return (
     <main className="flex  min-h-screen flex-col items-center justify-center  bg-gray-50 dark:bg-gray-900">
@@ -16,7 +18,7 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={() => setChatType("text")}>TEXT AI</Button>
-          <Button onClick={() => setChatType("image")}>3D AI</Button>
+          <Button onClick={() => router.push("/ai-tools/models")}>3D AI</Button>
         </div>
       </h1>
       <div className="w-full max-w-4xl">

@@ -5,11 +5,15 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
 import * as THREE from "three";
-import { PromptPanel } from "./promt-panel";
-import { LoaderCircle } from "lucide-react";
-import { set } from "zod";
 
-function Model({ url }: { url: string }) {
+import { CircleFadingArrowUp, Download, LoaderCircle } from "lucide-react";
+import { PromptPanel } from "./promt-panel";
+
+interface ModelProps {
+  url: string;
+}
+
+function Model({ url }: ModelProps) {
   const { scene } = useGLTF(url);
   return <primitive object={scene} />;
 }
@@ -30,40 +34,19 @@ function LoadingSpinner() {
 }
 
 export default function ModelViewer() {
-  const [modelUrl, setModelUrl] = useState(
-    "https://cdn-luma.com/blender_convert/114128e1-b8a3-4d62-b6e6-e020c7ec8801/a6d925ab6a96_39312cfca241_iridescent_small_al.glb"
-  );
+  const [modelUrls, setModelUrls] = useState<string[]>([
+    "https://cdn-luma.com/blender_convert/114128e1-b8a3-4d62-b6e6-e020c7ec8801/a6d925ab6a96_39312cfca241_iridescent_small_al.glb",
+  ]);
   const [error, setError] = useState<string | null>(null);
   const [background, setBackground] = useState<string>("sunset");
   const [isGenerating, setIsGenerating] = useState(false);
-
-  // useEffect(() => {
-  //   const fetchModel = async () => {
-  //     try {
-  //       const response = await fetch(modelUrl);
-  //       if (!response.ok) {
-  //         throw new Error(`HTTP error! status: ${response.status}`);
-  //       }
-  //       const blob = await response.blob();
-  //       const url = URL.createObjectURL(blob);
-  //       setModelUrl(url);
-  //     } catch (error) {
-  //       console.error("Error fetching model:", error);
-  //       setError(
-  //         `Failed to fetch model: ${
-  //           error instanceof Error ? error.message : String(error)
-  //         }`
-  //       );
-  //     }
-  //   };
-  //   fetchModel();
-  // }, [modelUrl]);
+  const [activeModelIndex, setActiveModelIndex] = useState(0);
 
   const handleDownload = () => {
-    if (modelUrl) {
+    if (modelUrls[activeModelIndex]) {
       const link = document.createElement("a");
-      link.href = modelUrl;
-      link.download = "3d-model.glb";
+      link.href = modelUrls[activeModelIndex];
+      link.download = `3d-model-${activeModelIndex + 1}.glb`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -76,28 +59,43 @@ export default function ModelViewer() {
 
   const handleGenerate = async (prompt: string) => {
     setIsGenerating(true);
-    // api для генерации
-    const response = await fetch("/api/get3dModels", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt }),
-    });
-    let dataUids = await response.json();
-    const timeout = setInterval(async () => {
-      const result = await fetch(
-        `https://webapp.engineeringlumalabs.com/api/v3/creations/uuid/${dataUids.response[0]}`
-      ).then((response) => response.json());
-      if (result.response.status !== "completed") return;
-      let model = result.response.output.filter(
-        (item: any) => item.metadata.file_extension === ".glb"
-      )[0].file_url;
-      // обновить url модели
-      setModelUrl(model);
+    try {
+      const response = await fetch("/api/get3dModels", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      });
+      let dataUids = await response.json();
+      const promises = dataUids.response.map(async (uid: string) => {
+        return new Promise<string>((resolve, reject) => {
+          const timeout = setInterval(async () => {
+            const result = await fetch(
+              `https://webapp.engineeringlumalabs.com/api/v3/creations/uuid/${uid}`
+            ).then((response) => response.json());
+            if (result.response.status === "completed") {
+              let model = result.response.output.filter(
+                (item: any) => item.metadata.file_extension === ".glb"
+              )[1].file_url;
+              resolve(model);
+              clearInterval(timeout);
+            }
+          }, 1000);
+        });
+      });
+      const models = await Promise.all(promises);
+      setModelUrls(models);
+    } catch (error) {
+      console.error("Error generating models:", error);
+      setError(
+        `Failed to generate models: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    } finally {
       setIsGenerating(false);
-      clearInterval(timeout);
-    }, 1000);
+    }
   };
 
   if (error) {
@@ -106,19 +104,26 @@ export default function ModelViewer() {
 
   return (
     <div className="w-full h-[800px] flex gap-4">
-      <PromptPanel onGenerate={handleGenerate} />0
-      <div className="flex-grow  relative">
-        <Canvas className="rounded-3xl" camera={{ position: [0, 1, 1] }}>
+      <PromptPanel onGenerate={handleGenerate} />
+      <div className="flex-grow relative">
+        <Canvas className="rounded-3xl h-full" camera={{ position: [0, 1, 1] }}>
           <Suspense fallback={<LoadingSpinner />}>
             <ambientLight intensity={3} />
             <hemisphereLight intensity={0.5} />
             <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
             <pointLight position={[-10, -10, -10]} />
-            {modelUrl && <Model url={modelUrl} />}
+            {modelUrls[activeModelIndex] && (
+              <Model url={modelUrls[activeModelIndex]} />
+            )}
             <OrbitControls />
             <Environment preset={background as any} background />
           </Suspense>
         </Canvas>
+        <div className="absolute bottom-16 left-4 flex gap-2">
+          <Button className="bg-red-500 gap-2 hover:bg-red-700 text-white font-bold py-2 px-[58px] rounded">
+            Улучшить <CircleFadingArrowUp />
+          </Button>
+        </div>
         <div className="absolute bottom-4 left-4 flex gap-2">
           <Button
             onClick={() => handleBackgroundChange("sunset")}
@@ -139,20 +144,37 @@ export default function ModelViewer() {
             Ночь
           </Button>
         </div>
-        {modelUrl && (
+        {modelUrls.length > 0 && (
+          <div className="absolute top-4 left-4 flex gap-2">
+            {modelUrls.map((_, index) => (
+              <Button
+                key={index}
+                onClick={() => setActiveModelIndex(index)}
+                className={`${
+                  activeModelIndex === index
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-300 text-gray-700"
+                } hover:bg-blue-700 hover:text-white font-bold py-2 px-4 rounded-full`}
+              >
+                {index + 1}
+              </Button>
+            ))}
+          </div>
+        )}
+        {modelUrls.length > 0 && (
           <Button
             onClick={handleDownload}
-            className="absolute bottom-4 right-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="absolute bottom-4 right-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
           >
-            Скачать
+            <Download />
           </Button>
         )}
         {isGenerating && (
-          <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-            <div className="text-white text-2xl">
-              Генерация модели{" "}
-              <LoaderCircle size={50} className="animate-spin w-full " />
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 rounded-[25px] to-red-500 flex flex-col items-center justify-center">
+            <div className="text-white text-3xl font-bold mb-4 animate-pulse">
+              Генерация...
             </div>
+            <LoaderCircle size={60} className="animate-spin text-white" />
           </div>
         )}
       </div>
