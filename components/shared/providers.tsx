@@ -9,7 +9,7 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <SessionProvider>
       <UserProvider>
-        <Navbar>
+        <Navbar className="h-screen">
           <main className="flex-1">
             {children}
             <Toaster />

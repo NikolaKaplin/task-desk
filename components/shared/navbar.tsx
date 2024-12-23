@@ -39,7 +39,7 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <div className="flex">
-      <div className="flex max-h-screen min-h-screen">
+      <div className="fixed left-0 flex max-h-screen min-h-screen ">
         <div className="flex flex-col w-full max-h-full bg-stone-800 text-white">
           <Title
             icon={<CodeXml size={50} />}
@@ -95,14 +95,16 @@ export const Navbar: React.FC<Props> = ({
           </div>
         </div>
       </div>
-      <IndicatorsVersionContext.Provider
-        value={{
-          version: indicatorsVersion,
-          update: () => setIndicatorsVersion((v) => v + 1),
-        }}
-      >
-        {children}
-      </IndicatorsVersionContext.Provider>
+      <div className="w-full pl-64">
+        <IndicatorsVersionContext.Provider
+          value={{
+            version: indicatorsVersion,
+            update: () => setIndicatorsVersion((v) => v + 1),
+          }}
+        >
+          {children}
+        </IndicatorsVersionContext.Provider>
+      </div>
     </div>
   );
 };
