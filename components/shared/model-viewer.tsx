@@ -1,12 +1,16 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
 import * as THREE from "three";
 
-import { CircleFadingArrowUp, Download, LoaderCircle } from "lucide-react";
+import {
+  CircleFadingPlusIcon as CircleFadingArrowUp,
+  Download,
+  LoaderCircle,
+} from "lucide-react";
 import { PromptPanel } from "./promt-panel";
 
 interface ModelProps {
@@ -103,9 +107,9 @@ export default function ModelViewer() {
   }
 
   return (
-    <div className="w-full h-[800px] flex gap-4">
+    <div className="w-full flex flex-col lg:flex-row gap-4">
       <PromptPanel onGenerate={handleGenerate} />
-      <div className="flex-grow relative">
+      <div className="flex-grow relative h-[400px] lg:h-[800px]">
         <Canvas className="rounded-3xl h-full" camera={{ position: [0, 1, 1] }}>
           <Suspense fallback={<LoadingSpinner />}>
             <ambientLight intensity={3} />
@@ -120,26 +124,26 @@ export default function ModelViewer() {
           </Suspense>
         </Canvas>
         <div className="absolute bottom-16 left-4 flex gap-2">
-          <Button className="bg-red-500 gap-2 hover:bg-red-700 text-white font-bold py-2 px-[58px] rounded">
+          <Button className="bg-red-500 gap-2 hover:bg-red-700 text-white font-bold py-2 px-4 lg:px-[58px] rounded text-sm lg:text-base">
             Улучшить <CircleFadingArrowUp />
           </Button>
         </div>
         <div className="absolute bottom-4 left-4 flex gap-2">
           <Button
             onClick={() => handleBackgroundChange("sunset")}
-            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-2 lg:px-4 rounded text-xs lg:text-base"
           >
             Утро
           </Button>
           <Button
             onClick={() => handleBackgroundChange("dawn")}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 lg:px-4 rounded text-xs lg:text-base"
           >
             День
           </Button>
           <Button
             onClick={() => handleBackgroundChange("night")}
-            className="bg-indigo-900 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-indigo-900 hover:bg-indigo-700 text-white font-bold py-2 px-2 lg:px-4 rounded text-xs lg:text-base"
           >
             Ночь
           </Button>
@@ -154,7 +158,7 @@ export default function ModelViewer() {
                   activeModelIndex === index
                     ? "bg-blue-500 text-white"
                     : "bg-gray-300 text-gray-700"
-                } hover:bg-blue-700 hover:text-white font-bold py-2 px-4 rounded-full`}
+                } hover:bg-blue-700 hover:text-white font-bold py-1 px-2 lg:py-2 lg:px-4 rounded-full text-xs lg:text-base`}
               >
                 {index + 1}
               </Button>
@@ -171,10 +175,10 @@ export default function ModelViewer() {
         )}
         {isGenerating && (
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 rounded-[25px] to-red-500 flex flex-col items-center justify-center">
-            <div className="text-white text-3xl font-bold mb-4 animate-pulse">
+            <div className="text-white text-xl lg:text-3xl font-bold mb-4 animate-pulse">
               Генерация...
             </div>
-            <LoaderCircle size={60} className="animate-spin text-white" />
+            <LoaderCircle size={40} className="animate-spin text-white" />
           </div>
         )}
       </div>

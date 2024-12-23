@@ -1,6 +1,7 @@
 "use client";
+
 import { CircleUserRound, CodeXml, LoaderCircle, LogOut } from "lucide-react";
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { navItems } from "@/app/constants";
 import { Title } from "./title";
 import { usePathname } from "next/navigation";
@@ -9,6 +10,8 @@ import { signOut, useSession } from "next-auth/react";
 import NavbarItem from "./navbar-item";
 import { AvatarImage } from "../ui/avatar";
 import { Avatar } from "@radix-ui/react-avatar";
+import { MobileHeader } from "./mobile-header";
+
 interface Props {
   SetNumber?: number;
   className?: string;
@@ -22,6 +25,7 @@ export const Navbar: React.FC<Props> = ({
   children,
   hidden,
 }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   let pathName = usePathname();
   console.log(pathName);
   if (pathName == "/") {
@@ -37,65 +41,66 @@ export const Navbar: React.FC<Props> = ({
   const [indicatorsVersion, setIndicatorsVersion] = React.useState(0);
   const { data: session, status } = useSession();
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
-    <div className="flex">
-      <div className="fixed left-0 flex max-h-screen min-h-screen ">
-        <div className="flex flex-col w-full max-h-full bg-stone-800 text-white">
+    <div className="flex flex-col lg:flex-row h-screen">
+      <MobileHeader teamName="Altergemu" onMenuClick={toggleMobileMenu} />
+      <div
+        className={`fixed inset-y-0 left-0 transform ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 transition duration-200 ease-in-out flex flex-col w-64 bg-stone-800 text-white z-30`}
+      >
+        <div className="flex-grow overflow-y-auto">
           <Title
             icon={<CodeXml size={50} />}
-            className=" text-center p-5"
+            className="text-center p-5 hidden lg:block"
             size="xl"
             text="Altergemu"
           />
-          <div
-            className="flex flex-col grow max-h-full overflow-y-scroll"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "#292524 #292524",
-            }}
-          >
+          <nav>
             {navItems.map(({ title, icon, path, hiddenFor }, index, item) => (
               <NavbarItem
                 key={index}
                 item={item[index]}
                 pathName={pathName}
                 indicatorVersion={indicatorsVersion}
-              ></NavbarItem>
+              />
             ))}
-            <div className="grow"></div>
-            <div className="flex justify-between items-center px-5">
-              {status == "loading" ? (
-                <div>
-                  <div>
-                    <LoaderCircle className="animate-spin" />
-                  </div>
-                </div>
-              ) : (
-                <div className="flex justify-evenly items-center w-full">
-                  {session?.user?.avatar ? (
-                    <Avatar>
-                      <AvatarImage
-                        src={session?.user.avatar}
-                        className="w-10 h-10 rounded-full"
-                      />
-                    </Avatar>
-                  ) : (
-                    <CircleUserRound className="w-10 h-10 rounded-full" />
-                  )}
-                  <h2>{session?.user?.name}</h2>
-                </div>
-              )}
+          </nav>
+        </div>
+        <div className="p-4 border-t border-stone-700">
+          {status === "loading" ? (
+            <div className="flex justify-center">
+              <LoaderCircle className="animate-spin" />
+            </div>
+          ) : session?.user ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage
+                    src={session.user.avatar || undefined}
+                    alt={session.user.name || "User avatar"}
+                  />
+                  <CircleUserRound className="h-10 w-10" />
+                </Avatar>
+                <span className="text-sm font-medium">{session.user.name}</span>
+              </div>
               <Button
-                className=" border border-primary bg-transparent max-w-fit items-center gap-4 m-2 p-4 cursor-pointer rounded-2xl text-primary-foreground hover:bg-stone-700 hover:text-red-500"
+                variant="ghost"
+                size="icon"
                 onClick={() => signOut()}
+                className="text-primary-foreground hover:bg-stone-700 hover:text-red-500"
               >
-                <LogOut />
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
-      <div className="w-full pl-64">
+      <div className="ml-0 lg:ml-64 flex-grow overflow-y-auto">
         <IndicatorsVersionContext.Provider
           value={{
             version: indicatorsVersion,
@@ -122,6 +127,7 @@ const IndicatorsVersionContext = React.createContext<IndicatorVersion>({
 export function useIndicatorsVersion() {
   return React.useContext(IndicatorsVersionContext);
 }
+
 export function useIndicatorsVersionUpdater() {
   return React.useContext(IndicatorsVersionContext).update;
 }

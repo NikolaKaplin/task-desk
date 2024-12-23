@@ -1,60 +1,35 @@
-import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { getUserSession } from "@/lib/get-session-server";
-import { useState } from "react";
+import AvatarUpload from "@/components/shared/avatar-upload";
 import { ProfileForm } from "@/components/shared/forms/profile/form-profile";
-import { ProfileDialog } from "@/components/shared/profile-dialog";
+import { Metadata } from "next";
 
-export default async function Home() {
-  const user = await getUserSession();
+export const metadata: Metadata = {
+  title: "Profile",
+  description: "User profile page",
+};
+
+async function getUser() {
+  // This would typically fetch the user from your database
+  return {
+    id: "1",
+    name: "John Doe",
+    email: "john@example.com",
+    bio: "I'm a software developer",
+    avatarUrl: "/placeholder.svg?height=128&width=128",
+  };
+}
+
+export default async function ProfilePage() {
+  const user = await getUser();
+
   return (
-    <div className=" flex flex-wrap content-center bg-gradient-to-tl from-zinc-900 via-violet-600 to-indigo-600 min-h-screen min-w-screen justify-center bg-cover ">
-      <div className="  flex gap-10 rounded-3xl min-h-max w-11/12 p-5  ">
-        <div className="  bg-white min-h-content w-5/12 rounded-2xl">
-          <Avatar className=" text-black">
-            <AvatarImage
-              className=" rounded-full m-auto p-2"
-              src="https://github.com/shadcn.png"
-            />
-          </Avatar>
-          <div className="grid gap-3 p-5">
-            <div className="flex justify-between">
-              <div>
-                {" "}
-                <h1>First Name</h1>
-                <Input
-                  size={20}
-                  className="min-h-10"
-                  placeholder="firstname"
-                  defaultValue={user?.firstName}
-                />
-              </div>
-
-              <div>
-                {" "}
-                <h1>Last Name</h1>
-                <label htmlFor="block"></label>
-                <Input
-                  size={20}
-                  className="min-h-10"
-                  placeholder="firstname"
-                  defaultValue={user?.lastName}
-                />
-              </div>
-            </div>
-            <ProfileDialog>
-              <ProfileForm />
-            </ProfileDialog>
-            <h1>Email</h1>
-            <Input size={20} className="min-h-10" placeholder="email" />
-            <h1>About</h1>
-            <Textarea className=" resize-none" />
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Profile</h1>
+      <div className="grid gap-8 md:grid-cols-[1fr_2fr]">
+        <div>
+          <AvatarUpload user={user} />
         </div>
-        <div className="grid gap-2 w-7/12">
-          <div className="bg-white p-5 rounded-2xl">dfe</div>
-          <div className="bg-white p-5 rounded-2xl">fef</div>
+        <div>
+          <ProfileForm user={user} />
         </div>
       </div>
     </div>
