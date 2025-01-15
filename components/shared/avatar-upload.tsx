@@ -1,48 +1,42 @@
-"use client";
+"use client"
+import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { Button } from "@/components/ui/button"
+import { InputImage } from './input-image'
+import { getUserSession } from '@/lib/get-session-server'
 
-import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { Button } from "@/components/ui/button" //Removed as per update 2
+interface AvatarUploadProps {
+  currentAvatarUrl: string
+}
 
-export default function AvatarUpload({
-  user,
-}: {
-  user: { id: string; name: string; avatarUrl: string };
-}) {
-  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
+export default function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
+  const [user, setUser] = useState();
+  const [avatar, setAvatar] = useState();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [questionImage, setQuestionImage] = useState("");
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append("avatar", file);
-      formData.append("userId", user.id);
-
-      const result = await updateAvatar(formData);
-      if (result.success) {
-        setAvatarUrl(result.avatarUrl);
-      }
-    }
-  };
-
+  React.useEffect(() => {
+    (async () => {
+      const u = await getUserSession();
+      setUser(u);
+      setAvatar(u?.avatar);
+      console.log(avatar)
+      setIsLoading(false)
+    })();
+  }, []);
   return (
     <div className="flex flex-col items-center space-y-4">
-      <Avatar
-        className="w-32 h-32 cursor-pointer"
-        onClick={() => document.getElementById("avatar-upload")?.click()}
-      >
-        <AvatarImage src={avatarUrl} alt={user.name} />
-        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-      </Avatar>
-      <input
-        id="avatar-upload"
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
+      <img
+        src={isLoading ? "https://cdn-user30887.skyeng.ru/uploads/6769b4e6502ea676889877.webp" : avatar}
+        alt="User Avatar"
+        width={100}
+        height={100}
+        className="rounded-full"
       />
+      <div>
+        {user ? <InputImage userId={user.id} onChange={setQuestionImage}/> : <>Загрузка</> }
+      </div>
     </div>
-  );
+  )
 }
+

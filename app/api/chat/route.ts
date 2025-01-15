@@ -69,7 +69,7 @@ const generateApiKey = () => {
         myhashfunction(
           userAgent +
             myhashfunction(
-              userAgent + myrandomstr + "i_am_a_smelly_hacker_yes_i_am"
+              userAgent + myrandomstr + "suditya_is_a_smelly_hacker"
             )
         )
     )
