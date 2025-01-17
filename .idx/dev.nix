@@ -7,12 +7,16 @@
     pkgs.openssl.dev
   ];
 
+  
+
   env = {};
 
   idx = {
     extensions = [
       "esbenp.prettier-vscode"
     ];
+
+    
     
     workspace = {
       onCreate = {

@@ -7,6 +7,9 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { writeFile } from 'fs/promises'
 import path from 'path'
+import { ConstantColorFactor } from "three";
+import { equal } from "assert";
+import { Code } from "lucide-react";
 
 export async function registerUser(
   body: Prisma.UserCreateInput
@@ -27,7 +30,8 @@ export async function registerUser(
           lastName: body.lastName,
           email: body.email,
           password: hashSync(body.password, 10),
-          bio: ""
+          bio: "",
+          devStatus: ""
         },
       });
       return { success: !!createdUser };
@@ -56,17 +60,21 @@ export async function updateProfile(
   body: Prisma.UserUncheckedUpdateInput
 ): Promise<ProfileEdited> {
   try {
+    console.log(body)
     await prisma.user.update({
       where: {
-        id: body.id as number,
+        id: body.id,
       },
       data: {
         firstName: body.firstName,
         lastName: body.lastName,
         email: body.email,
+        bio: body.bio,
+        devStatus: body.devStatus?.toString(),
       },
     });
-    return { edit: true };
+    revalidatePath('/profile')
+    return {edit: true};
   } catch (err) {
     console.error(err);
     return { edit: false };
@@ -121,6 +129,7 @@ export async function updateProfileUser(data: {
   name: string;
   email: string;
   bio: string;
+  developerType: []
 }) {
   // This is a mock function. In a real application, you would update the user's profile in the database.
   console.log("Updating profile:", data);
@@ -145,4 +154,24 @@ export async function setUserAvatar(userId: number, avatar: string) {
     }
   })
   return response;
+}
+
+
+
+
+export async function getUsers() {
+  try {
+    const response = await prisma.user.findMany({
+      select: {
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        bio: true,
+        devStatus: true
+      }
+    })
+    return response;
+  } catch (error) {
+    return error;
+  }
 }

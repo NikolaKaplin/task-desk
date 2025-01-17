@@ -42,6 +42,7 @@ export const authOptions: AuthOptions = {
 
         return {
           id: findUser.id,
+          avatar: findUser.avatar,
           email: findUser.email,
           name: findUser.firstName,
           role: findUser.role,
@@ -88,7 +89,7 @@ export const authOptions: AuthOptions = {
         token.id = findUser.id;
         token.email = findUser.email;
         token.name = findUser.firstName;
-        token.picture = findUser.avatar;
+        token.avatar = findUser.avatar;
         token.role = findUser.role;
       }
 
@@ -99,6 +100,7 @@ export const authOptions: AuthOptions = {
       if (session?.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.avatar = token.avatar;
       }
       return session;
     },

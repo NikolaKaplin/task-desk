@@ -11,6 +11,7 @@ import NavbarItem from "./navbar-item";
 import { AvatarImage } from "../ui/avatar";
 import { Avatar } from "@radix-ui/react-avatar";
 import { MobileHeader } from "./mobile-header";
+import Link from "next/link";
 
 interface Props {
   SetNumber?: number;
@@ -78,16 +79,16 @@ export const Navbar: React.FC<Props> = ({
             </div>
           ) : session?.user ? (
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-10 w-10">
+              <Link href="/profile" className="flex items-center space-x-3">
+              <Avatar className="h-10 w-10 rounded-sm">
                   <AvatarImage
+                  className=" rounded-[50%]"
                     src={session.user.avatar || undefined}
                     alt={session.user.name || "User avatar"}
                   />
-                  <CircleUserRound className="h-10 w-10" />
                 </Avatar>
                 <span className="text-sm font-medium">{session.user.name}</span>
-              </div>
+              </Link>
               <Button
                 variant="ghost"
                 size="icon"

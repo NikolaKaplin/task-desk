@@ -10,36 +10,69 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { X } from 'lucide-react'
+import { updateProfile } from "@/app/actions"
 import AvatarUpload from "../../avatar-upload"
 
+
+const softwareDevelopers = [
+  'Frontend Developer',
+  'Backend Developer',
+  'Full Stack Developer',
+  'Mobile Developer',
+  'Game Developer',
+  'DevOps Engineer',
+  'Data Scientist',
+  'Data Engineer',
+  'Machine Learning Engineer',
+  'Quality Assurance Engineer',
+  'UI/UX Designer',
+  'Systems Analyst',
+  'Embedded Systems Developer',
+  'Cloud Engineer',
+  'Blockchain Developer',
+  'Security Engineer',
+  'Game Designer',
+  'Database Administrator'
+];
+
 const profileFormSchema = z.object({
+  id: z.number(),
   firstName: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: "First name must be at least 2 characters.",
   }),
   lastName: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: "Last name must be at least 2 characters.",
   }),
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  bio: z.string().max(160, {
-    message: "Bio must not be longer than 160 characters.",
+  bio: z.string().max(350, {
+    message: "Bio must not be longer than 350 characters.",
+  }),
+  devStatus: z.array(z.string()).min(1, {
+    message: "Please select at least one developer status.",
   }),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-export default function ProfileForm() {
-  const { toast } = useToast();
+export default function ProfileForm({user}:{user: number}) {
+  const { toast } = useToast()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: "",
+      id: user,
+      firstName: "",
+      lastName: "",
       email: "",
       bio: "",
+      devStatus: [],
     },
   })
 
@@ -50,7 +83,7 @@ export default function ProfileForm() {
 
     setIsLoading(false)
 
-    if (result.success) {
+    if (result.edit) {
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
@@ -65,27 +98,52 @@ export default function ProfileForm() {
     }
   }
 
+  const handleStatusSelect = (status: string) => {
+    const currentDevStatus = form.getValues("devStatus")
+    if (!currentDevStatus.includes(status)) {
+      form.setValue("devStatus", [...currentDevStatus, status])
+    }
+  }
+
+  const handleStatusRemove = (status: string) => {
+    const currentDevStatus = form.getValues("devStatus")
+    form.setValue("devStatus", currentDevStatus.filter(s => s !== status))
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <AvatarUpload currentAvatarUrl="/placeholder.svg?height=100&width=100" />
-        <div className="h-8" />
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Your name" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the name that will be displayed on your profile and in emails.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex justify-center">
+          <AvatarUpload currentAvatarUrl="/placeholder.svg?height=100&width=100" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your first name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your last name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <FormField
           control={form.control}
           name="email"
@@ -122,7 +180,50 @@ export default function ProfileForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isLoading}>
+        <FormField
+          control={form.control}
+          name="devStatus"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Developer Status</FormLabel>
+              <Select onValueChange={handleStatusSelect}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {softwareDevelopers.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Select the statuses that best describe your skills.
+              </FormDescription>
+              <FormMessage />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {field.value.map((status) => (
+                  <Badge key={status} variant="secondary">
+                    {status}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-1 h-auto p-0 text-muted-foreground hover:text-foreground"
+                      onClick={() => handleStatusRemove(status)}
+                    >
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">Remove</span>
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Updating..." : "Update profile"}
         </Button>
       </form>
