@@ -1,29 +1,28 @@
-"use client";
-
-import React from "react";
-import { AlignJustify, Menu } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/button"
+import { Menu, CodeXml } from "lucide-react"
+import Link from "next/link"
 
 interface MobileHeaderProps {
-  teamName: string;
-  onMenuClick: () => void;
+  teamName: string
+  onMenuClick: () => void
 }
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({
-  teamName,
-  onMenuClick,
-}) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({ teamName, onMenuClick }) => {
   return (
-    <header className="flex items-center justify-between p-4 bg-stone-800 text-white lg:hidden">
-      <h1 className="text-xl font-bold">{teamName}</h1>
+    <header className="bg-gray-800 p-4 flex items-center justify-between lg:hidden">
+      <Link href="/" className="flex items-center space-x-2">
+        <CodeXml size={28} className="text-indigo-400" />
+        <h1 className="text-xl  font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600">
+          {teamName}
+        </h1>
+      </Link>
       <Button
-        variant="ghost"
         size="icon"
         onClick={onMenuClick}
-        aria-label="Toggle menu"
       >
-        <AlignJustify className="h-6 w-6" />
+        <Menu size={24} />
       </Button>
     </header>
-  );
-};
+  )
+}
+

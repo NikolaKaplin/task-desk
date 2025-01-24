@@ -5,7 +5,6 @@ import Image from "next/image";
 
 export default async function TeamPage() {
   const teamMembers = await getUsers();
-  console.log(teamMembers)
   return (
     <div className=" min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <header className="py-16 text-center">

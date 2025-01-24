@@ -12,7 +12,7 @@ export function TeamMember({ firstName, lastName, avatar, bio, devStatus }: Team
   return (
     <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 ease-in-out hover:scale-105">
       <Link
-        href={`/team/${firstName.toLowerCase().replace(" ", "-")}`}
+        href={`/team/${firstName.replace(" ", "-")}-${lastName.replace(" ", "-")}`}
         className="block"
       >
         <div className="aspect-square overflow-hidden">

@@ -10,7 +10,7 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
     <SessionProvider>
       <UserProvider>
         <Navbar>
-          <main className="flex-1">
+        <main className=" flex-1 min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
             {children}
             <Toaster />
           </main>

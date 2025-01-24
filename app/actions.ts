@@ -175,3 +175,105 @@ export async function getUsers() {
     return error;
   }
 }
+
+
+export async function getUserInfo(firsName: string, lastName: string) {
+  try {
+    const response = await prisma.user.findFirst({
+      where: {
+        firstName: firsName,
+        lastName: lastName
+      },
+      select: {
+        firstName: true,
+        lastName: true,
+        bio: true,
+        avatar: true,
+        devStatus: true
+      }
+    })
+    return response;
+  } catch (error) {
+    return error;
+  }
+}
+
+
+type PostData = {
+  title: string,
+  userId: number,
+  content: string
+}
+
+export async function postCreate(body: PostData): Promise<RegisterResult>{
+  try {
+    const createPost = await prisma.post.create({
+      data: {
+        name: body.title,
+        authorId: body.userId,
+        content: body.content
+      }
+    })
+    return {success: !!createPost}
+  } catch (error) {
+    return {success: false}
+  }
+}
+
+type Posts = {
+  id: number,
+        name: string,
+        authorId: number,
+        content: string,
+        createdAt: Date
+}
+export async function getPosts(){
+  try{
+    const response: Posts = await prisma.post.findMany({
+      select: {
+        id: true,
+        name: true,
+        authorId: true,
+        content: true,
+        createdAt: true,
+      }
+    })
+    return response;
+  } catch (error) {
+  }
+}
+
+
+
+export async function getUserInfoById(id: number) {
+  try {
+    const response = await prisma.user.findFirst({
+      where: {
+        id: id,
+      },
+      select: {
+        firstName: true,
+        lastName: true,
+        bio: true,
+        avatar: true,
+        devStatus: true
+      }
+    })
+    return response;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function getPostById(id: number) {
+  try {
+    const post = await prisma.post.findFirst({
+      where: {
+        id: id,
+      },
+    })
+    return post;
+  } catch (error) {
+    console.log("Get Post failed");
+  }
+}

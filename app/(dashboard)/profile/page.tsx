@@ -7,7 +7,7 @@ export default async function ProfilePage() {
   let user = (await getUserSession())?.id
   return (
     <div className="  bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      <Card className=" mt-10 max-w-2xl mx-auto">
+      <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Profile</CardTitle>
           <CardDescription>View and update your profile information</CardDescription>
