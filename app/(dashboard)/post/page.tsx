@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Upload, Video, Plus, X } from "lucide-react"
+import { Upload, Video, Plus, X, LoaderCircle } from "lucide-react"
 import Image from "next/image"
 import { getUserSession } from "@/lib/get-session-server"
-import { postCreate } from "@/app/actions"
+import { getLastPostId, postCreate } from "@/app/actions"
+import { number } from "zod"
+import { uploadLargeFiles } from "@/utils/awsLargeUpload"
 
 type ContentBlock = {
   type: "text" | "image"
@@ -20,28 +22,34 @@ type ContentBlock = {
 export default function CreatePost() {
   const [user, setUser] = useState()
   const [title, setTitle] = useState("")
+  const [video, setVideo] = useState<File | null>(null)
   const [description, setDescription] = useState("")
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([{ type: "text", content: "" }])
-  const [video, setVideo] = useState<File | null>(null)
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoUploading, setVideoUploading] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const imageInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
-    ;(async () => {
-      const user = await getUserSession()
+    (async () => {
+      const user = await getUserSession();
       if (user) {
         setUser(user)
       }
     })()
   }, [])
 
+
+
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    console.log('hui');
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       try {
-        const res = await fetch(`/api/upload-image-post/${new Date().toISOString()}`, {
+        const postId = await getLastPostId(); 
+        const res = await fetch(`/api/upload-image-post/${postId?.id + 1}`, {
           method: "POST",
           headers: {
             "Content-Type": file.type,
@@ -68,15 +76,34 @@ export default function CreatePost() {
     }
   }, [])
 
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = useCallback(async(e: React.ChangeEvent<HTMLInputElement>) => {
+    setVideoUploading(true);
+    console.log(await e.target.files[0].arrayBuffer());
+    let result = uploadLargeFiles(await e.target.files[0].arrayBuffer())
+    console.log(result);
     if (e.target.files && e.target.files[0]) {
       setVideo(e.target.files[0])
+      const file = e.target.files[0]
+      const postId = await getLastPostId(); 
+      const res = await fetch(`/api/upload-video-post/${postId?.id + 1}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: file,
+      })
+      if (!res.ok) {
+        console.log(res);
     }
-  }
+    const data = await res.json()
+    const imageUrl = data.url
+    setVideoUrl(imageUrl.toString())
+    setVideoUploading(false);
+  }}, [])
 
   const handleContentChange = (index: number, value: string) => {
     const newBlocks = [...contentBlocks]
-    newBlocks[index].content = value
+    newBlocks[index].content = value  
     setContentBlocks(newBlocks)
   }
 
@@ -103,7 +130,7 @@ export default function CreatePost() {
         description,
         author: user.id,
         contentBlocks,
-        video: video ? video.name : null,
+        video: videoUrl ? videoUrl : null,
         createdAt: new Date().toISOString(),
       }
 
@@ -257,7 +284,7 @@ export default function CreatePost() {
                 >
                   <Video className="mr-2 h-4 w-4" /> Загрузить видео
                 </Button>
-                {video && <span className="ml-2 text-gray-300">{video.name}</span>}
+                {videoUploading ? (<div className="ml-2 flex text-white"><LoaderCircle className="h-8 w-8 animate-spin" />Загрузка может занять несколько минут</div>) : null}
               </div>
             </div>
           </CardContent>

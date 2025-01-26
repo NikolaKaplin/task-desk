@@ -277,3 +277,16 @@ export async function getPostById(id: number) {
     console.log("Get Post failed");
   }
 }
+
+export async function getLastPostId() {
+  try{
+    const lastPost = await prisma.post.findFirst({
+      orderBy: {
+        id: 'desc'
+      }
+    })
+    return lastPost;
+  } catch (error) {
+    console.log(error);
+  }
+}

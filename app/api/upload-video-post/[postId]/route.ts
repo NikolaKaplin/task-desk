@@ -5,19 +5,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ postId: number }> }
+  { params }: { params: Promise<{ postId: number}> }
 ) {
-  if (!req.headers.get("Content-Type")?.startsWith("image"))
+  if (!req.headers.get("Content-Type")?.startsWith("video"))
     return new NextResponse(null, { status: 400 });
-  const {postId } = await params;
+  const {postId} = await params;
   const Body = Buffer.from(await req.arrayBuffer());
-  const Key = `post/${postId}/${Date.now()}.png`;
-
-  if (Body.byteLength > 5 * 1024 * 1024)
-    return new NextResponse(null, { status: 400 });
-
+  const Key = `post/${postId}/${req}.mp4`;
   await s3.send(
-    new PutObjectCommand({
+    new PutObjectCommand({  
       Bucket: "altergemu-team",
       Key,
       Body,

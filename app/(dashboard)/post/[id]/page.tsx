@@ -8,7 +8,6 @@ import { getPostById, getUserInfoById } from "@/app/actions"
 import { useState, useEffect } from "react"
 import { formatDistanceToNow } from "date-fns"
 import { ru } from "date-fns/locale"
-
 interface Post {
   title: string
   description: string

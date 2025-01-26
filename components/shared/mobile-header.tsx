@@ -17,6 +17,8 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ teamName, onMenuClic
         </h1>
       </Link>
       <Button
+      variant={"link"}
+      className=" bg-gray-800 text-white"
         size="icon"
         onClick={onMenuClick}
       >

@@ -12,25 +12,29 @@ interface NavbarItemProps {
   item: NavItems
   pathName: string
   indicatorVersion: number
-  onClick: () => void
+  closeMobileMenu: () => void
 }
 
 export default function NavbarItem({
   item: { title, icon, path, hiddenFor, indicatorHandler },
   pathName,
   indicatorVersion: indicatorsVersion,
-  onClick,
+  closeMobileMenu,
 }: NavbarItemProps) {
   const [count, setCount] = React.useState(0)
   useEffect(() => {
     indicatorHandler?.().then((res) => setCount(res))
-  }, [indicatorHandler, pathName, indicatorsVersion])
+  }, [indicatorHandler])
 
   const isActive = pathName.includes(path)
 
+  const handleClick = () => {
+    closeMobileMenu()
+  }
+
   return (
     <RoleHidden roles={hiddenFor}>
-      <Link href={path.includes("home") ? "/" : path} onClick={onClick}>
+      <Link href={path.includes("home") ? "/" : path} onClick={handleClick}>
         <motion.div
           className={cn(
             "flex items-center gap-3 m-1 px-3 py-2 cursor-pointer rounded-lg transition-all duration-200",
