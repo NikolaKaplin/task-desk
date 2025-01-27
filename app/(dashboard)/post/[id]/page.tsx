@@ -95,7 +95,8 @@ export default function PostPage() {
           ))}
           {post.video && (
             <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-              <video src={post.video} controls className="w-full h-full object-cover">
+              <video controls className="w-full h-full object-cover">
+                <source src={post.video} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>

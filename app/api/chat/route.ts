@@ -132,7 +132,7 @@ export async function POST(req: Request) {
       }
     },
   });
-
+0
   return new NextResponse(stream, {
     headers: {
       "Content-Type": "text/event-stream",
