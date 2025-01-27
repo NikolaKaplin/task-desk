@@ -13,6 +13,7 @@ import { getUserSession } from "@/lib/get-session-server"
 import { getLastPostId, postCreate } from "@/app/actions"
 import { number } from "zod"
 import { uploadLargeFiles } from "@/utils/awsLargeUpload"
+import axios from "axios"
 
 type ContentBlock = {
   type: "text" | "image"
@@ -21,34 +22,33 @@ type ContentBlock = {
 
 export default function CreatePost() {
   const [user, setUser] = useState()
+  const [progress, setProgress] = useState(0)
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
   const [title, setTitle] = useState("")
-  const [video, setVideo] = useState<File | null>(null)
+  const [file, setFile] = useState<File | null>(null)
   const [description, setDescription] = useState("")
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([{ type: "text", content: "" }])
-  const [videoUrl, setVideoUrl] = useState('')
-  const [videoUploading, setVideoUploading] = useState(false)
-  const [isPublishing, setIsPublishing] = useState(false)
+  const [videoUrl, setVideoUrl] = useState("")
+  const [isPublishing, setIsPublishing] = useState(false) // Added state for publishing status
   const imageInputRef = useRef<HTMLInputElement>(null)
   const videoInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   useEffect(() => {
-    (async () => {
-      const user = await getUserSession();
+    ;(async () => {
+      const user = await getUserSession()
       if (user) {
         setUser(user)
       }
     })()
   }, [])
 
-
-
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    console.log('hui');
+    console.log("hui")
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       try {
-        const postId = await getLastPostId(); 
+        const postId = await getLastPostId()
         const res = await fetch(`/api/upload-image-post/${postId?.id + 1}`, {
           method: "POST",
           headers: {
@@ -76,34 +76,47 @@ export default function CreatePost() {
     }
   }, [])
 
-  const handleVideoUpload = useCallback(async(e: React.ChangeEvent<HTMLInputElement>) => {
-    setVideoUploading(true);
-    console.log(await e.target.files[0].arrayBuffer());
-    let result = uploadLargeFiles(await e.target.files[0].arrayBuffer())
-    console.log(result);
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setVideo(e.target.files[0])
-      const file = e.target.files[0]
-      const postId = await getLastPostId(); 
-      const res = await fetch(`/api/upload-video-post/${postId?.id + 1}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": file.type,
-        },
-        body: file,
-      })
-      if (!res.ok) {
-        console.log(res);
+      setFile(e.target.files[0])
     }
-    const data = await res.json()
-    const imageUrl = data.url
-    setVideoUrl(imageUrl.toString())
-    setVideoUploading(false);
-  }}, [])
+  }
+
+  const uploadFile = async () => {
+    if (!file) return
+
+    setUploadStatus("uploading")
+    setProgress(0)
+
+    try {
+      const postId = await getLastPostId()
+      const {
+        data: { presignedUrl, key },
+      } = await axios.post(`/api/getPresignedUrl/${postId?.id + 1}`, {
+        filename: file.name,
+        contentType: file.type,
+      })
+
+      await axios.put(presignedUrl, file, {
+        headers: { "Content-Type": file.type },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!)
+          setProgress(percentCompleted)
+        },
+      })
+      setVideoUrl(key)
+      setUploadStatus("success")
+      setProgress(100)
+      console.log("File uploaded successfully. Object key:", key)
+    } catch (error) {
+      console.error("Upload error:", error)
+      setUploadStatus("error")
+    }
+  }
 
   const handleContentChange = (index: number, value: string) => {
     const newBlocks = [...contentBlocks]
-    newBlocks[index].content = value  
+    newBlocks[index].content = value
     setContentBlocks(newBlocks)
   }
 
@@ -124,7 +137,6 @@ export default function CreatePost() {
     e.preventDefault()
     setIsPublishing(true)
     try {
-      // Создаем объект с данными поста
       const postData = {
         title,
         description,
@@ -134,7 +146,6 @@ export default function CreatePost() {
         createdAt: new Date().toISOString(),
       }
 
-      // Преобразуем объект в JSON строку
       const jsonString = JSON.stringify(postData, null, 2)
 
       const DbData = {
@@ -145,21 +156,6 @@ export default function CreatePost() {
 
       postCreate(DbData)
 
-      //   const blob = new Blob([jsonString], { type: 'application/json' })
-
-      //   const url = URL.createObjectURL(blob)
-
-      //   const link = document.createElement('a')
-      //   link.href = url
-      //   link.download = `post_${Date.now()}.json`
-
-      //   document.body.appendChild(link)
-      //   link.click()
-      //   document.body.removeChild(link)
-
-      //   URL.revokeObjectURL(url)
-
-      //   console.log('Post data saved to JSON file')
       router.push("/")
     } catch (error) {
       console.error("Error publishing post:", error)
@@ -268,7 +264,7 @@ export default function CreatePost() {
               <Label htmlFor="video" className="text-gray-300">
                 Видео
               </Label>
-              <div className="flex items-center mt-1">
+              <div className="flex items-center mt-1 space-x-2">
                 <Input
                   id="video"
                   type="file"
@@ -282,10 +278,38 @@ export default function CreatePost() {
                   onClick={() => videoInputRef.current?.click()}
                   className="bg-gray-700 hover:bg-gray-600 text-white"
                 >
-                  <Video className="mr-2 h-4 w-4" /> Загрузить видео
+                  <Video className="mr-2 h-4 w-4" /> Выбрать видео
                 </Button>
-                {videoUploading ? (<div className="ml-2 flex text-white"><LoaderCircle className="h-8 w-8 animate-spin" />Загрузка может занять несколько минут</div>) : null}
+                <Button
+                  onClick={uploadFile}
+                  disabled={!file || uploadStatus === "uploading" || uploadStatus === "success"}
+                  className={`flex-1 ${
+                    uploadStatus === "uploading"
+                      ? "bg-blue-500 hover:bg-blue-600"
+                      : uploadStatus === "success"
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-gray-500 hover:bg-gray-600"
+                  } text-white transition-colors duration-200`}
+                >
+                  {uploadStatus === "uploading"
+                    ? `Загрузка: ${progress}%`
+                    : uploadStatus === "success"
+                      ? "Загружено успешно"
+                      : "Загрузить"}
+                </Button>
               </div>
+              {uploadStatus === "success" && (
+                <div className="mt-2 p-2 bg-green-100 border border-green-400 text-green-700 rounded-md flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  Файл успешно загружен!
+                </div>
+              )}
             </div>
           </CardContent>
           <CardFooter>

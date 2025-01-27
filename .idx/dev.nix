@@ -5,6 +5,7 @@
   packages = [
     pkgs.zip
     pkgs.openssl.dev
+    pkgs.awscli
   ];
 
   

@@ -12,6 +12,7 @@ export async function POST(
   const {postId} = await params;
   const Body = Buffer.from(await req.arrayBuffer());
   const Key = `post/${postId}/${req}.mp4`;
+  console.log("Start sending ==>")
   await s3.send(
     new PutObjectCommand({  
       Bucket: "altergemu-team",

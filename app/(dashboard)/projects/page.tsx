@@ -1,10 +1,11 @@
-import { getUserSession } from "@/lib/get-session-server";
-import { redirect } from "next/navigation";
+import FileUploader from "@/components/shared/file-uploader"
 
-export default async function Home() {
+export default function UploadPage() {
   return (
-    <div>
-      <p>Page</p>
+    <div className="container mx-auto px-4">
+      <h1 className="text-2xl font-bold text-center my-8">Upload File to S3</h1>
+      <FileUploader />
     </div>
-  );
+  )
 }
+
