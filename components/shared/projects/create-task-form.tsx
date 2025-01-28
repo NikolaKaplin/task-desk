@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createProject, getUsers } from "@/app/actions";
+import { createProject, createTask, getUsers } from "@/app/actions";
 import React from "react";
 import {
   Form,
@@ -41,29 +41,32 @@ import { getUserSession } from "@/lib/get-session-server";
 import { set } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { ProjectStatus } from "@prisma/client";
 
-const profileFormSchema = z.object({
+const taskFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   description: z.string(),
   content: z.string(),
-  projectStatus: z.string(),
+  taskStatus: z.string(),
   createdAt: z.date(),
   users: z.array(z.string()),
+  projectId: z.number(),
 });
 
 export type Project = {
-  name: string;
+  title: string;
   content: string;
   authorId: number;
-  projectStatus: string;
+  projectId: number;
+  taskStatus: string;
   createdAt: Date;
 };
 
-type ProjectFormValues = z.infer<typeof profileFormSchema>;
+type ProjectFormValues = z.infer<typeof taskFormSchema>;
 
-export function CreateProjectForm() {
+export function CreateTaskForm() {
   const [authorId, setAuthorId] = useState(0);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -107,33 +110,36 @@ export function CreateProjectForm() {
   };
 
   const form = useForm<ProjectFormValues>({
-    resolver: zodResolver(profileFormSchema),
+    resolver: zodResolver(taskFormSchema),
     defaultValues: {
       name: "",
       content: "",
       description: "",
-      projectStatus: "DEVELOPMENT",
+      taskStatus: "",
+      projectId: 0,
       createdAt: new Date(),
       users: [],
     },
   });
 
   async function onSubmit(data: ProjectFormValues) {
+    console.log("penis");
     setIsLoading(true);
     const project: Project = {
       authorId: authorId,
+      title: data.name,
       content: JSON.stringify({ users: [], description: data.description }),
       createdAt: data.createdAt,
-      name: data.name,
-      projectStatus: data.projectStatus,
+      projectId: 1,
+      taskStatus: data.taskStatus,
     };
 
-    const projectCreate = await createProject(project);
+    const projectCreate = await createTask(project);
     setIsLoading(false);
 
     if (projectCreate?.success) {
       toast({
-        title: "Profile updated",
+        title: "Task created",
         description: "Your profile has been successfully updated.",
       });
       router.refresh();
@@ -150,12 +156,12 @@ export function CreateProjectForm() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> New Project
+          <PlusCircle className="mr-2 h-4 w-4" /> New Task
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle>Create New Task</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -166,7 +172,7 @@ export function CreateProjectForm() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your project name" {...field} />
+                    <Input placeholder="Your task name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -179,7 +185,7 @@ export function CreateProjectForm() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Your last name" {...field} />
+                    <Textarea placeholder="Your task description" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
