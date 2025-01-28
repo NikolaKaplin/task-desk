@@ -10,6 +10,7 @@ import path from 'path'
 import { ConstantColorFactor } from "three";
 import { equal } from "assert";
 import { Code } from "lucide-react";
+import { InputJsonValue, JsonValue } from "@prisma/client/runtime/library";
 
 export async function registerUser(
   body: Prisma.UserCreateInput
@@ -290,3 +291,51 @@ export async function getLastPostId() {
     console.log(error);
   }
 }
+
+export type Project = {
+  id: number,
+  name: string,
+  content: InputJsonValue,
+  authorId: number,
+  projectStatus: string,
+  createdAt: Date
+}
+export async function createProject(data: Project) {
+  try {
+    const projectCreate = await prisma.project.create({
+      data: {
+        name: data.name,
+        content: data.content,
+        authorId: data.authorId,
+        projectStatus: 'DEVELOPMENT' || 'PRODUCTION',
+        createdAt: data.createdAt
+      }
+    })
+    if (projectCreate) {
+      return {success: true}
+    }
+  }
+  catch (error) {
+    return {success: false}
+  }
+}
+
+export async function getProjects() {
+  try {
+    const projectsGet = await prisma.project.findMany({
+      select: {
+        id: true,
+        name: true,
+        authorId: true,
+        content: true,
+        createdAt: true,
+        projectStatus: true
+      }
+    })
+    return projectsGet;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+

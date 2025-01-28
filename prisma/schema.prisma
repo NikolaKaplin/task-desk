@@ -8,18 +8,57 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   firstName String
   lastName  String
-  bio       String   @db.LongText
-  devStatus String   @default("")
-  email     String   @unique
+  bio       String    @db.LongText
+  devStatus String    @default("")
+  email     String    @unique
   password  String
-  avatar    String   @default("")
-  role      UserRole @default(UNVERIFIED)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  avatar    String    @default("")
+  role      UserRole  @default(UNVERIFIED)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  contacts  Json?
   posts     Post[]
+  Task      Task[]
+  Project   Project[]
+}
+
+model Project {
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  content       Json
+  authorId      Int
+  author        User          @relation(fields: [authorId], references: [id])
+  projectStatus ProjectStatus @default(DEVELOPMENT)
+  createdAt     DateTime      @default(now())
+  tasks         Task[]
+}
+
+enum ProjectStatus {
+  DEVELOPMENT
+  PRODUCTION
+}
+
+model Task {
+  id         Int        @id @default(autoincrement())
+  title      String
+  authorId   Int
+  author     User       @relation(fields: [authorId], references: [id])
+  content    Json
+  taskStatus TaskStatus @default(ISSUED)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  project    Project    @relation(fields: [projectId], references: [id])
+  projectId  Int
+}
+
+enum TaskStatus {
+  ISSUED
+  PROCESSING
+  PROBLEMS
+  COMPLETED
 }
 
 enum UserRole {
@@ -36,12 +75,12 @@ model ThirdPartyTokens {
 }
 
 model Post {
-  id       Int @id @default(autoincrement())
-  name     String
-  content  Json
-  authorId Int?
-  author   User?  @relation(fields: [authorId], references: [id])
-  createdAt DateTime @default(now())
+  id         Int        @id @default(autoincrement())
+  name       String
+  content    Json
+  authorId   Int?
+  author     User?      @relation(fields: [authorId], references: [id])
+  createdAt  DateTime   @default(now())
   postStatus PostStatus @default(EXPECTATION)
 }
 
