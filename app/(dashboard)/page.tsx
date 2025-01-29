@@ -75,12 +75,20 @@ function NewsCard({ title, description, category }) {
   );
 }
 
-async function PostCard({ id, title, author, createdAt, content, video }: Post) {
-  const authorInfo = await getUserInfoById(author)
-  const jsonContent = JSON.parse(content)
-  const firstImageBlock = jsonContent.contentBlocks.find((block) => block.type === "image");
-  const excerpt =
-  jsonContent.description.slice(0, 100) + "...";
+async function PostCard({
+  id,
+  title,
+  author,
+  createdAt,
+  content,
+  video,
+}: Post) {
+  const authorInfo = await getUserInfoById(author);
+  const jsonContent = JSON.parse(content);
+  const firstImageBlock = jsonContent.contentBlocks.find(
+    (block) => block.type === "image"
+  );
+  const excerpt = jsonContent.description.slice(0, 100) + "...";
 
   return (
     <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden">
@@ -130,82 +138,3 @@ async function PostCard({ id, title, author, createdAt, content, video }: Post) 
     </Card>
   );
 }
-
-
-
-const posts: Post[] = [
-  {
-    id: 1,
-    title: "Оптимизация производительности React-приложений",
-    author: {
-      name: "Анна Иванова",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    date: "10 мая 2023",
-    contentBlocks: [
-      {
-        type: "text",
-        content:
-          "В этой статье мы рассмотрим несколько эффективных способов оптимизации производительности React-приложений.",
-      },
-      {
-        type: "image",
-        content:
-          "https://avatars.mds.yandex.net/get-kinopoisk-image/6201401/62e9b64b-b59f-4dea-b27e-4d3fe0fd76b4/600x900",
-      },
-      {
-        type: "text",
-        content:
-          "Мы обсудим использование React.memo, useCallback и useMemo для предотвращения ненужных ререндеров.",
-      },
-      {
-        type: "image",
-        content:
-          "https://pic.rutube.ru/video/ee/6a/ee6aed915edb4bcdc18ec72d52584fd7.jpg",
-      },
-    ],
-    video: "/placeholder.mp4",
-  },
-  {
-    id: 2,
-    title: "Введение в GraphQL",
-    author: {
-      name: "Петр Сидоров",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    date: "5 мая 2023",
-    contentBlocks: [
-      {
-        type: "text",
-        content:
-          "GraphQL - это мощный язык запросов для API. Давайте разберемся, почему он становится все более популярным.",
-      },
-      {
-        type: "image",
-        content:
-          "https://pic.rutube.ru/video/ee/6a/ee6aed915edb4bcdc18ec72d52584fd7.jpg",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Микросервисы на Go",
-    author: {
-      name: "Мария Петрова",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    date: "1 мая 2023",
-    contentBlocks: [
-      {
-        type: "text",
-        content:
-          "Go становится все более популярным для построения микросервисных архитектур. Рассмотрим основные преимущества.",
-      },
-      {
-        type: "image",
-        content:
-          "https://avatars.mds.yandex.net/get-kinopoisk-image/1600647/886786c0-c93a-4034-b8a8-a7300fe97250/600x900",
-      },
-    ],
-  },
-];

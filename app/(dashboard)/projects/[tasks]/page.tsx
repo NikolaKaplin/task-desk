@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { PlusCircle, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   DragDropContext,
   Droppable,
@@ -11,10 +11,8 @@ import {
 } from "react-beautiful-dnd";
 
 import { Button } from "@/components/ui/button";
-import NewProjectModal from "@/components/shared/projects/new-project-modal";
-import TaskColumn from "@/components/shared/projects/task-column";
-import { CreateProjectForm } from "@/components/shared/projects/create-project-form";
 import { CreateTaskForm } from "@/components/shared/projects/create-task-form";
+import TaskColumn from "@/components/shared/projects/task-column";
 
 export interface Task {
   id: string;
@@ -32,6 +30,8 @@ const initialTasks: Task[] = [
     description: "Create initial design mockups",
     performers: ["John Doe"],
     status: "ISSUE",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
   },
   {
     id: "2",
@@ -39,6 +39,8 @@ const initialTasks: Task[] = [
     description: "Implement the frontend",
     performers: ["Jane Smith"],
     status: "IN PROGRESS",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
   },
   {
     id: "3",
@@ -46,6 +48,8 @@ const initialTasks: Task[] = [
     description: "Develop the backend API",
     performers: ["Bob Johnson"],
     status: "PROBLEMS",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
   },
   {
     id: "4",
@@ -53,19 +57,51 @@ const initialTasks: Task[] = [
     description: "Perform QA testing",
     performers: ["Alice Williams"],
     status: "COMPLETED",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
+  },
+  {
+    id: "5",
+    name: "Design mockups",
+    description: "Create initial design mockups",
+    performers: ["John Doe"],
+    status: "ISSUE",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
+  },
+  {
+    id: "6",
+    name: "Frontend development",
+    description: "Implement the frontend",
+    performers: ["Jane Smith"],
+    status: "IN PROGRESS",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
+  },
+  {
+    id: "7",
+    name: "Backend API",
+    description: "Develop the backend API",
+    performers: ["Bob Johnson"],
+    status: "PROBLEMS",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
+  },
+  {
+    id: "8",
+    name: "Testing",
+    description: "Perform QA testing",
+    performers: ["Alice Williams"],
+    status: "COMPLETED",
+    image:
+      "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
   },
 ];
 
 const listIds = ["ISSUE", "IN PROGRESS", "PROBLEMS", "COMPLETED"] as const;
 
 export default function ProjectTasksPage() {
-  const { id } = useParams();
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
-
-  const addTask = (task: Task) => {
-    setTasks([...tasks, task]);
-  };
 
   const getTasksByStatus = useCallback(
     (status: Task["status"]) => tasks.filter((task) => task.status === status),
@@ -91,20 +127,20 @@ export default function ProjectTasksPage() {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto p-4 h-screen flex flex-col">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex items-center">
           <Link href="/projects">
             <Button variant="ghost" size="sm" className="mr-4">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Projects
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">Project Tasks (ID: {id})</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Project</h1>
         </div>
         <CreateTaskForm />
       </div>
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex flex-nowrap overflow-x-auto gap-4 h-[calc(100vh-150px)]">
+        <div className="flex flex-col md:flex-row flex-grow overflow-x-auto gap-4">
           {listIds.map((listId) => (
             <Droppable droppableId={listId} key={listId}>
               {(provided, snapshot) => (

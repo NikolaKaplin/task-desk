@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createProject, getUsers } from "@/app/actions";
-import React from "react";
 import {
   Form,
   FormControl,
@@ -30,15 +29,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import AvatarUpload from "../avatar-upload";
 import { Badge } from "@/components/ui/badge";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { InputJsonValue } from "@prisma/client/runtime/library";
 import { getUserSession } from "@/lib/get-session-server";
-import { set } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -50,7 +46,7 @@ const profileFormSchema = z.object({
   content: z.string(),
   projectStatus: z.string(),
   createdAt: z.date(),
-  users: z.array(z.string()),
+  users: z.array(z.number()),
 });
 
 export type Project = {
@@ -59,22 +55,28 @@ export type Project = {
   authorId: number;
   projectStatus: string;
   createdAt: Date;
+  users: number[];
 };
 
 type ProjectFormValues = z.infer<typeof profileFormSchema>;
 
+type User = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+};
+
 export function CreateProjectForm() {
   const [authorId, setAuthorId] = useState(0);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [users, setUsers] = useState();
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const usersArr = await getUsers();
       if (usersArr) {
@@ -83,7 +85,7 @@ export function CreateProjectForm() {
     })();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const userSession = await getUserSession();
       if (userSession) {
@@ -91,18 +93,20 @@ export function CreateProjectForm() {
       }
     })();
   }, []);
-  const handleStatusSelect = (status: string) => {
-    const currentDevStatus = form.getValues("users");
-    if (!currentDevStatus.includes(status)) {
-      form.setValue("users", [...currentDevStatus, status]);
+
+  const handleStatusSelect = (userId: string) => {
+    const currentUsers = form.getValues("users");
+    const id = Number.parseInt(userId, 10);
+    if (!currentUsers.includes(id)) {
+      form.setValue("users", [...currentUsers, id]);
     }
   };
 
-  const handleStatusRemove = (status: string) => {
-    const currentDevStatus = form.getValues("users");
+  const handleStatusRemove = (userId: number) => {
+    const currentUsers = form.getValues("users");
     form.setValue(
       "users",
-      currentDevStatus.filter((s) => s !== status)
+      currentUsers.filter((id) => id !== userId)
     );
   };
 
@@ -122,10 +126,15 @@ export function CreateProjectForm() {
     setIsLoading(true);
     const project: Project = {
       authorId: authorId,
-      content: JSON.stringify({ users: [], description: data.description }),
+      content: JSON.stringify({
+        users: data.users,
+        description: data.description,
+        projects: [],
+      }),
       createdAt: data.createdAt,
       name: data.name,
       projectStatus: data.projectStatus,
+      users: data.users,
     };
 
     const projectCreate = await createProject(project);
@@ -133,14 +142,15 @@ export function CreateProjectForm() {
 
     if (projectCreate?.success) {
       toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
+        title: "Project created",
+        description: "Your project has been successfully created.",
       });
       router.refresh();
+      setIsOpen(false);
     } else {
       toast({
         title: "Error",
-        description: "There was a problem updating your profile.",
+        description: "There was a problem creating your project.",
         variant: "destructive",
       });
     }
@@ -179,7 +189,7 @@ export function CreateProjectForm() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Your last name" {...field} />
+                    <Textarea placeholder="Project description" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -190,7 +200,7 @@ export function CreateProjectForm() {
               name="users"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Developer Status</FormLabel>
+                  <FormLabel>Users</FormLabel>
                   <Select onValueChange={handleStatusSelect}>
                     <FormControl>
                       <SelectTrigger>
@@ -199,12 +209,8 @@ export function CreateProjectForm() {
                     </FormControl>
                     <SelectContent>
                       {users.map((user) => (
-                        <SelectItem
-                          className=""
-                          key={user.firstName}
-                          value={user.firstName}
-                        >
-                          <div className=" flex items-center gap-4">
+                        <SelectItem key={user.id} value={user.id.toString()}>
+                          <div className="flex items-center gap-4">
                             {user.firstName} {user.lastName}{" "}
                             <Avatar>
                               <AvatarImage src={user.avatar} />
@@ -219,38 +225,36 @@ export function CreateProjectForm() {
                   </FormDescription>
                   <FormMessage />
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value.map((status) => (
-                      <Badge
-                        className=" justify-between"
-                        key={status}
-                        variant="secondary"
-                      >
-                        {status}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-1 h-auto p-0 text-muted-foreground hover:text-foreground"
-                          onClick={() => handleStatusRemove(status)}
+                    {field.value.map((userId) => {
+                      const user = users.find((u) => u.id === userId);
+                      return user ? (
+                        <Badge
+                          className="justify-between"
+                          key={user.id}
+                          variant="secondary"
                         >
-                          <Avatar>
-                            <AvatarImage
-                              src={
-                                users.find((user) => user.firstName === status)
-                                  ?.avatar
-                              }
-                            />
-                          </Avatar>
-                          <X className="h-3 w-3" />
-                          <span className="sr-only">Remove</span>
-                        </Button>
-                      </Badge>
-                    ))}
+                          {user.firstName} {user.lastName}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="ml-1 h-auto p-0 text-muted-foreground hover:text-foreground"
+                            onClick={() => handleStatusRemove(user.id)}
+                          >
+                            <Avatar>
+                              <AvatarImage src={user.avatar} />
+                            </Avatar>
+                            <X className="h-3 w-3" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </Badge>
+                      ) : null;
+                    })}
                   </div>
                 </FormItem>
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Updating..." : "Update profile"}
+              {isLoading ? "Creating..." : "Create Project"}
             </Button>
           </form>
         </Form>

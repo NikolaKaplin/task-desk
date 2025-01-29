@@ -158,6 +158,7 @@ export async function getUsers() {
   try {
     const response = await prisma.user.findMany({
       select: {
+        id: true,
         firstName: true,
         lastName: true,
         avatar: true,
