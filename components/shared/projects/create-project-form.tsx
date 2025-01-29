@@ -159,24 +159,33 @@ export function CreateProjectForm() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="bg-green-500 hover:bg-green-600 text-white">
           <PlusCircle className="mr-2 h-4 w-4" /> New Project
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
+          <DialogTitle className="text-green-400">
+            Create New Project
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8 text-white"
+          >
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel className="text-gray-300">Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your project name" {...field} />
+                    <Input
+                      placeholder="Your project name"
+                      {...field}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -187,9 +196,13 @@ export function CreateProjectForm() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-gray-300">Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Project description" {...field} />
+                    <Textarea
+                      placeholder="Project description"
+                      {...field}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -200,16 +213,20 @@ export function CreateProjectForm() {
               name="users"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Users</FormLabel>
+                  <FormLabel className="text-gray-300">Users</FormLabel>
                   <Select onValueChange={handleStatusSelect}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                         <SelectValue placeholder="Select users" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-gray-700 border-gray-600 text-white">
                       {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id.toString()}>
+                        <SelectItem
+                          key={user.id}
+                          value={user.id.toString()}
+                          className="text-white hover:bg-gray-600"
+                        >
                           <div className="flex items-center gap-4">
                             {user.firstName} {user.lastName}{" "}
                             <Avatar>
@@ -220,7 +237,7 @@ export function CreateProjectForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
+                  <FormDescription className="text-gray-400">
                     Select the users that are working on this project.
                   </FormDescription>
                   <FormMessage />
@@ -229,7 +246,7 @@ export function CreateProjectForm() {
                       const user = users.find((u) => u.id === userId);
                       return user ? (
                         <Badge
-                          className="justify-between"
+                          className="justify-between bg-gray-700 text-white"
                           key={user.id}
                           variant="secondary"
                         >
@@ -237,7 +254,7 @@ export function CreateProjectForm() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="ml-1 h-auto p-0 text-muted-foreground hover:text-foreground"
+                            className="ml-1 h-auto p-0 text-gray-400 hover:text-white"
                             onClick={() => handleStatusRemove(user.id)}
                           >
                             <Avatar>
@@ -253,7 +270,11 @@ export function CreateProjectForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-green-500 hover:bg-green-600 text-white"
+              disabled={isLoading}
+            >
               {isLoading ? "Creating..." : "Create Project"}
             </Button>
           </form>

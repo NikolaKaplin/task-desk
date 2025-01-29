@@ -1,65 +1,72 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Skeleton } from "@/components/ui/skeleton"
-import Image from "next/image"
-import { getPostById, getUserInfoById } from "@/app/actions"
-import { useState, useEffect } from "react"
-import { formatDistanceToNow } from "date-fns"
-import { ru } from "date-fns/locale"
+import { usePathname } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
+import { getPostById, getUserInfoById } from "@/app/actions";
+import { useState, useEffect } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { ru } from "date-fns/locale";
 interface Post {
-  title: string
-  description: string
-  authorId: number
-  createdAt: string
+  title: string;
+  description: string;
+  authorId: number;
+  createdAt: string;
   contentBlocks: Array<{
-    type: string
-    content: string
-  }>
-  video?: string
+    type: string;
+    content: string;
+  }>;
+  video?: string;
 }
 
 interface Author {
-  firstName: string
-  lastName: string
-  avatar: string
+  firstName: string;
+  lastName: string;
+  avatar: string;
 }
 
 export default function PostPage() {
-  const [post, setPost] = useState<Post | null>(null)
-  const [author, setAuthor] = useState<Author | null>(null)
-  const pathname = usePathname()
-  const postId = pathname?.split("/").pop()
+  const [post, setPost] = useState<Post | null>(null);
+  const [author, setAuthor] = useState<Author | null>(null);
+  const pathname = usePathname();
+  const postId = pathname?.split("/").pop();
 
   useEffect(() => {
     async function fetchPost() {
       if (postId) {
-        const fetchedPost = await getPostById(Number(postId))
+        const fetchedPost = await getPostById(Number(postId));
         if (fetchedPost) {
-          const parsedPost = JSON.parse(fetchedPost.content)
-          setPost(parsedPost)
-          const authorData = await getUserInfoById(Number(fetchedPost.authorId))
-          setAuthor(authorData)
+          const parsedPost = JSON.parse(fetchedPost.content);
+          setPost(parsedPost);
+          const authorData = await getUserInfoById(
+            Number(fetchedPost.authorId)
+          );
+          setAuthor(authorData);
         }
       }
     }
-    fetchPost()
-  }, [postId])
+    fetchPost();
+  }, [postId]);
 
   if (!post || !author) {
-    return <LoadingSkeleton />
+    return <LoadingSkeleton />;
   }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <article className="max-w-4xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-4xl sm:text-5xl font-bold text-green-400 mb-4">{post.title}</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold text-green-400 mb-4">
+            {post.title}
+          </h1>
           <p className="text-xl text-gray-300 mb-6">{post.description}</p>
           <div className="flex items-center">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={author.avatar} alt={`${author.firstName} ${author.lastName}`} />
+              <AvatarImage
+                src={author.avatar}
+                alt={`${author.firstName} ${author.lastName}`}
+              />
               <AvatarFallback>
                 {author.firstName[0]}
                 {author.lastName[0]}
@@ -70,7 +77,10 @@ export default function PostPage() {
                 {author.firstName} {author.lastName}
               </p>
               <p className="text-sm text-gray-400">
-                {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: ru })}
+                {formatDistanceToNow(new Date(post.createdAt), {
+                  addSuffix: true,
+                  locale: ru,
+                })}
               </p>
             </div>
           </div>
@@ -79,7 +89,9 @@ export default function PostPage() {
           {post.contentBlocks.map((block, index) => (
             <div key={index}>
               {block.type === "text" ? (
-                <p className="text-gray-300 text-lg leading-relaxed">{block.content}</p>
+                <p className="text-gray-300 text-lg leading-relaxed">
+                  {block.content}
+                </p>
               ) : (
                 <div className="relative h-64 sm:h-96 w-full rounded-lg overflow-hidden">
                   <img
@@ -87,7 +99,7 @@ export default function PostPage() {
                     alt="Post image"
                     layout="fill"
                     objectFit="cover"
-                    className="transition-transform duration-300 hover:scale-105"
+                    className="transition-transform duration-300 "
                   />
                 </div>
               )}
@@ -104,7 +116,7 @@ export default function PostPage() {
         </div>
       </article>
     </div>
-  )
+  );
 }
 
 function LoadingSkeleton() {
@@ -126,6 +138,5 @@ function LoadingSkeleton() {
         <Skeleton className="h-4 w-4/6 bg-gray-600 animate-pulse" />
       </div>
     </div>
-  )
+  );
 }
-

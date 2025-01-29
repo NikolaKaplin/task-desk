@@ -11,11 +11,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { CreateProjectForm } from "@/components/shared/projects/create-project-form";
-import { getPosts, getProjects, getUsers } from "@/app/actions";
+import { getProjects, getUsers } from "@/app/actions";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Calendar, Users } from "lucide-react";
+import { Briefcase, Users } from "lucide-react";
 
 interface Project {
   id: string;

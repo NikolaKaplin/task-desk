@@ -20,7 +20,7 @@ type ContentBlock = {
 
 type Post = {
   id: number;
-  name: string;
+  title: string;
   authorId: number;
   content: string;
   createdAt: Date;
@@ -48,7 +48,12 @@ export default async function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map((post) => (
-              <PostCard key={post.id} {...post} />
+              <PostCard
+                title={post.name}
+                authorId={post.authorId}
+                key={post.id}
+                {...post}
+              />
             ))}
           </div>
         </div>
@@ -57,33 +62,15 @@ export default async function Home() {
   );
 }
 
-function NewsCard({ title, description, category }) {
-  return (
-    <Card className="bg-gray-800 border-gray-700 text-white">
-      <CardHeader>
-        <CardTitle className="text-green-400">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-gray-300">{description}</p>
-      </CardContent>
-      <CardFooter>
-        <Badge variant="secondary" className="bg-green-600 text-white">
-          {category}
-        </Badge>
-      </CardFooter>
-    </Card>
-  );
-}
-
 async function PostCard({
   id,
   title,
-  author,
+  authorId,
   createdAt,
   content,
   video,
 }: Post) {
-  const authorInfo = await getUserInfoById(author);
+  const authorInfo = await getUserInfoById(authorId);
   const jsonContent = JSON.parse(content);
   const firstImageBlock = jsonContent.contentBlocks.find(
     (block) => block.type === "image"
