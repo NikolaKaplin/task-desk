@@ -24,6 +24,7 @@ type Post = {
   authorId: number;
   content: string;
   createdAt: Date;
+  video: string;
 };
 
 export default async function Home() {
@@ -51,6 +52,7 @@ export default async function Home() {
               <PostCard
                 title={post.name}
                 authorId={post.authorId}
+                video={(JSON.parse(post.content)).video}
                 key={post.id}
                 {...post}
               />
@@ -75,6 +77,7 @@ async function PostCard({
   const firstImageBlock = jsonContent.contentBlocks.find(
     (block) => block.type === "image"
   );
+  console.log(video)
   const excerpt = jsonContent.description.slice(0, 100) + "...";
 
   return (
@@ -119,7 +122,7 @@ async function PostCard({
         </Link>
         <div className="flex space-x-2">
           {firstImageBlock && <ImageIcon className="w-5 h-5 text-gray-400" />}
-          {video && <Video className="w-5 h-5 text-gray-400" />}
+          {video !== null ? <Video className="w-5 h-5 text-gray-400" /> : null}
         </div>
       </CardFooter>
     </Card>

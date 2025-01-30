@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -12,31 +12,30 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { X } from 'lucide-react'
+import { X } from "lucide-react"
 import { updateProfile } from "@/app/actions"
 import AvatarUpload from "../../avatar-upload"
 
-
 const softwareDevelopers = [
-  'Frontend Developer',
-  'Backend Developer',
-  'Full Stack Developer',
-  'Mobile Developer',
-  'Game Developer',
-  'DevOps Engineer',
-  'Data Scientist',
-  'Data Engineer',
-  'Machine Learning Engineer',
-  'Quality Assurance Engineer',
-  'UI/UX Designer',
-  'Systems Analyst',
-  'Embedded Systems Developer',
-  'Cloud Engineer',
-  'Blockchain Developer',
-  'Security Engineer',
-  'Game Designer',
-  'Database Administrator'
-];
+  "Frontend Developer",
+  "Backend Developer",
+  "Full Stack Developer",
+  "Mobile Developer",
+  "Game Developer",
+  "DevOps Engineer",
+  "Data Scientist",
+  "Data Engineer",
+  "Machine Learning Engineer",
+  "Quality Assurance Engineer",
+  "UI/UX Designer",
+  "Systems Analyst",
+  "Embedded Systems Developer",
+  "Cloud Engineer",
+  "Blockchain Developer",
+  "Security Engineer",
+  "Game Designer",
+  "Database Administrator",
+]
 
 const profileFormSchema = z.object({
   id: z.number(),
@@ -55,11 +54,14 @@ const profileFormSchema = z.object({
   devStatus: z.array(z.string()).min(1, {
     message: "Please select at least one developer status.",
   }),
+  telegram: z.string().optional(),
+  github: z.string().optional(),
+  linkedin: z.string().optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-export default function ProfileForm({user}:{user: number}) {
+export default function ProfileForm({ user }: { user: number }) {
   const { toast } = useToast()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -73,6 +75,9 @@ export default function ProfileForm({user}:{user: number}) {
       email: "",
       bio: "",
       devStatus: [],
+      telegram: "",
+      github: "",
+      linkedin: "",
     },
   })
 
@@ -107,7 +112,10 @@ export default function ProfileForm({user}:{user: number}) {
 
   const handleStatusRemove = (status: string) => {
     const currentDevStatus = form.getValues("devStatus")
-    form.setValue("devStatus", currentDevStatus.filter(s => s !== status))
+    form.setValue(
+      "devStatus",
+      currentDevStatus.filter((s) => s !== status),
+    )
   }
 
   return (
@@ -122,9 +130,9 @@ export default function ProfileForm({user}:{user: number}) {
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel className="text-gray-300">First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your first name" {...field} />
+                  <Input placeholder="Your first name" {...field} className="bg-gray-700 border-gray-600 text-white" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -135,9 +143,9 @@ export default function ProfileForm({user}:{user: number}) {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel className="text-gray-300">Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your last name" {...field} />
+                  <Input placeholder="Your last name" {...field} className="bg-gray-700 border-gray-600 text-white" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -149,11 +157,11 @@ export default function ProfileForm({user}:{user: number}) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-gray-300">Email</FormLabel>
               <FormControl>
-                <Input placeholder="Your email address" {...field} />
+                <Input placeholder="Your email address" {...field} className="bg-gray-700 border-gray-600 text-white" />
               </FormControl>
-              <FormDescription>
+              <FormDescription className="text-gray-400">
                 This email will be used for account-related notifications.
               </FormDescription>
               <FormMessage />
@@ -165,15 +173,15 @@ export default function ProfileForm({user}:{user: number}) {
           name="bio"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Bio</FormLabel>
+              <FormLabel className="text-gray-300">Bio</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Tell us a little bit about yourself"
-                  className="resize-none"
+                  className="resize-none bg-gray-700 border-gray-600 text-white"
                   {...field}
                 />
               </FormControl>
-              <FormDescription>
+              <FormDescription className="text-gray-400">
                 You can @mention other users and organizations to link to them.
               </FormDescription>
               <FormMessage />
@@ -185,33 +193,33 @@ export default function ProfileForm({user}:{user: number}) {
           name="devStatus"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Developer Status</FormLabel>
+              <FormLabel className="text-gray-300">Developer Status</FormLabel>
               <Select onValueChange={handleStatusSelect}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
+                <SelectContent className="bg-gray-700 border-gray-600">
                   {softwareDevelopers.map((status) => (
-                    <SelectItem key={status} value={status}>
+                    <SelectItem key={status} value={status} className="text-white hover:bg-gray-600">
                       {status}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>
+              <FormDescription className="text-gray-400">
                 Select the statuses that best describe your skills.
               </FormDescription>
               <FormMessage />
               <div className="flex flex-wrap gap-2 mt-2">
                 {field.value.map((status) => (
-                  <Badge key={status} variant="secondary">
+                  <Badge key={status} variant="secondary" className="bg-gray-600 text-white">
                     {status}
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="ml-1 h-auto p-0 text-muted-foreground hover:text-foreground"
+                      className="ml-1 h-auto p-0 text-gray-400 hover:text-white"
                       onClick={() => handleStatusRemove(status)}
                     >
                       <X className="h-3 w-3" />
@@ -223,7 +231,60 @@ export default function ProfileForm({user}:{user: number}) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <div className="space-y-4">
+          <FormField
+            control={form.control}
+            name="telegram"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-300">Telegram</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Your Telegram username"
+                    {...field}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="github"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-300">GitHub</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Your GitHub username"
+                    {...field}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="linkedin"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-300">LinkedIn</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Your LinkedIn profile URL"
+                    {...field}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <Button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white" disabled={isLoading}>
           {isLoading ? "Updating..." : "Update profile"}
         </Button>
       </form>

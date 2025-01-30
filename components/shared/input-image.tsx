@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { getUserSession } from "@/lib/get-session-server";
+import { CloudUpload } from "lucide-react";
 
 export const InputImage = (props: {
   onChange: (url: string) => string;
@@ -11,9 +12,11 @@ export const InputImage = (props: {
   const [showError, setShowError] = useState(false);
   return (
     <>
+      <CloudUpload />
       <Input
         type="file"
         accept="image/*"
+        about="penis"
         onChange={async (e) => {
           const file = e.target.files?.item(0);
           if (!file) return;
