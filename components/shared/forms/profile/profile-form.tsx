@@ -1,20 +1,34 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
-import { updateProfile } from "@/app/actions"
-import AvatarUpload from "../../avatar-upload"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { updateProfile } from "@/app/actions";
+import AvatarUpload from "../../avatar-upload";
 
 const softwareDevelopers = [
   "Frontend Developer",
@@ -35,7 +49,7 @@ const softwareDevelopers = [
   "Security Engineer",
   "Game Designer",
   "Database Administrator",
-]
+];
 
 const profileFormSchema = z.object({
   id: z.number(),
@@ -57,14 +71,14 @@ const profileFormSchema = z.object({
   telegram: z.string().optional(),
   github: z.string().optional(),
   linkedin: z.string().optional(),
-})
+});
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfileForm({ user }: { user: number }) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -79,78 +93,88 @@ export default function ProfileForm({ user }: { user: number }) {
       github: "",
       linkedin: "",
     },
-  })
+  });
 
   async function onSubmit(data: ProfileFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
 
-    const result = await updateProfile(data)
+    const result = await updateProfile(data);
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (result.edit) {
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
-      })
-      router.refresh()
+      });
+      router.refresh();
     } else {
       toast({
         title: "Error",
         description: "There was a problem updating your profile.",
         variant: "destructive",
-      })
+      });
     }
   }
 
   const handleStatusSelect = (status: string) => {
-    const currentDevStatus = form.getValues("devStatus")
+    const currentDevStatus = form.getValues("devStatus");
     if (!currentDevStatus.includes(status)) {
-      form.setValue("devStatus", [...currentDevStatus, status])
+      form.setValue("devStatus", [...currentDevStatus, status]);
     }
-  }
+  };
 
   const handleStatusRemove = (status: string) => {
-    const currentDevStatus = form.getValues("devStatus")
+    const currentDevStatus = form.getValues("devStatus");
     form.setValue(
       "devStatus",
-      currentDevStatus.filter((s) => s !== status),
-    )
-  }
+      currentDevStatus.filter((s) => s !== status)
+    );
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="flex justify-center">
-          <AvatarUpload currentAvatarUrl="/placeholder.svg?height=100&width=100" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">First Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Your first name" {...field} className="bg-gray-700 border-gray-600 text-white" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-gray-300">Last Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Your last name" {...field} className="bg-gray-700 border-gray-600 text-white" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="flex flex-col sm:flex-row gap-8 mb-8">
+          <div className="flex flex-col items-center">
+            <AvatarUpload currentAvatarUrl="/placeholder.svg?height=200&width=200" />
+          </div>
+          <div className="flex-1 space-y-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-300">First Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Your first name"
+                      {...field}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-300">Last Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Your last name"
+                      {...field}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
         <FormField
           control={form.control}
@@ -159,7 +183,11 @@ export default function ProfileForm({ user }: { user: number }) {
             <FormItem>
               <FormLabel className="text-gray-300">Email</FormLabel>
               <FormControl>
-                <Input placeholder="Your email address" {...field} className="bg-gray-700 border-gray-600 text-white" />
+                <Input
+                  placeholder="Your email address"
+                  {...field}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
               </FormControl>
               <FormDescription className="text-gray-400">
                 This email will be used for account-related notifications.
@@ -202,7 +230,11 @@ export default function ProfileForm({ user }: { user: number }) {
                 </FormControl>
                 <SelectContent className="bg-gray-700 border-gray-600">
                   {softwareDevelopers.map((status) => (
-                    <SelectItem key={status} value={status} className="text-white hover:bg-gray-600">
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="text-white hover:bg-gray-600"
+                    >
                       {status}
                     </SelectItem>
                   ))}
@@ -214,7 +246,11 @@ export default function ProfileForm({ user }: { user: number }) {
               <FormMessage />
               <div className="flex flex-wrap gap-2 mt-2">
                 {field.value.map((status) => (
-                  <Badge key={status} variant="secondary" className="bg-gray-600 text-white">
+                  <Badge
+                    key={status}
+                    variant="secondary"
+                    className="bg-gray-600 text-white"
+                  >
                     {status}
                     <Button
                       variant="ghost"
@@ -284,11 +320,14 @@ export default function ProfileForm({ user }: { user: number }) {
             )}
           />
         </div>
-        <Button type="submit" className="w-full bg-green-500 hover:bg-green-600 text-white" disabled={isLoading}>
+        <Button
+          type="submit"
+          className="w-full bg-green-500 hover:bg-green-600 text-white"
+          disabled={isLoading}
+        >
           {isLoading ? "Updating..." : "Update profile"}
         </Button>
       </form>
     </Form>
-  )
+  );
 }
-

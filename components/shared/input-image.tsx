@@ -1,51 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Input } from "../ui/input";
-import { getUserSession } from "@/lib/get-session-server";
 import { CloudUpload } from "lucide-react";
+import { Button } from "../ui/button";
+import type React from "react"; // Added import for React
+import { useToast } from "@/hooks/use-toast";
 
 export const InputImage = (props: {
-  onChange: (url: string) => string;
+  onChange: (url: string) => void;
   userId: number;
 }) => {
-  const [showError, setShowError] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.item(0);
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const res = await fetch(`/api/update-avatar/${props.userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": file.type,
+        },
+        body: Buffer.from(await file.arrayBuffer()),
+      });
+
+      if (res.status !== 200) {
+        throw new Error("Failed to upload image");
+      }
+
+      const obj = await res.json();
+      if (!obj.url) {
+        throw new Error("No URL returned from server");
+      }
+
+      props.onChange(obj.url);
+      toast({
+        title: "Success",
+        description: "Avatar updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update avatar",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
-    <>
-      <CloudUpload />
+    <div className="flex flex-col items-center">
+      <Button
+        variant="outline"
+        size="icon"
+        className="w-12 min-h-12 text-green-500 border-none rounded-full transition-transform hover:translate-y-[-9px] hover:bg-transparent "
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploading}
+      >
+        <CloudUpload
+          className={`min-w-12 min-h-12 text-green-400 ${
+            isUploading ? "animate-pulse" : ""
+          }`}
+        />
+      </Button>
       <Input
         type="file"
         accept="image/*"
-        about="penis"
-        onChange={async (e) => {
-          const file = e.target.files?.item(0);
-          if (!file) return;
-          if (file.size > 5 * 1024 * 1024) return setShowError(true);
-          else setShowError(false);
-          const res = await fetch(`/api/update-avatar/${props.userId}`, {
-            method: "post",
-            headers: {
-              "Content-Type": file.type,
-            },
-            body: Buffer.from(await file.arrayBuffer()),
-          });
-          if (res.status != 200) return;
-
-          const obj = await res.json();
-          if (!obj.url) return;
-
-          props.onChange(obj.url);
-        }}
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleFileChange}
       />
-
-      <span
-        style={{
-          color: "red",
-          display: showError ? "block" : "none",
-        }}
-      >
-        Размер файла больше чем пашел нахуй
-      </span>
-    </>
+      {isUploading && (
+        <p className="mt-2 text-sm text-gray-400">Uploading...</p>
+      )}
+    </div>
   );
 };
