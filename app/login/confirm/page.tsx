@@ -4,10 +4,6 @@ import { redirect } from "next/navigation"
 
 
 export default async function Register() {
-  const user = await getUserSession()
-
-  if (!user) redirect("/login")
-  if (user.role === "USER") redirect("/")
 
   return <AwaitingVerification />
 }

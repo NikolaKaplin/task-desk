@@ -17,7 +17,6 @@ export async function registerUser(
   body: Prisma.UserCreateInput
 ): Promise<RegisterResult> {
   try {
-    const res = await sendApplication(body)
     const user = await prisma.user.findFirst({
       where: {
         email: body.email,
@@ -37,6 +36,8 @@ export async function registerUser(
           devStatus: "",
         },
       });
+      const res = await sendApplication(body)
+      console.log(res)
       return { success: !!createdUser };
     }
   } catch (err) {
@@ -88,14 +89,27 @@ export async function confirmUser(
   body: Prisma.UserUpdateInput,
   isDelete: boolean
 ) {
+
+  const user = await prisma.user.findFirst({
+    where: {
+      email: body.email as string,
+    },
+  });
+
+  if (!user) {
+    throw new Error(`User with email ${body.email} not found`);
+  }
+
+
   if (isDelete) {
-    await prisma.user.delete({
+    await prisma.user.deleteMany({
       where: {
         email: body.email as string,
       },
     });
+    prisma.$disconnect();
   } else {
-    await prisma.user.update({
+    await prisma.user.updateMany({
       where: {
         email: body.email as string,
       },
@@ -103,6 +117,7 @@ export async function confirmUser(
         role: "USER",
       },
     });
+    prisma.$disconnect();
   }
 }
 

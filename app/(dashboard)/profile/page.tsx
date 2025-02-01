@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getUserSession } from "@/lib/get-session-server"
 
 export default async function ProfilePage() {
-  const user = (await getUserSession())?.id
+  const user = (await getUserSession())
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4 sm:p-6 md:p-8">
       <Card className="max-w-2xl mx-auto bg-gray-800 border-gray-700 shadow-lg">

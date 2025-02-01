@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { updateProfile } from "@/app/actions";
 import AvatarUpload from "../../avatar-upload";
+import { FormInput } from "../form-input";
 
 const softwareDevelopers = [
   "Frontend Developer",
@@ -75,7 +76,7 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-export default function ProfileForm({ user }: { user: number }) {
+export default function ProfileForm({ user }: { user: any }) {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -133,89 +134,19 @@ export default function ProfileForm({ user }: { user: number }) {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    <FormProvider {...form}>
+      <div className="space-y-8">
         <div className="flex flex-col sm:flex-row gap-8 mb-8">
           <div className="flex flex-col items-center">
             <AvatarUpload currentAvatarUrl="/placeholder.svg?height=200&width=200" />
           </div>
           <div className="flex-1 space-y-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-300">First Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Your first name"
-                      {...field}
-                      className="bg-gray-700 border-gray-600 text-white"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-300">Last Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Your last name"
-                      {...field}
-                      className="bg-gray-700 border-gray-600 text-white"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+           <FormInput name={"firstName"} type={"text"} defaultValue={user.firstName} label={"First Name"}/>
+           <FormInput name={"lastName"} type={"text"} defaultValue={user.lastName} label={"Last Name"}/>
           </div>
         </div>
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-300">Email</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Your email address"
-                  {...field}
-                  className="bg-gray-700 border-gray-600 text-white"
-                />
-              </FormControl>
-              <FormDescription className="text-gray-400">
-                This email will be used for account-related notifications.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-gray-300">Bio</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Tell us a little bit about yourself"
-                  className="resize-none bg-gray-700 border-gray-600 text-white"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription className="text-gray-400">
-                You can @mention other users and organizations to link to them.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <FormInput name={"email"} isMotion={false} type={"text"} defaultValue={user.email} label={"Email"}/>
+        <FormInput name={"bio"} type={"text"} defaultValue={user.bio ? user.bio : ""} label={"Bio"}/>
         <FormField
           control={form.control}
           name="devStatus"
@@ -327,7 +258,7 @@ export default function ProfileForm({ user }: { user: number }) {
         >
           {isLoading ? "Updating..." : "Update profile"}
         </Button>
-      </form>
-    </Form>
+      </div>
+    </FormProvider>
   );
 }
