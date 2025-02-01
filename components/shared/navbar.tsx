@@ -32,9 +32,8 @@ export const Navbar: React.FC<Props> = ({
     pathName = "home";
   }
   if (
-    pathName == "/register" ||
     pathName == "/login" ||
-    pathName == "/register/confirm"
+    pathName == "/login/confirm"
   ) {
     return children;
   }

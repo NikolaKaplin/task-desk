@@ -11,11 +11,13 @@ import { ConstantColorFactor } from "three";
 import { equal } from "assert";
 import { Code } from "lucide-react";
 import { InputJsonValue, JsonValue } from "@prisma/client/runtime/library";
+import { sendApplication } from "@/bot";
 
 export async function registerUser(
   body: Prisma.UserCreateInput
 ): Promise<RegisterResult> {
   try {
+    const res = await sendApplication(body)
     const user = await prisma.user.findFirst({
       where: {
         email: body.email,
@@ -123,24 +125,7 @@ export async function countUnverifiedUsers() {
   return usersWithRoleUser;
 }
 
-export async function updateProfileUser(data: {
-  name: string;
-  email: string;
-  bio: string;
-  developerType: [];
-}) {
-  // This is a mock function. In a real application, you would update the user's profile in the database.
-  console.log("Updating profile:", data);
 
-  // Simulate a delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Revalidate the profile page
-  revalidatePath("/profile");
-
-  // Return a mock result
-  return { success: true };
-}
 
 export async function setUserAvatar(userId: number, avatar: string) {
   const response = await prisma.user.update({

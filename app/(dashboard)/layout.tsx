@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 export default async function DashboardLayout(props: { children: ReactNode }) {
   const user = await getUserSession();
   if (!user) redirect("/login");
-  if (user.role == "UNVERIFIED") redirect("/register/confirm");
+  if (user.role == "UNVERIFIED") redirect("/login/confirm");
 
   return <Providers>{props.children}</Providers>;
 }

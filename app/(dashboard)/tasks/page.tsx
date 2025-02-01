@@ -1,113 +1,69 @@
-"use client";
-import { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+"use client"
 
-const initialItems = [
-  { id: "1", content: "Задача 1" },
-  { id: "2", content: "Задача 2" },
-  { id: "3", content: "Задача 3" },
-];
-
-const initialCompleted = [{ id: "4", content: "Завершенная задача 1" }];
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function Home() {
-  const [items, setItems] = useState(initialItems);
-  const [completed, setCompleted] = useState(initialCompleted);
+  const [message, setMessage] = useState("")
+  const [status, setStatus] = useState("")
+  const [error, setError] = useState("")
 
-  const onDragEnd = (result) => {
-    const { source, destination } = result;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setStatus("Отправка...")
+    setError("")
 
-    // Если элемент был перетащен в одно и то же место
-    if (!destination) return;
+    try {
+      const response = await fetch("/api/send-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      })
 
-    if (source.droppableId === destination.droppableId) {
-      const itemsList = source.droppableId === "items" ? items : completed;
-      const setItemsList =
-        source.droppableId === "items" ? setItems : setCompleted;
+      const data = await response.json()
 
-      const [removed] = itemsList.splice(source.index, 1);
-      itemsList.splice(destination.index, 0, removed);
-
-      setItemsList([...itemsList]);
-    } else {
-      const sourceList = source.droppableId === "items" ? items : completed;
-      const targetList = source.droppableId === "items" ? completed : items;
-      const setSourceList =
-        source.droppableId === "items" ? setItems : setCompleted;
-      const setTargetList =
-        source.droppableId === "items" ? setCompleted : setItems;
-
-      const [removed] = sourceList.splice(source.index, 1);
-      targetList.splice(destination.index, 0, removed);
-
-      setSourceList([...sourceList]);
-      setTargetList([...targetList]);
+      if (response.ok) {
+        setStatus("Сообщение отправлено!")
+        setMessage("")
+      } else {
+        setStatus("Ошибка при отправке")
+        setError(`Ошибка: ${data.error}. Chat ID: ${data.chatId}`)
+      }
+    } catch (error) {
+      setStatus("Ошибка при отправке")
+      setError(`Неизвестная ошибка: ${error}`)
+      console.error("Error:", error)
     }
-  };
+  }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "20px",
-      }}
-    >
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="items">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              style={{ width: "300px", background: "#f0f0f0", padding: "10px" }}
-            >
-              <h3>Несделанные задачи</h3>
-              {items.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
-                  {(provided) => (
-                    <div
-                      className="border border-gray-800 text-green-500 p-2 mb-2 rounded-md"
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      {item.content}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-
-        <Droppable droppableId="completed">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              style={{ width: "300px", background: "#f0f0f0", padding: "10px" }}
-            >
-              <h3>Завершенные задачи</h3>
-              {completed.map((item, index) => (
-                <Draggable key={item.id} draggableId={item.id} index={index}>
-                  {(provided) => (
-                    <div
-                      className="border border-gray-800 text-green-500 p-2 mb-2 rounded-md"
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      {item.content}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Отправить сообщение в Telegram</CardTitle>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent>
+            <Input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Введите ваше сообщение"
+              required
+            />
+          </CardContent>
+          <CardFooter className="flex flex-col items-start">
+            <Button type="submit">Отправить</Button>
+            {status && <p className="text-sm text-gray-500 mt-2">{status}</p>}
+            {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+          </CardFooter>
+        </form>
+      </Card>
     </div>
-  );
+  )
 }
+
