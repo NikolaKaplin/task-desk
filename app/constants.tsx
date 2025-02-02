@@ -51,3 +51,26 @@ export const navItems: NavItems[] = [
     indicatorHandler: countUnverifiedUsers,
   },
 ];
+
+
+export const softwareDevelopers = [
+  "Frontend Developer",
+  "Backend Developer",
+  "Full Stack Developer",
+  "Mobile Developer",
+  "Game Developer",
+  "DevOps Engineer",
+  "Data Scientist",
+  "Data Engineer",
+  "Machine Learning Engineer",
+  "Quality Assurance Engineer",
+  "UI/UX Designer",
+  "Systems Analyst",
+  "Embedded Systems Developer",
+  "Cloud Engineer",
+  "Blockchain Developer",
+  "Security Engineer",
+  "Game Designer",
+  "Database Administrator",
+];
+

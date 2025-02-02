@@ -11,7 +11,6 @@ import { ConstantColorFactor } from "three";
 import { equal } from "assert";
 import { Code } from "lucide-react";
 import { InputJsonValue, JsonValue } from "@prisma/client/runtime/library";
-import { sendApplication } from "@/bot";
 
 export async function registerUser(
   body: Prisma.UserCreateInput
@@ -140,7 +139,23 @@ export async function countUnverifiedUsers() {
   return usersWithRoleUser;
 }
 
-
+export async function setConfidentiality(id: number, isPublic: boolean) {
+  try{
+    const response = await prisma.user.update({
+      where: {
+        id: id
+      },
+      data: {
+        isPublic: isPublic,
+      }
+    })
+    if(response){
+      return {success: true}
+    }
+  }catch(error){
+    return {success: false}
+  }
+}
 
 export async function setUserAvatar(userId: number, avatar: string) {
   const response = await prisma.user.update({
@@ -375,5 +390,17 @@ export async function getTasksByProjectId(id: number) {
     return tasks;
   } catch (error) {
     return error;
+  }
+}
+
+export async function sendApplication(message: any) {
+  const email = '`' + message.email + '`';
+  const formApplication = `
+  *Имя:* ${message.firstName}\n*Фамилия:* ${message.lastName}\n*Email:* ${email}`;
+  try{
+    const res = await await fetch(`https://api.telegram.org/bot8161546974:AAGY1YsmJEKdw79_js9caNrHwhU-8YcynUQ/sendMessage?chat_id=5791279590&text=${encodeURI(formApplication)}&parse_mode=Markdown`)
+    if (res) return res
+  } catch (error) {
+    console.log(error)
   }
 }

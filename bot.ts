@@ -1,66 +1,33 @@
-import { Telegraf } from "telegraf";
-import dotenv from "dotenv";
-import { confirmUser } from "./app/actions";
-import { prisma } from "./prisma/prisma-client";
+import { Telegraf } from 'telegraf';
+import { confirmUser } from './app/actions';
 
-dotenv.config({ path: ".env.local" });
+const bot = new Telegraf('8161546974:AAGY1YsmJEKdw79_js9caNrHwhU-8YcynUQ'); // Замените YOUR_BOT_TOKEN на токен вашего бота
 
-const bot = new Telegraf("8161546974:AAGY1YsmJEKdw79_js9caNrHwhU-8YcynUQ");
-
-export async function sendApplication(message: any) {
-  bot.drop
-  const email = message.email;
-  const formApplication = `
-  *Имя:* ${message.firstName}\n*Фамилия:* ${message.lastName}\n*Email:* ${message.email}`;
-
-  await bot.telegram.sendMessage("5791279590", formApplication, {
-    parse_mode: "Markdown",
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: "✅", callback_data: "approve" },
-          { text: "❌", callback_data: "deny" },
-        ],
-      ],
-    },
+bot.start((ctx) => ctx.reply('Добро пожаловать!'));
+bot.help((ctx) => ctx.reply('Это помощник бота.'));
+bot.command('accept', async (ctx) => {
+  const commandText = (ctx.message.text).split(' ')[1];
+  await confirmUser({email: commandText}, false)
+  await ctx.reply('Заявка принята!');
+});
+bot.command('deny', async (ctx) => {
+  const commandText = (ctx.message.text).split(' ')[1];
+  console.log(commandText)
+  await confirmUser({email: commandText}, true)
+  await ctx.reply('Заявка отклонена!');
+});
+bot.launch()
+  .then(() => {
+    console.log('Bot is running...');
+  })
+  .catch(err => {
+    console.error('Error launching the bot:', err);
   });
 
-  bot.action("approve", async (ctx) => {
-    try {
-      let res = await prisma.user.update({
-        where: {
-          email: email,
-        },
-        data: {
-          role: "USER",
-        },
-      });
-      if (res) {
-        await ctx.answerCbQuery("Заявка одобрена!");
-        await ctx.reply("Заявка одобрена ✅");
-      }
-      bot.stop();
-    } catch (error) {
-      await ctx.reply("Произошла ошибка:" + error);
-      bot.stop();
-    }
-  });
-
-  bot.action("deny", async (ctx) => {
-    try {
-      let res = await prisma.user.delete({
-        where: {
-          email: email,
-        },
-      });
-      if (res) {
-        await ctx.answerCbQuery("Заявка отклонена!");
-        await ctx.reply("Заявка отклонена ❌");
-      }
-      bot.stop();
-    } catch (error) {
-      await ctx.reply("Произошла ошибка:" + error);
-      bot.stop();
-    }
-  });
-}
+// Обработка остановки бота
+process.once('SIGINT', () => {
+  bot.stop('SIGINT');
+});
+process.once('SIGTERM', () => {
+  bot.stop('SIGTERM');
+});

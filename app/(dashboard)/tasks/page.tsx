@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
 export default function Home() {
   const [message, setMessage] = useState("")
@@ -41,28 +43,9 @@ export default function Home() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Отправить сообщение в Telegram</CardTitle>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent>
-            <Input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Введите ваше сообщение"
-              required
-            />
-          </CardContent>
-          <CardFooter className="flex flex-col items-start">
-            <Button type="submit">Отправить</Button>
-            {status && <p className="text-sm text-gray-500 mt-2">{status}</p>}
-            {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-          </CardFooter>
-        </form>
-      </Card>
+<div className="flex items-center space-x-2">
+      <Switch type="button" id="airplane-mode" />
+      <Label htmlFor="airplane-mode">Airplane Mode</Label>
     </div>
   )
 }

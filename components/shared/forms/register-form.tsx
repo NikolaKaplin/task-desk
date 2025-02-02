@@ -59,10 +59,10 @@ export const RegisterForm: React.FC = () => {
   return (
     <FormProvider {...form}>
       <div className="space-y-4">
-      <FormInput name="lastName" label="Фамилия" required />
-        <FormInput name="firstName" label="Имя" required />
-        <FormInput name="email" label="E-Mail" required />
-        <FormInput name="password" label="Пароль" type="password" required />
+      <FormInput type={"text"} name="lastName" isMotion={true} label="Фамилия"  />
+        <FormInput name="firstName" isMotion={true} label="Имя"  />
+        <FormInput name="email" isMotion={true} label="E-Mail"  />
+        <FormInput name="password" label="Пароль" type="password"  />
         <Button
           type="submit"
           disabled={form.formState.isSubmitting}

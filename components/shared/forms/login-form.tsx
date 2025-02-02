@@ -46,8 +46,8 @@ export const LoginForm: React.FC = () => {
   return (
     <FormProvider {...form}>
       <div className="space-y-4">
-        <FormInput name="email" label="E-Mail" required />
-        <FormInput name="password" label="Пароль" type="password" required />
+        <FormInput name="email" isMotion={true} label="E-Mail"  />
+        <FormInput name="password" isMotion={true} label="Пароль" type="password" />
         <Button
           type="submit"
           disabled={form.formState.isSubmitting}
