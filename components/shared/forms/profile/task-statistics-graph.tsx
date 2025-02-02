@@ -7,7 +7,7 @@ interface TaskStatisticsGraphProps {
 export default function TaskStatisticsGraph({ userId }: TaskStatisticsGraphProps) {
   // In a real application, you would fetch the task statistics data here
   // For this example, we'll use placeholder data
-  const completionRate = 75
+  const completionRate = 37
 
   return (
     <Card className="bg-gray-700 border-gray-600">

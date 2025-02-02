@@ -72,5 +72,6 @@ export const softwareDevelopers = [
   "Security Engineer",
   "Game Designer",
   "Database Administrator",
+  "Windows Destroyer"
 ];
 
