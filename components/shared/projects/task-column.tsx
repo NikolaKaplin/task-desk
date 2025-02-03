@@ -80,16 +80,21 @@ export default function TaskColumn({
                 >
                   <Card className="bg-gray-700 border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors">
                     <CardContent className="p-4">
-                      <h3 className="font-semibold text-green-400">
-                        {task.name}
-                      </h3>
-                      <p className="text-sm text-gray-300 line-clamp-2">
-                        {task.description}
-                      </p>
-                      {task.image && (
+                      <div className="items-center">
+                        <h3 className="font-semibold text-green-400">
+                          {task.title}
+                        </h3>
+                        <p className="text-sm text-gray-300 line-clamp-2">
+                          {task.description}
+                        </p>
+                      </div>
+                      {task.image != "" && (
                         <img
-                          src={task.image || "/placeholder.svg"}
-                          alt={task.name}
+                          src={
+                            task.image ||
+                            "/placeholder.svghttps://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200"
+                          }
+                          alt={task.title}
                           className="mt-2 rounded-md w-full h-32 object-cover"
                         />
                       )}

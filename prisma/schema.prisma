@@ -48,7 +48,7 @@ model Task {
   authorId    Int
   author      User       @relation(fields: [authorId], references: [id])
   description String
-  performers  String
+  performers  Json
   image       String     @default("")
   taskStatus  TaskStatus @default(ISSUED)
   createdAt   DateTime   @default(now())

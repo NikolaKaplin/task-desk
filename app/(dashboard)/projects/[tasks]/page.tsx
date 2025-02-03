@@ -15,7 +15,11 @@ import { CreateTaskForm } from "@/components/shared/projects/create-task-form";
 import TaskColumn from "@/components/shared/projects/task-column";
 import TaskDetails from "@/components/shared/projects/task-details";
 import { listIds } from "@/app/constants";
-import { getProjectById, getTasksByProjectId } from "@/app/actions";
+import {
+  getProjectById,
+  getTasksByProjectId,
+  upgateTaskStatusById,
+} from "@/app/actions";
 import { getUserSession } from "@/lib/get-session-server";
 
 export interface Task {
@@ -24,12 +28,12 @@ export interface Task {
   description: string;
   performers: string[];
   image?: string;
-  status: "ISSUED" | "PROCESSING" | "REVIEW" | "COMPLETED";
+  taskStatus: "ISSUED" | "PROCESSING" | "REVIEW" | "COMPLETED";
 }
 
 export default function ProjectTasksPage() {
   const [user, setUser] = useState();
-  const [tasks, setTasks] = useState();
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [project, setProject] = useState();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const path = usePathname().split("/").pop();
@@ -55,29 +59,49 @@ export default function ProjectTasksPage() {
         ...task,
         id: task.id.toString(),
       }));
-      console.log(tasksGetConverted);
       if (tasksGetConverted) setTasks(tasksGetConverted);
     })();
   }, [path]);
 
   const getTasksByStatus = useCallback(
-    (status) => tasks.filter((task) => task.taskStatus === status),
+    (status: Task["taskStatus"]) =>
+      tasks.filter((task) => task.taskStatus === status),
     [tasks]
   );
 
-  const onDragEnd = useCallback((result: DropResult) => {
+  const onDragEnd = useCallback(async (result: DropResult) => {
     const { source, destination, draggableId } = result;
 
     if (!destination) return;
 
     if (source.droppableId !== destination.droppableId) {
+      const newStatus = destination.droppableId as Task["taskStatus"];
+      const taskId = Number(draggableId);
+
+      // Оптимистично обновляем состояние
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
-          task.id === draggableId
-            ? { ...task, status: destination.droppableId as Task["status"] }
-            : task
+          task.id === draggableId ? { ...task, taskStatus: newStatus } : task
         )
       );
+
+      try {
+        // Вызываем функцию для обновления статуса задачи на сервере
+        await upgateTaskStatusById(taskId, newStatus);
+      } catch (error) {
+        console.error("Failed to update task status:", error);
+        // В случае ошибки, возвращаем задачу в исходное состояние
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === draggableId
+              ? {
+                  ...task,
+                  taskStatus: source.droppableId as Task["taskStatus"],
+                }
+              : task
+          )
+        );
+      }
     }
   }, []);
 
@@ -121,16 +145,18 @@ export default function ProjectTasksPage() {
                   <DragDropContext onDragEnd={onDragEnd}>
                     <div className="flex flex-col md:flex-row flex-grow overflow-x-auto gap-4">
                       {listIds.map((listId) => (
-                        <Droppable droppableId={listId.name} key={listId}>
+                        <Droppable droppableId={listId.name} key={listId.name}>
                           {(provided, snapshot) => (
                             <TaskColumn
                               title={listId.name
                                 .replace("-", " ")
                                 .toUpperCase()}
-                              tasks={getTasksByStatus(listId.name)}
+                              tasks={getTasksByStatus(
+                                listId.name as Task["taskStatus"]
+                              )}
                               description={listId.description}
                               colors={listId.colors}
-                              status={listId.name}
+                              status={listId.name as Task["taskStatus"]}
                               provided={provided}
                               snapshot={snapshot}
                               onTaskClick={handleTaskClick}

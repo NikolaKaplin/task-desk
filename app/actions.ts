@@ -426,3 +426,19 @@ export async function getProjectById(id: number) {
     console.log("Get project error: ", error);
   }
 }
+
+export async function upgateTaskStatusById(id: number, status: string) {
+  try {
+    const upgateTaskStatus = await prisma.task.update({
+      where: {
+        id: id,
+      },
+      data: {
+        taskStatus: status,
+      },
+    });
+    if (upgateTaskStatus) return upgateTaskStatus;
+  } catch (error) {
+    console.log("Get project error: ", error);
+  }
+}
