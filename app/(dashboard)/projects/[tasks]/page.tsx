@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import {
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { CreateTaskForm } from "@/components/shared/projects/create-task-form";
 import TaskColumn from "@/components/shared/projects/task-column";
 import { initialTasks, listIds } from "@/app/constants";
+import { getProjectById } from "@/app/actions";
 
 export interface Task {
   id: string;
@@ -30,10 +31,12 @@ export interface Task {
 
 export default function ProjectTasksPage() {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [project, setproject] = useState();
-
+  const [project, setProject] = useState();
+  const path = usePathname().split('/').pop();
   useEffect(() => {
     (async() =>{
+      const projectGet = await getProjectById(Number(path))
+      if (projectGet) setProject(projectGet)
     })();
   },[])
 
@@ -62,37 +65,41 @@ export default function ProjectTasksPage() {
   }, []);
 
   return (
-    <div className="container mx-auto p-4 h-screen flex flex-col">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div className="flex items-center">
-          <Link href="/projects">
-            <Button variant="ghost" size="sm" className="mr-4">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
-            </Button>
-          </Link>
-          <h1 className="text-2xl md:text-3xl font-bold">Project</h1>
+    <div>
+      {project ? (
+        <div className="container mx-auto p-4 h-screen flex flex-col">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div className="flex items-center">
+            <Link href="/projects">
+              <Button variant="ghost" size="sm" className="mr-4">
+                <ArrowLeft className="mr-2 h-8 w-8" />
+              </Button>
+            </Link>
+            <h1 className="text-2xl md:text-3xl text-green-500 font-bold">{project.name}</h1>
+          </div>
+          <CreateTaskForm />
         </div>
-        <CreateTaskForm />
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div className="flex flex-col md:flex-row flex-grow overflow-x-auto gap-4">
+            {listIds.map((listId) => (
+              <Droppable droppableId={listId.name} key={listId}>
+                {(provided, snapshot) => (
+                  <TaskColumn
+                    title={listId.name.replace("-", " ").toUpperCase()}
+                    tasks={getTasksByStatus(listId.name)}
+                    description={listId.description}
+                    colors={listId.colors}
+                    status={listId.name}
+                    provided={provided}
+                    snapshot={snapshot}
+                  />
+                )}
+              </Droppable>
+            ))}
+          </div>
+        </DragDropContext>
       </div>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex flex-col md:flex-row flex-grow overflow-x-auto gap-4">
-          {listIds.map((listId) => (
-            <Droppable droppableId={listId.name} key={listId}>
-              {(provided, snapshot) => (
-                <TaskColumn
-                  title={listId.name.replace("-", " ").toUpperCase()}
-                  tasks={getTasksByStatus(listId.name)}
-                  description={listId.description}
-                  colors={listId.colors}
-                  status={listId.name}
-                  provided={provided}
-                  snapshot={snapshot}
-                />
-              )}
-            </Droppable>
-          ))}
-        </div>
-      </DragDropContext>
+      ) : null}
     </div>
   );
 }

@@ -83,24 +83,6 @@ export const AuthForm: React.FC = () => {
             {isLogin ? <LoginForm /> : <RegisterForm />}
           </motion.div>
         </AnimatePresence>
-        <p className="mt-5 text-sm sm:text-base text-center text-gray-300">
-          {isLogin ? (
-            <>
-              Нет аккаунта?{" "}
-              <button className="font-bold text-green-400 hover:text-green-500" onClick={() => setIsLogin(false)}>
-                Зарегистрируйтесь
-              </button>{" "}
-              бесплатно
-            </>
-          ) : (
-            <>
-              Уже есть аккаунт?{" "}
-              <button className="font-bold text-green-400 hover:text-green-500" onClick={() => setIsLogin(true)}>
-                Войдите
-              </button>
-            </>
-          )}
-        </p>
       </motion.div>
     </div>
   )

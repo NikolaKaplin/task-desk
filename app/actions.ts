@@ -404,3 +404,17 @@ export async function sendApplication(message: any) {
     console.log(error)
   }
 }
+
+
+export async function  getProjectById(id: number) {
+  try{
+    const project = await prisma.project.findFirst({
+      where: {
+        id: id,
+      }
+    })
+    if (project) return project;
+  } catch (error) {
+    console.log("Get project error: ", error)
+  }
+}
