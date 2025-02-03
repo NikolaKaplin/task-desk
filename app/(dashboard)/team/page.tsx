@@ -1,7 +1,5 @@
 import { getUsers } from "@/app/actions";
 import { TeamMember } from "@/components/shared/team-member";
-import Image from "next/image";
-
 
 export default async function TeamPage() {
   const teamMembers = await getUsers();

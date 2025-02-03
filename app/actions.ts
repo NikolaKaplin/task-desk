@@ -35,8 +35,8 @@ export async function registerUser(
           devStatus: "",
         },
       });
-      const res = await sendApplication(body)
-      console.log(res)
+      const res = await sendApplication(body);
+      console.log(res);
       return { success: !!createdUser };
     }
   } catch (err) {
@@ -88,7 +88,6 @@ export async function confirmUser(
   body: Prisma.UserUpdateInput,
   isDelete: boolean
 ) {
-
   const user = await prisma.user.findFirst({
     where: {
       email: body.email as string,
@@ -98,7 +97,6 @@ export async function confirmUser(
   if (!user) {
     throw new Error(`User with email ${body.email} not found`);
   }
-
 
   if (isDelete) {
     await prisma.user.deleteMany({
@@ -140,20 +138,20 @@ export async function countUnverifiedUsers() {
 }
 
 export async function setConfidentiality(id: number, isPublic: boolean) {
-  try{
+  try {
     const response = await prisma.user.update({
       where: {
-        id: id
+        id: id,
       },
       data: {
         isPublic: isPublic,
-      }
-    })
-    if(response){
-      return {success: true}
+      },
+    });
+    if (response) {
+      return { success: true };
     }
-  }catch(error){
-    return {success: false}
+  } catch (error) {
+    return { success: false };
   }
 }
 
@@ -342,12 +340,16 @@ export async function getProjects() {
 }
 
 type Task = {
+  id: number;
   title: string;
   authorId: number;
-  content: string;
+  description: string;
   projectId: number;
   taskStatus: string;
   createdAt: Date;
+  performers: string;
+  image?: string;
+  updatedAt: Date;
 };
 export async function createTask(data: Task) {
   console.log("penis");
@@ -356,11 +358,12 @@ export async function createTask(data: Task) {
       data: {
         title: data.title,
         authorId: data.authorId,
-        content: data.content,
+        description: data.description,
         projectId: data.projectId,
-        createdAt: data.createdAt,
+        createdAt: new Date(),
         updatedAt: new Date(),
         taskStatus: "ISSUED",
+        performers: data.performers.toString(),
       },
     });
     if (taskCreate) {
@@ -381,40 +384,45 @@ export async function getTasksByProjectId(id: number) {
         id: true,
         title: true,
         authorId: true,
-        content: true,
+        description: true,
         taskStatus: true,
         createdAt: true,
         updatedAt: true,
+        image: true,
+        performers: true,
       },
     });
-    return tasks;
+    if (tasks) return tasks;
   } catch (error) {
     return error;
   }
 }
 
 export async function sendApplication(message: any) {
-  const email = '`' + message.email + '`';
+  const email = "`" + message.email + "`";
   const formApplication = `
   *Имя:* ${message.firstName}\n*Фамилия:* ${message.lastName}\n*Email:* ${email}`;
-  try{
-    const res = await await fetch(`https://api.telegram.org/bot8161546974:AAGY1YsmJEKdw79_js9caNrHwhU-8YcynUQ/sendMessage?chat_id=5791279590&text=${encodeURI(formApplication)}&parse_mode=Markdown`)
-    if (res) return res
+  try {
+    const res = await await fetch(
+      `https://api.telegram.org/bot8161546974:AAGY1YsmJEKdw79_js9caNrHwhU-8YcynUQ/sendMessage?chat_id=5791279590&text=${encodeURI(
+        formApplication
+      )}&parse_mode=Markdown`
+    );
+    if (res) return res;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }
 
-
-export async function  getProjectById(id: number) {
-  try{
+export async function getProjectById(id: number) {
+  try {
     const project = await prisma.project.findFirst({
       where: {
         id: id,
-      }
-    })
+      },
+    });
     if (project) return project;
   } catch (error) {
-    console.log("Get project error: ", error)
+    console.log("Get project error: ", error);
   }
 }

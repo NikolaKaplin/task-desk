@@ -191,7 +191,6 @@ export default function ProjectsPage() {
           <p className="mt-2 text-gray-400">
             Get started by creating a new project.
           </p>
-          <CreateProjectForm />
         </div>
       )}
     </div>

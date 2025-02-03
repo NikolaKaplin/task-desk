@@ -19,11 +19,12 @@ export interface Task {
 interface TaskColumnProps {
   title: string;
   description: string;
-  colors: any,
+  colors: any;
   tasks: Task[];
   status: Task["status"];
   provided: DroppableProvided;
   snapshot: DroppableStateSnapshot;
+  onTaskClick: (task: Task) => void;
 }
 
 export default function TaskColumn({
@@ -34,26 +35,33 @@ export default function TaskColumn({
   status,
   provided,
   snapshot,
+  onTaskClick,
 }: TaskColumnProps) {
   return (
-    <Card className="w-full md:w-80 flex-shrink-0 flex flex-col h-[calc(100vh-200px)] md:h-full">
+    <Card className="w-full md:w-80 flex-shrink-0 flex flex-col h-[calc(100vh-200px)] md:h-full bg-gray-800 border-gray-700">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>
+        <CardTitle className="text-green-500">
           <div className="flex items-center gap-3">
-            <div className={cn(`h-[18px] w-[18px] border-[2px] rounded-full`, colors[0], colors[1])}/>
+            <div
+              className={cn(
+                `h-[18px] w-[18px] border-[2px] rounded-full`,
+                colors[0],
+                colors[1]
+              )}
+            />
             {title}
-            <Badge variant="secondary">{tasks.length}</Badge>
+            <Badge variant="secondary" className="bg-gray-700 text-green-400">
+              {tasks.length}
+            </Badge>
           </div>
-          <p className="text-sm text-gray-500">{description}</p>
+          <p className="text-sm text-gray-400">{description}</p>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow overflow-y-auto">
+      <CardContent className="flex-grow overflow-x-hidden overflow-y-auto body penis">
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`min-h-[100px] transition-colors duration-300 ${
-            snapshot.isDraggingOver ? "bg-green-100" : ""
-          }`}
+          className={`min-h-[100px] transition-colors duration-300`}
         >
           {tasks.map((task, index) => (
             <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -68,11 +76,14 @@ export default function TaskColumn({
                   style={{
                     ...provided.draggableProps.style,
                   }}
+                  onClick={() => onTaskClick(task)}
                 >
-                  <Card>
+                  <Card className="bg-gray-700 border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors">
                     <CardContent className="p-4">
-                      <h3 className="font-semibold">{task.name}</h3>
-                      <p className="text-sm text-gray-500">
+                      <h3 className="font-semibold text-green-400">
+                        {task.name}
+                      </h3>
+                      <p className="text-sm text-gray-300 line-clamp-2">
                         {task.description}
                       </p>
                       {task.image && (
@@ -83,11 +94,15 @@ export default function TaskColumn({
                         />
                       )}
                       <div className="mt-2 flex flex-wrap gap-1">
-                        {task.performers.map((performer, index) => (
-                          <Badge key={index} variant="outline">
+                        {/* {task.performers.map((performer, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="border-green-500 text-green-400"
+                          >
                             {performer}
                           </Badge>
-                        ))}
+                        ))} */}
                       </div>
                     </CardContent>
                   </Card>

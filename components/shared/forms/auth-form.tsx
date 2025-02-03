@@ -1,33 +1,39 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useRef, type KeyboardEvent } from "react"
-import { LoginForm } from "./login-form"
-import { RegisterForm } from "./register-form"
-import { motion, AnimatePresence } from "framer-motion"
+import type React from "react";
+import { useState, useRef, type KeyboardEvent } from "react";
+import { LoginForm } from "./login-form";
+import { RegisterForm } from "./register-form";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const AuthForm: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true)
-  const formRef = useRef<HTMLDivElement>(null)
+  const [isLogin, setIsLogin] = useState(true);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      e.preventDefault()
-      const inputs = formRef.current?.querySelectorAll("input")
+      e.preventDefault();
+      const inputs = formRef.current?.querySelectorAll("input");
       if (inputs) {
-        const currentIndex = Array.from(inputs).findIndex((input) => input === document.activeElement)
+        const currentIndex = Array.from(inputs).findIndex(
+          (input) => input === document.activeElement
+        );
         const nextIndex =
-          e.key === "ArrowUp" ? (currentIndex - 1 + inputs.length) % inputs.length : (currentIndex + 1) % inputs.length
-        inputs[nextIndex].focus()
+          e.key === "ArrowUp"
+            ? (currentIndex - 1 + inputs.length) % inputs.length
+            : (currentIndex + 1) % inputs.length;
+        inputs[nextIndex].focus();
       }
     } else if (e.key === "Enter") {
-      e.preventDefault()
-      const submitButton = formRef.current?.querySelector('button[type="submit"]') as HTMLButtonElement | null
+      e.preventDefault();
+      const submitButton = formRef.current?.querySelector(
+        'button[type="submit"]'
+      ) as HTMLButtonElement | null;
       if (submitButton) {
-        submitButton.click()
+        submitButton.click();
       }
     }
-  }
+  };
 
   return (
     <div
@@ -64,7 +70,9 @@ export const AuthForm: React.FC = () => {
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsLogin(false)}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              !isLogin ? "bg-green-500 text-white" : "bg-gray-700 text-green-400"
+              !isLogin
+                ? "bg-green-500 text-white"
+                : "bg-gray-700 text-green-400"
             }`}
           >
             Регистрация
@@ -85,6 +93,5 @@ export const AuthForm: React.FC = () => {
         </AnimatePresence>
       </motion.div>
     </div>
-  )
-}
-
+  );
+};

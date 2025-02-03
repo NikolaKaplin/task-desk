@@ -132,3 +132,21 @@
 .markdown-body th {
   @apply bg-gray-100 dark:bg-gray-800 font-semibold;
 }
+
+.penis::-webkit-scrollbar {
+  display: none;
+}
+
+/* .penis::-webkit-scrollbar {
+  display: none;
+}
+::-webkit-scrollbar {
+  width: 0.4rem;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(72, 255, 0, 0.904);
+  border-radius: 0.6rem;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+} */

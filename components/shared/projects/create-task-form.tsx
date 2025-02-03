@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,8 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createProject, createTask, getUsers } from "@/app/actions";
-import React from "react";
+import { createTask, getTasksByProjectId, getUsers } from "@/app/actions";
 import {
   Form,
   FormControl,
@@ -30,54 +29,46 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import AvatarUpload from "../avatar-upload";
 import { Badge } from "@/components/ui/badge";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { InputJsonValue } from "@prisma/client/runtime/library";
-import { getUserSession } from "@/lib/get-session-server";
-import { set } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { ProjectStatus } from "@prisma/client";
+import { getUserSession } from "@/lib/get-session-server";
 
 const taskFormSchema = z.object({
-  name: z.string().min(2, {
+  title: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   description: z.string(),
-  content: z.string(),
-  taskStatus: z.string(),
-  createdAt: z.date(),
-  users: z.array(z.string()),
+  status: z.string(),
+  performers: z.array(z.string()),
+  image: z.string().optional(),
   projectId: z.number(),
+  authorId: z.number(),
 });
 
-export type Project = {
-  title: string;
-  content: string;
-  authorId: number;
+type TaskFormValues = z.infer<typeof taskFormSchema>;
+
+interface CreateTaskFormProps {
+  onTaskCreated: (task: TaskFormValues) => void;
   projectId: number;
-  taskStatus: string;
-  createdAt: Date;
-};
+  authorId: number;
+}
 
-type ProjectFormValues = z.infer<typeof taskFormSchema>;
-
-export function CreateTaskForm() {
-  const [authorId, setAuthorId] = useState(0);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+export function CreateTaskForm({
+  onTaskCreated,
+  projectId,
+  authorId,
+}: CreateTaskFormProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [users, setUsers] = useState();
+  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const { toast } = useToast();
-  const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const usersArr = await getUsers();
       if (usersArr) {
@@ -86,67 +77,55 @@ export function CreateTaskForm() {
     })();
   }, []);
 
-  React.useEffect(() => {
-    (async () => {
-      const userSession = await getUserSession();
-      if (userSession) {
-        setAuthorId(userSession.id);
-      }
-    })();
-  }, []);
-  const handleStatusSelect = (status: string) => {
-    const currentDevStatus = form.getValues("users");
-    if (!currentDevStatus.includes(status)) {
-      form.setValue("users", [...currentDevStatus, status]);
-    }
-  };
-
-  const handleStatusRemove = (status: string) => {
-    const currentDevStatus = form.getValues("users");
-    form.setValue(
-      "users",
-      currentDevStatus.filter((s) => s !== status)
-    );
-  };
-
-  const form = useForm<ProjectFormValues>({
+  const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
-      name: "",
-      content: "",
+      title: "",
       description: "",
-      taskStatus: "",
-      projectId: 0,
-      createdAt: new Date(),
-      users: [],
+      status: "ISSUE",
+      performers: [],
+      projectId: Number(projectId),
+      authorId: authorId,
+      image: "",
     },
   });
 
-  async function onSubmit(data: ProjectFormValues) {
-    console.log("penis");
+  const handlePerformerSelect = (performer: string) => {
+    const currentPerformers = form.getValues("performers");
+    if (!currentPerformers.includes(performer)) {
+      form.setValue("performers", [...currentPerformers, performer]);
+    }
+  };
+
+  const handlePerformerRemove = (performer: string) => {
+    const currentPerformers = form.getValues("performers");
+    form.setValue(
+      "performers",
+      currentPerformers.filter((p) => p !== performer)
+    );
+  };
+
+  async function onSubmit(data: TaskFormValues) {
     setIsLoading(true);
-    const project: Project = {
-      authorId: authorId,
-      title: data.name,
-      content: JSON.stringify({ users: [], description: data.description }),
-      createdAt: data.createdAt,
-      projectId: 1,
-      taskStatus: data.taskStatus,
-    };
-
-    const projectCreate = await createTask(project);
-    setIsLoading(false);
-
-    if (projectCreate?.success) {
-      toast({
-        title: "Task created",
-        description: "Your profile has been successfully updated.",
-      });
-      router.refresh();
-    } else {
+    try {
+      const createdTask = await createTask(data);
+      setIsLoading(false);
+      if (createdTask) {
+        toast({
+          title: "Task created",
+          description: "Your task has been successfully created.",
+        });
+        onTaskCreated(createdTask);
+        setIsOpen(false);
+        form.reset();
+      } else {
+        throw new Error("Failed to create task");
+      }
+    } catch (error) {
+      setIsLoading(false);
       toast({
         title: "Error",
-        description: "There was a problem updating your profile.",
+        description: "There was a problem creating your task.",
         variant: "destructive",
       });
     }
@@ -155,26 +134,37 @@ export function CreateTaskForm() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base">
           <PlusCircle className="mr-2 h-4 w-4" /> New Task
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-gray-800 text-green-400 border-0 sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Task</DialogTitle>
+          <DialogTitle className="text-xl md:text-2xl font-bold text-green-500">
+            Create New Task
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 md:space-y-6"
+          >
             <FormField
               control={form.control}
-              name="name"
+              name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel className="text-green-400 text-sm md:text-base">
+                    Name
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Your task name" {...field} />
+                    <Input
+                      placeholder="Your task name"
+                      {...field}
+                      className="bg-gray-700 text-green-400 border-gray-600 text-sm md:text-base"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs md:text-sm" />
                 </FormItem>
               )}
             />
@@ -183,36 +173,70 @@ export function CreateTaskForm() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel className="text-green-400 text-sm md:text-base">
+                    Description
+                  </FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Your task description" {...field} />
+                    <Textarea
+                      placeholder="Your task description"
+                      {...field}
+                      className="bg-gray-700 text-green-400 border-gray-600 text-sm md:text-base"
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs md:text-sm" />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="users"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Developer Status</FormLabel>
-                  <Select onValueChange={handleStatusSelect}>
+                  <FormLabel className="text-green-400 text-sm md:text-base">
+                    Status
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select users" />
+                      <SelectTrigger className="bg-gray-700 text-green-400 border-gray-600 text-sm md:text-base">
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-gray-700 text-green-400">
+                      <SelectItem value="ISSUE">Issue</SelectItem>
+                      <SelectItem value="IN PROGRESS">In Progress</SelectItem>
+                      <SelectItem value="REVIEW">Review</SelectItem>
+                      <SelectItem value="COMPLETED">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-xs md:text-sm" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="performers"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-green-400 text-sm md:text-base">
+                    Performers
+                  </FormLabel>
+                  <Select onValueChange={handlePerformerSelect}>
+                    <FormControl>
+                      <SelectTrigger className="bg-gray-700 text-green-400 border-gray-600 text-sm md:text-base">
+                        <SelectValue placeholder="Select performers" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-gray-700 text-green-400">
                       {users.map((user) => (
-                        <SelectItem
-                          className=""
-                          key={user.firstName}
-                          value={user.firstName}
-                        >
-                          <div className=" flex items-center gap-4">
-                            {user.firstName} {user.lastName}{" "}
-                            <Avatar>
+                        <SelectItem key={user.id} value={user.firstName}>
+                          <div className="flex items-center gap-2 md:gap-4">
+                            <span className="text-xs md:text-sm">
+                              {user.firstName} {user.lastName}
+                            </span>
+                            <Avatar className="w-6 h-6 md:w-8 md:h-8">
                               <AvatarImage src={user.avatar} />
                             </Avatar>
                           </div>
@@ -220,32 +244,24 @@ export function CreateTaskForm() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Select the users that are working on this project.
+                  <FormDescription className="text-gray-400 text-xs md:text-sm">
+                    Select the users that will work on this task.
                   </FormDescription>
-                  <FormMessage />
+                  <FormMessage className="text-xs md:text-sm" />
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value.map((status) => (
+                    {field.value.map((performer) => (
                       <Badge
-                        className=" justify-between"
-                        key={status}
+                        key={performer}
                         variant="secondary"
+                        className="bg-gray-700 text-green-400 flex items-center text-xs md:text-sm"
                       >
-                        {status}
+                        {performer}
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="ml-1 h-auto p-0 text-muted-foreground hover:text-foreground"
-                          onClick={() => handleStatusRemove(status)}
+                          className="ml-1 h-auto p-0 text-green-400 hover:text-green-300"
+                          onClick={() => handlePerformerRemove(performer)}
                         >
-                          <Avatar>
-                            <AvatarImage
-                              src={
-                                users.find((user) => user.firstName === status)
-                                  ?.avatar
-                              }
-                            />
-                          </Avatar>
                           <X className="h-3 w-3" />
                           <span className="sr-only">Remove</span>
                         </Button>
@@ -255,8 +271,12 @@ export function CreateTaskForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Updating..." : "Update profile"}
+            <Button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700 text-white text-sm md:text-base"
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating..." : "Create Task"}
             </Button>
           </form>
         </Form>

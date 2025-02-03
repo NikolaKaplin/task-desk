@@ -53,7 +53,6 @@ export const navItems: NavItems[] = [
   },
 ];
 
-
 export const softwareDevelopers = [
   "Frontend Developer",
   "Backend Developer",
@@ -73,10 +72,8 @@ export const softwareDevelopers = [
   "Security Engineer",
   "Game Designer",
   "Database Administrator",
-  "Windows Destroyer"
+  "Windows Destroyer",
 ];
-
-
 
 export const initialTasks: Task[] = [
   {
@@ -120,7 +117,7 @@ export const initialTasks: Task[] = [
     name: "Design mockups",
     description: "Create initial design mockups",
     performers: ["John Doe"],
-    status: "ISSUE",
+    status: "ISSUED",
     image:
       "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
   },
@@ -129,7 +126,7 @@ export const initialTasks: Task[] = [
     name: "Frontend development",
     description: "Implement the frontend",
     performers: ["Jane Smith"],
-    status: "IN PROGRESS",
+    status: "PROCESSING",
     image:
       "https://avatars.dzeninfra.ru/get-zen_doc/1873182/pub_605c73f132b80a09c6213a69_605c9d537271d71bc031ae17/scale_1200",
   },
@@ -155,23 +152,23 @@ export const initialTasks: Task[] = [
 
 export const listIds = [
   {
-    name: "ISSUE",
+    name: "ISSUED",
     description: "Ещё не начато",
-    colors: ['bg-green-300', 'border-green-800' ]
+    colors: ["bg-green-300", "border-green-800"],
   },
   {
-    name: "IN PROGRESS",
-    description: "Активно идёт работа. Перед перемещением в эту колонку необходимо назначить исполнителей",
-    colors: ['bg-yellow-300', 'border-yellow-800' ]
+    name: "PROCESSING",
+    description: "Активно идёт работа.",
+    colors: ["bg-yellow-300", "border-yellow-800"],
   },
   {
     name: "REVIEW",
-    description: "Проверяется, форматируется и стилизуется. Не пройдя эту колонку таск не может попасть в Done",
-    colors: ['bg-red-300', 'border-red-800' ]
+    description: "Проверяется, форматируется.",
+    colors: ["bg-red-300", "border-red-800"],
   },
   {
     name: "DONE",
     description: "Полностью выполнено",
-    colors: ['bg-purple-300', 'border-purple-800' ]
-  }
+    colors: ["bg-purple-300", "border-purple-800"],
+  },
 ] as const;
