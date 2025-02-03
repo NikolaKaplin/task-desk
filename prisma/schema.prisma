@@ -58,7 +58,7 @@ model Task {
 enum TaskStatus {
   ISSUED
   PROCESSING
-  PROBLEMS
+  REVIEW
   COMPLETED
 }
 

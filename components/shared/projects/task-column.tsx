@@ -5,6 +5,7 @@ import {
 } from "react-beautiful-dnd";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export interface Task {
   id: string;
@@ -17,6 +18,8 @@ export interface Task {
 
 interface TaskColumnProps {
   title: string;
+  description: string;
+  colors: any,
   tasks: Task[];
   status: Task["status"];
   provided: DroppableProvided;
@@ -25,6 +28,8 @@ interface TaskColumnProps {
 
 export default function TaskColumn({
   title,
+  description,
+  colors,
   tasks,
   status,
   provided,
@@ -33,8 +38,14 @@ export default function TaskColumn({
   return (
     <Card className="w-full md:w-80 flex-shrink-0 flex flex-col h-[calc(100vh-200px)] md:h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>{title}</CardTitle>
-        <Badge variant="secondary">{tasks.length}</Badge>
+        <CardTitle>
+          <div className="flex items-center gap-3">
+            <div className={cn(`h-[18px] w-[18px] border-[2px] rounded-full`, colors[0], colors[1])}/>
+            {title}
+            <Badge variant="secondary">{tasks.length}</Badge>
+          </div>
+          <p className="text-sm text-gray-500">{description}</p>
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-y-auto">
         <div
