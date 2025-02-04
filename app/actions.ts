@@ -363,7 +363,7 @@ export async function createTask(data: Task) {
         createdAt: new Date(),
         updatedAt: new Date(),
         taskStatus: "ISSUED",
-        performers: data.performers.toString(),
+        performers: JSON.stringify(data.performers),
       },
     });
     if (taskCreate) {

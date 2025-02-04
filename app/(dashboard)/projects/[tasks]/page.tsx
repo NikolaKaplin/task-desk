@@ -18,6 +18,7 @@ import { listIds } from "@/app/constants";
 import {
   getProjectById,
   getTasksByProjectId,
+  getUsers,
   upgateTaskStatusById,
 } from "@/app/actions";
 import { getUserSession } from "@/lib/get-session-server";
@@ -37,6 +38,7 @@ export default function ProjectTasksPage() {
   const [project, setProject] = useState();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const path = usePathname().split("/").pop();
+  const [usersArr, setUsersArr] = useState();
 
   useEffect(() => {
     (async () => {
@@ -63,6 +65,15 @@ export default function ProjectTasksPage() {
     })();
   }, [path]);
 
+  useEffect(() => {
+    (async () => {
+      const usersArr = await getUsers();
+      if (usersArr) {
+        setUsersArr(usersArr);
+      }
+    })();
+  }, []);
+
   const getTasksByStatus = useCallback(
     (status: Task["taskStatus"]) =>
       tasks.filter((task) => task.taskStatus === status),
@@ -86,11 +97,11 @@ export default function ProjectTasksPage() {
       );
 
       try {
-        // Вызываем функцию для обновления статуса задачи на сервере
+
         await upgateTaskStatusById(taskId, newStatus);
       } catch (error) {
         console.error("Failed to update task status:", error);
-        // В случае ошибки, возвращаем задачу в исходное состояние
+
         setTasks((prevTasks) =>
           prevTasks.map((task) =>
             task.id === draggableId
@@ -137,6 +148,7 @@ export default function ProjectTasksPage() {
                       </h1>
                     </div>
                     <CreateTaskForm
+                    users={usersArr}
                       authorId={user?.id}
                       projectId={project.id}
                       onTaskCreated={(newTask) => setTasks([...tasks, newTask])}
@@ -170,6 +182,7 @@ export default function ProjectTasksPage() {
               ) : null}
               {selectedTask && (
                 <TaskDetails
+                usersArr={usersArr}
                   task={selectedTask}
                   onClose={handleCloseTaskDetails}
                 />

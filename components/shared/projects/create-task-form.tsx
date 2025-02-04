@@ -44,7 +44,7 @@ const taskFormSchema = z.object({
   }),
   description: z.string(),
   status: z.string(),
-  performers: z.array(z.string()),
+  performers: z.array(z.number()),
   image: z.string().optional(),
   projectId: z.number(),
   authorId: z.number(),
@@ -52,30 +52,24 @@ const taskFormSchema = z.object({
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
 
+
+
 interface CreateTaskFormProps {
   onTaskCreated: (task: TaskFormValues) => void;
   projectId: number;
   authorId: number;
+  users: any;
 }
 
 export function CreateTaskForm({
   onTaskCreated,
   projectId,
   authorId,
+  users,
 }: CreateTaskFormProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    (async () => {
-      const usersArr = await getUsers();
-      if (usersArr) {
-        setUsers(usersArr);
-      }
-    })();
-  }, []);
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
@@ -92,16 +86,17 @@ export function CreateTaskForm({
 
   const handlePerformerSelect = (performer: string) => {
     const currentPerformers = form.getValues("performers");
-    if (!currentPerformers.includes(performer)) {
-      form.setValue("performers", [...currentPerformers, performer]);
+    const id = Number.parseInt(performer, 10);
+    if (!currentPerformers.includes(id)) {
+      form.setValue("performers", [...currentPerformers, id]);
     }
   };
 
-  const handlePerformerRemove = (performer: string) => {
+  const handlePerformerRemove = (performerId: number) => {
     const currentPerformers = form.getValues("performers");
     form.setValue(
       "performers",
-      currentPerformers.filter((p) => p !== performer)
+      currentPerformers.filter((id) => Number(id) !== performerId)
     );
   };
 
@@ -189,34 +184,6 @@ export function CreateTaskForm({
             />
             <FormField
               control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-green-400 text-sm md:text-base">
-                    Status
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="bg-gray-700 text-green-400 border-gray-600 text-sm md:text-base">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-gray-700 text-green-400">
-                      <SelectItem value="ISSUE">Issue</SelectItem>
-                      <SelectItem value="IN PROGRESS">In Progress</SelectItem>
-                      <SelectItem value="REVIEW">Review</SelectItem>
-                      <SelectItem value="COMPLETED">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-xs md:text-sm" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="performers"
               render={({ field }) => (
                 <FormItem>
@@ -230,13 +197,15 @@ export function CreateTaskForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-gray-700 text-green-400">
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.firstName}>
-                          <div className="flex items-center gap-2 md:gap-4">
-                            <span className="text-xs md:text-sm">
-                              {user.firstName} {user.lastName}
-                            </span>
-                            <Avatar className="w-6 h-6 md:w-8 md:h-8">
+                    {users.map((user) => (
+                        <SelectItem
+                          key={user.id}
+                          value={user.id.toString()}
+                          className="text-white hover:bg-gray-600"
+                        >
+                          <div className="flex items-center gap-4">
+                            {user.firstName} {user.lastName}{" "}
+                            <Avatar>
                               <AvatarImage src={user.avatar} />
                             </Avatar>
                           </div>
@@ -249,24 +218,30 @@ export function CreateTaskForm({
                   </FormDescription>
                   <FormMessage className="text-xs md:text-sm" />
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {field.value.map((performer) => (
-                      <Badge
-                        key={performer}
-                        variant="secondary"
-                        className="bg-gray-700 text-green-400 flex items-center text-xs md:text-sm"
-                      >
-                        {performer}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-1 h-auto p-0 text-green-400 hover:text-green-300"
-                          onClick={() => handlePerformerRemove(performer)}
+                  {field.value.map((userId) => {
+                      const user = users.find((u) => u.id === userId);
+                      return user ? (
+                        <Badge
+                          className="justify-between bg-gray-700 text-white"
+                          key={user.id}
+                          variant="secondary"
                         >
-                          <X className="h-3 w-3" />
-                          <span className="sr-only">Remove</span>
-                        </Button>
-                      </Badge>
-                    ))}
+                          {user.firstName} {user.lastName}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="ml-1 h-auto p-0 text-gray-400 hover:text-white"
+                            onClick={() => handlePerformerRemove(user.id)}
+                          >
+                            <Avatar>
+                              <AvatarImage src={user.avatar} />
+                            </Avatar>
+                            <X className="h-3 w-3" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </Badge>
+                      ) : null;
+                    })}
                   </div>
                 </FormItem>
               )}

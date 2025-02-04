@@ -69,7 +69,7 @@ export const InputImage = (props: {
       <Button
         variant="outline"
         size="icon"
-        className="w-12 min-h-12 text-green-500 border-none rounded-full transition-transform hover:translate-y-[-9px] hover:bg-transparent "
+        className="w-12 min-h-12 text-green-500 border-none rounded-full transition-transform hover:translate-y-[-9px] bg-transparent hover:bg-transparent"
         onClick={() => fileInputRef.current?.click()}
         disabled={isUploading}
       >

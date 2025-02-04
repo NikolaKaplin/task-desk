@@ -13,7 +13,7 @@ export interface Task {
   description: string;
   performers: string[];
   image?: string;
-  status: "to-do" | "in-progress" | "problems" | "completed";
+  status: "ISSUED" | "PROCESSING" | "REVIEW" | "DONE";
 }
 
 interface TaskColumnProps {
@@ -25,6 +25,7 @@ interface TaskColumnProps {
   provided: DroppableProvided;
   snapshot: DroppableStateSnapshot;
   onTaskClick: (task: Task) => void;
+  usersArr: any;
 }
 
 export default function TaskColumn({
@@ -36,6 +37,7 @@ export default function TaskColumn({
   provided,
   snapshot,
   onTaskClick,
+  usersArr,
 }: TaskColumnProps) {
   return (
     <Card className="w-full md:w-80 flex-shrink-0 flex flex-col h-[calc(100vh-200px)] md:h-full bg-gray-800 border-gray-700">
@@ -99,7 +101,7 @@ export default function TaskColumn({
                         />
                       )}
                       <div className="mt-2 flex flex-wrap gap-1">
-                        {/* {task.performers.map((performer, index) => (
+                        {JSON.parse(task.performers).map((performer, index) => (
                           <Badge
                             key={index}
                             variant="outline"
@@ -107,7 +109,7 @@ export default function TaskColumn({
                           >
                             {performer}
                           </Badge>
-                        ))} */}
+                        ))}
                       </div>
                     </CardContent>
                   </Card>

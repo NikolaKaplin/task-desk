@@ -1,9 +1,15 @@
 "use client";
 
-import { CircleUserRound, CodeXml, LoaderCircle, LogOut } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  CodeXml,
+  LoaderCircle,
+  LogOut,
+  X,
+} from "lucide-react";
 import React, { useState } from "react";
 import { navItems } from "@/app/constants";
-import { Title } from "./title";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 import { signOut, useSession } from "next-auth/react";
@@ -12,6 +18,18 @@ import { AvatarImage } from "../ui/avatar";
 import { Avatar } from "@radix-ui/react-avatar";
 import { MobileHeader } from "./mobile-header";
 import Link from "next/link";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 interface Props {
   SetNumber?: number;
   className?: string;
@@ -26,19 +44,17 @@ export const Navbar: React.FC<Props> = ({
   hidden,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [indicatorsVersion, setIndicatorsVersion] = React.useState(0); // Moved useState call outside conditional
+  const { data: session, status } = useSession();
   let pathName = usePathname();
   console.log(pathName);
   if (pathName == "/") {
     pathName = "home";
   }
-  if (
-    pathName == "/login" ||
-    pathName == "/login/confirm"
-  ) {
+  if (pathName == "/login" || pathName == "/login/confirm") {
     return children;
   }
-  const [indicatorsVersion, setIndicatorsVersion] = React.useState(0);
-  const { data: session, status } = useSession();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -46,9 +62,18 @@ export const Navbar: React.FC<Props> = ({
 
   const closeMobileMenu = () => {
     if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false)
+      setIsMobileMenuOpen(false);
     }
-  }
+  };
+
+  const handleLogout = () => {
+    setIsLogoutDialogOpen(true);
+  };
+
+  const confirmLogout = () => {
+    signOut();
+    setIsLogoutDialogOpen(false);
+  };
 
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
@@ -58,19 +83,27 @@ export const Navbar: React.FC<Props> = ({
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 transition duration-300 ease-in-out flex flex-col w-64 bg-gray-800 text-white z-30 shadow-lg`}
       >
-         <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-         <div className="text-center p-6 lg:block">
+        <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+          <div className="text-center p-6 lg:block">
             <div className="flex items-center justify-center space-x-2">
               <CodeXml size={40} className="text-indigo-400" />
               <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600">
                 Altergemu
               </h1>
             </div>
-            <div className="mt-2 text-sm text-gray-400">Software & Game Dev</div>
+            <div className="mt-2 text-sm text-gray-400">
+              Software & Game Dev
+            </div>
           </div>
           <nav className="space-y-1 px-3">
             {navItems.map(({ title, icon, path, hiddenFor }, index, item) => (
-              <NavbarItem key={index} item={item[index]} pathName={pathName} indicatorVersion={indicatorsVersion} closeMobileMenu={closeMobileMenu} />
+              <NavbarItem
+                key={index}
+                item={item[index]}
+                pathName={pathName}
+                indicatorVersion={indicatorsVersion}
+                closeMobileMenu={closeMobileMenu}
+              />
             ))}
           </nav>
         </div>
@@ -81,7 +114,10 @@ export const Navbar: React.FC<Props> = ({
             </div>
           ) : session?.user ? (
             <div className="flex items-center justify-between">
-              <Link href="/profile" className="flex items-center space-x-3 group">
+              <Link
+                href="/profile"
+                className="flex items-center space-x-3 group"
+              >
                 <Avatar className="h-10 w-10 rounded-full ring-2 ring-indigo-400 transition-all duration-300 group-hover:ring-indigo-300">
                   <AvatarImage
                     className="rounded-full"
@@ -93,14 +129,45 @@ export const Navbar: React.FC<Props> = ({
                   {session.user.name}
                 </span>
               </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => signOut()}
-                className="text-gray-400 hover:bg-gray-700 hover:text-red-400 transition-colors duration-300"
+              <AlertDialog
+                open={isLogoutDialogOpen}
+                onOpenChange={setIsLogoutDialogOpen}
               >
-                <LogOut className="h-5 w-5" />
-              </Button>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleLogout}
+                    className="text-green-500 hover:bg-transparent hover:text-green-700"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-gray-800 border-gray-700">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-green-500 flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      Are you sure you want to log out?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-400">
+                      This action will end your current development session.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-gray-700 text-green-500 hover:bg-gray-600 hover:text-green-400 border-gray-600">
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={confirmLogout}
+                      className="bg-green-600 text-gray-100 hover:bg-green-700"
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Log out
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ) : null}
         </div>
@@ -119,23 +186,23 @@ export const Navbar: React.FC<Props> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 type IndicatorVersion = {
-  update: () => void
-  version: number
-}
+  update: () => void;
+  version: number;
+};
 
 const IndicatorsVersionContext = React.createContext<IndicatorVersion>({
   version: 0,
   update() {},
-})
+});
 
 export function useIndicatorsVersion() {
-  return React.useContext(IndicatorsVersionContext)
+  return React.useContext(IndicatorsVersionContext);
 }
 
 export function useIndicatorsVersionUpdater() {
-  return React.useContext(IndicatorsVersionContext).update
+  return React.useContext(IndicatorsVersionContext).update;
 }

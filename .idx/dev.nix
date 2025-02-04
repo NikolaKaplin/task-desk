@@ -6,6 +6,7 @@
     pkgs.zip
     pkgs.openssl.dev
     pkgs.awscli
+    pkgs.bun
   ];
 
   

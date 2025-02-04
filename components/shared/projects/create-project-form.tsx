@@ -129,7 +129,6 @@ export function CreateProjectForm() {
       content: JSON.stringify({
         users: data.users,
         description: data.description,
-        projects: [],
       }),
       createdAt: data.createdAt,
       name: data.name,
