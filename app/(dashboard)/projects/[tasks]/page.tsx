@@ -97,8 +97,7 @@ export default function ProjectTasksPage() {
       );
 
       try {
-
-        await upgateTaskStatusById(taskId, newStatus);
+        await upgateTaskStatusById(taskId, newStatus, new Date());
       } catch (error) {
         console.error("Failed to update task status:", error);
 
@@ -148,7 +147,7 @@ export default function ProjectTasksPage() {
                       </h1>
                     </div>
                     <CreateTaskForm
-                    users={usersArr}
+                      users={usersArr}
                       authorId={user?.id}
                       projectId={project.id}
                       onTaskCreated={(newTask) => setTasks([...tasks, newTask])}
@@ -172,6 +171,7 @@ export default function ProjectTasksPage() {
                               provided={provided}
                               snapshot={snapshot}
                               onTaskClick={handleTaskClick}
+                              usersArr={usersArr}
                             />
                           )}
                         </Droppable>
@@ -182,7 +182,7 @@ export default function ProjectTasksPage() {
               ) : null}
               {selectedTask && (
                 <TaskDetails
-                usersArr={usersArr}
+                  usersArr={usersArr}
                   task={selectedTask}
                   onClose={handleCloseTaskDetails}
                 />

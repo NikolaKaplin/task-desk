@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createTask, getTasksByProjectId, getUsers } from "@/app/actions";
+import { createTask } from "@/app/actions";
 import {
   Form,
   FormControl,
@@ -35,8 +35,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { getUserSession } from "@/lib/get-session-server";
 
 const taskFormSchema = z.object({
   title: z.string().min(2, {
@@ -48,11 +46,11 @@ const taskFormSchema = z.object({
   image: z.string().optional(),
   projectId: z.number(),
   authorId: z.number(),
+  deadlineDate: z.string(),
+  deadlineTime: z.string(),
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
-
-
 
 interface CreateTaskFormProps {
   onTaskCreated: (task: TaskFormValues) => void;
@@ -81,6 +79,8 @@ export function CreateTaskForm({
       projectId: Number(projectId),
       authorId: authorId,
       image: "",
+      deadlineDate: "",
+      deadlineTime: "",
     },
   });
 
@@ -103,7 +103,12 @@ export function CreateTaskForm({
   async function onSubmit(data: TaskFormValues) {
     setIsLoading(true);
     try {
-      const createdTask = await createTask(data);
+      const deadline = new Date(`${data.deadlineDate}T${data.deadlineTime}`);
+      const taskData = {
+        ...data,
+        deadline: deadline.toISOString(),
+      };
+      const createdTask = await createTask(taskData);
       setIsLoading(false);
       if (createdTask) {
         toast({
@@ -197,7 +202,7 @@ export function CreateTaskForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-gray-700 text-green-400">
-                    {users.map((user) => (
+                      {users.map((user) => (
                         <SelectItem
                           key={user.id}
                           value={user.id.toString()}
@@ -218,7 +223,7 @@ export function CreateTaskForm({
                   </FormDescription>
                   <FormMessage className="text-xs md:text-sm" />
                   <div className="flex flex-wrap gap-2 mt-2">
-                  {field.value.map((userId) => {
+                    {field.value.map((userId) => {
                       const user = users.find((u) => u.id === userId);
                       return user ? (
                         <Badge
@@ -246,6 +251,46 @@ export function CreateTaskForm({
                 </FormItem>
               )}
             />
+            <div className="flex gap-4">
+              <FormField
+                control={form.control}
+                name="deadlineDate"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel className="text-green-400 text-sm md:text-base">
+                      Deadline Date
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        className="bg-gray-700 text-green-400 border-gray-600 text-sm md:text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs md:text-sm" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="deadlineTime"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel className="text-green-400 text-sm md:text-base">
+                      Deadline Time
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="time"
+                        {...field}
+                        className="bg-gray-700 text-green-400 border-gray-600 text-sm md:text-base"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs md:text-sm" />
+                  </FormItem>
+                )}
+              />
+            </div>
             <Button
               type="submit"
               className="w-full bg-green-600 hover:bg-green-700 text-white text-sm md:text-base"

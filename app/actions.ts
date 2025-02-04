@@ -350,6 +350,7 @@ type Task = {
   performers: string;
   image?: string;
   updatedAt: Date;
+  deadline: Date;
 };
 export async function createTask(data: Task) {
   console.log("penis");
@@ -364,6 +365,7 @@ export async function createTask(data: Task) {
         updatedAt: new Date(),
         taskStatus: "ISSUED",
         performers: JSON.stringify(data.performers),
+        deadline: data.deadline,
       },
     });
     if (taskCreate) {
@@ -390,6 +392,7 @@ export async function getTasksByProjectId(id: number) {
         updatedAt: true,
         image: true,
         performers: true,
+        deadline: true,
       },
     });
     if (tasks) return tasks;
@@ -427,7 +430,11 @@ export async function getProjectById(id: number) {
   }
 }
 
-export async function upgateTaskStatusById(id: number, status: string) {
+export async function upgateTaskStatusById(
+  id: number,
+  status: string,
+  date: Date
+) {
   try {
     const upgateTaskStatus = await prisma.task.update({
       where: {
@@ -435,6 +442,7 @@ export async function upgateTaskStatusById(id: number, status: string) {
       },
       data: {
         taskStatus: status,
+        updatedAt: date,
       },
     });
     if (upgateTaskStatus) return upgateTaskStatus;
