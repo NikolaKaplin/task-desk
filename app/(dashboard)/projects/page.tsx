@@ -64,26 +64,7 @@ export default function ProjectsPage() {
       </header>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, index) => (
-            <Card
-              key={index}
-              className="bg-gray-800 border-gray-700 text-white"
-            >
-              <div className="h-48 bg-gray-700" />
-              <CardHeader>
-                <Skeleton className="h-6 w-2/3 mb-2 bg-gray-700" />
-                <Skeleton className="h-4 w-full bg-gray-700" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
-                <Skeleton className="h-4 w-2/3 bg-gray-700" />
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="h-10 w-full bg-gray-700" />
-              </CardFooter>
-            </Card>
-          ))}
+        <div>
         </div>
       ) : projects.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

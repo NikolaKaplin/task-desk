@@ -128,7 +128,7 @@ export default function ProjectTasksPage() {
       {user ? (
         <div>
           {tasks ? (
-            <div className="bg-gray-900 min-h-screen">
+            <div className="from-gray-900 to-gray-800 min-h-screen">
               {project ? (
                 <div className="container mx-auto p-4 h-screen flex flex-col">
                   <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-4">
