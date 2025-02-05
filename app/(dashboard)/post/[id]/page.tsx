@@ -54,7 +54,7 @@ export default function PostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <article className="max-w-4xl mx-auto">
         <header className="mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-green-400 mb-4">
@@ -121,7 +121,7 @@ export default function PostPage() {
 
 function LoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <Skeleton className="h-12 w-3/4 bg-gray-600 animate-pulse" />
         <Skeleton className="h-6 w-full bg-gray-600 animate-pulse" />

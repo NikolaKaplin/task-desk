@@ -1,37 +1,84 @@
-import { Check, Handshake, Plus, X } from "lucide-react";
-import { Applications, confirmUser } from "../../actions";
-import { Prisma } from "@prisma/client";
-import React, { use } from "react";
-import { ButtonApprove } from "@/components/shared/buttonApprove";
-import { useRouter } from "next/router";
-import { getUserSession } from "@/lib/get-session-server";
+import { Check, X } from "lucide-react"
+import { Applications, getPosts, getUsers, updatePostStatusById } from "../../actions"
+import { ButtonApprove } from "@/components/shared/buttonApprove"
+import { getUserSession } from "@/lib/get-session-server"
+import { Card, CardContent } from "@/components/ui/card"
+import { PendingPostCard } from "@/components/shared/PendingPostCard"
+
 
 export default async function Home() {
-  const user = await getUserSession();
-  if (user?.role != "ADMIN") return null;
-  const applications = await Applications();
-  console.log({ applications });
+  const user = await getUserSession()
+  if (user?.role != "ADMIN") return null
+  const users = await getUsers()
+  const applications = await Applications()
+  const allPosts = await getPosts()
+  const pendingPosts = allPosts.filter((post) => post.postStatus !== "APPROVED")
+
+  async function handleApprove(postId: string) {
+    "use server"
+    await updatePostStatusById(postId, true)
+  }
+
+  async function handleReject(postId: string) {
+    "use server"
+    await updatePostStatusById(postId, false)
+  }
+
   return (
-    <div className=" bg-stone-900 px-5 pt-2 min-h-screen min-w-screen">
-      <div className=" text-white text-3xl  text-center items-center">
-        К регистрации:
-      </div>
-      <div className="flex flex-col gap-5 pt-3">
-        {applications!.map((a) => (
-          <div
-            key={a.id}
-            className="flex  gap-5 bg-white  items-center p-2 rounded-2xl "
-          >
-            <div className="w-1/6">{a.firstName + " " + a.lastName}</div>
-            <div className="w-2/6">{a.email}</div>
-            <div className="w-6/12">{a.updatedAt.toString()}</div>
-            <div className="flex justify-end gap-5">
-              <ButtonApprove a={a} isDelete={false} icon={<Check />} />
-              <ButtonApprove a={a} isDelete={true} icon={<X />} />
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-6">
+      <div className="max-w-[1800px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* User Applications Section */}
+          <section>
+            <h1 className="text-3xl font-bold text-green-400 mb-8">Заявки на регистрацию</h1>
+            <div className="grid gap-4">
+              {applications!.map((a) => (
+                <Card key={a.id} className="bg-gray-800 border-gray-700 text-white">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                      <div className="flex flex-col sm:flex-row gap-6 flex-1">
+                        <div>
+                          <div className="text-sm text-gray-400">Имя</div>
+                          <div className="text-green-400 font-medium">{a.firstName + " " + a.lastName}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-400">Email</div>
+                          <div className="text-gray-300">{a.email}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-400">Дата обновления</div>
+                          <div className="text-gray-300">{new Date(a.updatedAt).toLocaleString("ru-RU")}</div>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <ButtonApprove a={a} isDelete={false} icon={<Check className="w-5 h-5 text-green-400" />} />
+                        <ButtonApprove a={a} isDelete={true} icon={<X className="w-5 h-5 text-red-400" />} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </div>
-        ))}
+          </section>
+
+          {/* Post Applications Section */}
+          <section>
+            <h2 className="text-3xl font-bold text-yellow-400 mb-8">Заявки на публикацию</h2>
+            <div className="grid gap-4">
+              {pendingPosts.map((post) => (
+                <PendingPostCard
+                  key={post.id}
+                  post={post}
+                  author={users.find((user) => user.id === post.authorId)}
+                  onApprove={handleApprove} 
+                  onReject={handleReject}
+                />
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
     </div>
-  );
+  )
 }
+

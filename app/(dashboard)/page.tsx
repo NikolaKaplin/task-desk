@@ -21,14 +21,16 @@ type ContentBlock = {
 type Post = {
   id: number;
   title: string;
+  name: string;
   authorId: number;
   content: string;
   createdAt: Date;
   video: string;
+  postStatus: string;
 };
 
 export default async function Home() {
-  const posts: Post = await getPosts();
+  const posts: Post[] = (await getPosts()).filter((post) => post.postStatus === "APPROVED");
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <header>
@@ -71,6 +73,7 @@ async function PostCard({
   createdAt,
   content,
   video,
+  postStatus,
 }: Post) {
   const authorInfo = await getUserInfoById(authorId);
   const jsonContent = JSON.parse(content);

@@ -243,10 +243,11 @@ export async function getPosts() {
         authorId: true,
         content: true,
         createdAt: true,
+        postStatus: true,
       },
     });
     return response;
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function getUserInfoById(id: number) {
@@ -290,6 +291,31 @@ export async function getLastPostId() {
       },
     });
     return lastPost;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function updatePostStatusById(id: number, isUpdate: boolean) {
+  try {
+    if (isUpdate) {
+      const response = await prisma.post.update({
+        where: {
+          id: id,
+        },
+        data: {
+          postStatus: "APPROVED",
+        },
+      });
+      return response;
+    } else {
+      const response = await prisma.post.delete({
+        where: {
+          id: id,
+        },
+      });
+      return response;
+    }
   } catch (error) {
     console.log(error);
   }
@@ -431,7 +457,7 @@ export async function getProjectById(id: number) {
 }
 
 export async function updateTask(body: any) {
-  try{
+  try {
     const taskUpdate = await prisma.task.update({
       where: {
         id: Number(body.id),
