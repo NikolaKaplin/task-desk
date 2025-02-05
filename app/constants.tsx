@@ -30,7 +30,7 @@ export const navItems: NavItems[] = [
     path: "team",
   },
   {
-    title: "Tasks",
+    title: "My tasks",
     icon: <ListTodo />,
     path: "tasks",
   },

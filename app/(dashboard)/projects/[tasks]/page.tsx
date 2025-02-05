@@ -131,17 +131,16 @@ export default function ProjectTasksPage() {
             <div className="bg-gray-900 min-h-screen">
               {project ? (
                 <div className="container mx-auto p-4 h-screen flex flex-col">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div className="flex items-center">
-                      <Link href="/projects">
-                        <Button
+                  <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-4">
+                  <Link className=" hover:bg-transparent" href="/projects">
+                        <Button 
                           variant="ghost"
-                          size="sm"
-                          className="mr-4 text-green-500 hover:text-green-400"
+                          className=" text-green-500 hover:bg-transparent items-center hover:text-green-400"
                         >
-                          <ArrowLeft className="mr-2 h-8 w-8" />
+                          <ArrowLeft size={48} />
                         </Button>
                       </Link>
+                    <div className="flex items-center hover:bg-transparent">
                       <h1 className="text-xl md:text-2xl lg:text-3xl text-green-500 font-bold">
                         {project.name}
                       </h1>
@@ -182,6 +181,7 @@ export default function ProjectTasksPage() {
               ) : null}
               {selectedTask && (
                 <TaskDetails
+                user={user}
                   usersArr={usersArr}
                   task={selectedTask}
                   onClose={handleCloseTaskDetails}

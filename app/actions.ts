@@ -430,6 +430,26 @@ export async function getProjectById(id: number) {
   }
 }
 
+export async function updateTask(body: any) {
+  try{
+    const taskUpdate = await prisma.task.update({
+      where: {
+        id: Number(body.id),
+      },
+      data: {
+        title: body.title,
+        description: body.description,
+        performers: body.performers,
+        deadline: body.deadline,
+        updatedAt: new Date()
+      }
+    })
+    if (taskUpdate) return
+  } catch (error) {
+    return error;
+  }
+}
+
 export async function upgateTaskStatusById(
   id: number,
   status: string,

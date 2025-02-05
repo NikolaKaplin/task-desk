@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PlusCircle, X } from "lucide-react";
+import { Plus, PlusCircle, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -135,7 +135,7 @@ export function CreateTaskForm({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base">
-          <PlusCircle className="mr-2 h-4 w-4" /> New Task
+          <Plus className=" h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-gray-800 text-green-400 border-0 sm:max-w-[425px]">
@@ -155,7 +155,7 @@ export function CreateTaskForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-green-400 text-sm md:text-base">
-                    Name
+                    Title
                   </FormLabel>
                   <FormControl>
                     <Input

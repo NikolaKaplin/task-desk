@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Check,
   CodeXml,
+  DoorOpen,
   LoaderCircle,
   LogOut,
   X,
@@ -138,7 +139,7 @@ export const Navbar: React.FC<Props> = ({
                     variant="ghost"
                     size="icon"
                     onClick={handleLogout}
-                    className="text-green-500 hover:bg-transparent hover:text-green-700"
+                    className="text-indigo-400 hover:bg-transparent hover:text-indigo-400"
                   >
                     <LogOut className="h-5 w-5" />
                   </Button>
@@ -162,7 +163,7 @@ export const Navbar: React.FC<Props> = ({
                       onClick={confirmLogout}
                       className="bg-green-600 text-gray-100 hover:bg-green-700"
                     >
-                      <Check className="h-4 w-4 mr-2" />
+                      <DoorOpen className="h-4 w-4 mr-2" />
                       Log out
                     </AlertDialogAction>
                   </AlertDialogFooter>
