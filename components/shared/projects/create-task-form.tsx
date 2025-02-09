@@ -42,10 +42,10 @@ const taskFormSchema = z.object({
   }),
   description: z.string(),
   status: z.string(),
-  performers: z.array(z.number()),
+  performers: z.array(z.string()),
   image: z.string().optional(),
-  projectId: z.number(),
-  authorId: z.number(),
+  projectId: z.string(),
+  authorId: z.string(),
   deadlineDate: z.string(),
   deadlineTime: z.string(),
 });
@@ -54,8 +54,8 @@ type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 interface CreateTaskFormProps {
   onTaskCreated: (task: TaskFormValues) => void;
-  projectId: number;
-  authorId: number;
+  projectId: string;
+  authorId: string;
   users: any;
 }
 
@@ -76,7 +76,7 @@ export function CreateTaskForm({
       description: "",
       status: "ISSUE",
       performers: [],
-      projectId: Number(projectId),
+      projectId: projectId,
       authorId: authorId,
       image: "",
       deadlineDate: "",
@@ -86,17 +86,17 @@ export function CreateTaskForm({
 
   const handlePerformerSelect = (performer: string) => {
     const currentPerformers = form.getValues("performers");
-    const id = Number.parseInt(performer, 10);
+    const id = performer;
     if (!currentPerformers.includes(id)) {
       form.setValue("performers", [...currentPerformers, id]);
     }
   };
 
-  const handlePerformerRemove = (performerId: number) => {
+  const handlePerformerRemove = (performerId: string) => {
     const currentPerformers = form.getValues("performers");
     form.setValue(
       "performers",
-      currentPerformers.filter((id) => Number(id) !== performerId)
+      currentPerformers.filter((id) => id !== performerId)
     );
   };
 
@@ -106,7 +106,8 @@ export function CreateTaskForm({
       const deadline = new Date(`${data.deadlineDate}T${data.deadlineTime}`);
       const taskData = {
         ...data,
-        deadline: deadline.toISOString(),
+        performers: JSON.stringify(data.performers),
+        deadline: deadline,
       };
       const createdTask = await createTask(taskData);
       setIsLoading(false);

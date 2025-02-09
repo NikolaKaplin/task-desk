@@ -5,6 +5,9 @@ import { text } from "stream/consumers";
 import { prisma } from "@/prisma/prisma-client";
 import { compare } from "bcryptjs";
 import Email from "next-auth/providers/email";
+import { db } from "@/db";
+import { userTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -23,17 +26,17 @@ export const authOptions: AuthOptions = {
           email: credentials.email,
         };
 
-        const findUser = await prisma.user.findFirst({
-          where: values,
-        });
-
+        const [findUser] = await db
+          .selectDistinct()
+          .from(userTable)
+          .where(eq(userTable.email, values.email));
         if (!findUser) {
           return null;
         }
 
         const isPassword = await compare(
           credentials.password,
-          findUser.password
+          findUser.passwordHash
         );
 
         if (!isPassword) {
@@ -42,7 +45,7 @@ export const authOptions: AuthOptions = {
 
         return {
           id: findUser.id,
-          avatar: findUser.avatar,
+          avatar: findUser.avatarUrl,
           email: findUser.email,
           name: findUser.firstName,
           role: findUser.role,
@@ -65,11 +68,10 @@ export const authOptions: AuthOptions = {
           return false;
         }
 
-        const findUser = await prisma.user.findFirst({
-          where: {
-            email: user.email,
-          },
-        });
+        const [findUser] = await db
+          .selectDistinct()
+          .from(userTable)
+          .where(eq(userTable.email, user.email));
         return !!findUser;
       } catch (error) {
         console.log("Error [SIGN IN]");
@@ -80,16 +82,15 @@ export const authOptions: AuthOptions = {
       if (!token.email) {
         return token;
       }
-      const findUser = await prisma.user.findFirst({
-        where: {
-          email: token.email,
-        },
-      });
+      const [findUser] = await db
+        .selectDistinct()
+        .from(userTable)
+        .where(eq(userTable.email, token.email));
       if (findUser) {
         token.id = findUser.id;
         token.email = findUser.email;
         token.name = findUser.firstName;
-        token.avatar = findUser.avatar;
+        token.avatar = findUser.avatarUrl || "";
         token.role = findUser.role;
       }
 

@@ -1,184 +1,204 @@
-"use client"
+"use client";
 
-import { useState, useRef, useCallback, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Upload, Video, Plus, X, LoaderCircle } from "lucide-react"
-import Image from "next/image"
-import { getUserSession } from "@/lib/get-session-server"
-import { getLastPostId, postCreate } from "@/app/actions"
-import { number } from "zod"
-import { uploadLargeFiles } from "@/utils/awsLargeUpload"
-import axios from "axios"
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Upload, Video, Plus, X, LoaderCircle } from "lucide-react";
+import Image from "next/image";
+import { getUserSession } from "@/lib/get-session-server";
+import { getLastPostId, postCreate } from "@/app/actions";
+import { number } from "zod";
+import { uploadLargeFiles } from "@/utils/awsLargeUpload";
+import axios from "axios";
 
 type ContentBlock = {
-  type: "text" | "image"
-  content: string
-}
+  type: "text" | "image";
+  content: string;
+};
 
 export default function CreatePost() {
-  const [user, setUser] = useState()
-  const [progress, setProgress] = useState(0)
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
-  const [title, setTitle] = useState("")
-  const [file, setFile] = useState<File | null>(null)
-  const [description, setDescription] = useState("")
-  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([{ type: "text", content: "" }])
-  const [videoUrl, setVideoUrl] = useState("")
-  const [isPublishing, setIsPublishing] = useState(false) // Added state for publishing status
-  const imageInputRef = useRef<HTMLInputElement>(null)
-  const videoInputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
+  const [user, setUser] = useState();
+  const [progress, setProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "uploading" | "success" | "error"
+  >("idle");
+  const [name, setTitle] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [description, setDescription] = useState("");
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
+    { type: "text", content: "" },
+  ]);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [isPublishing, setIsPublishing] = useState(false); // Added state for publishing status
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    ;(async () => {
-      const user = await getUserSession()
+    (async () => {
+      const user = await getUserSession();
       if (user) {
-        setUser(user)
+        setUser(user);
       }
-    })()
-  }, [])
+    })();
+  }, []);
 
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    console.log("hui")
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      try {
-        const postId = await getLastPostId()
-        const res = await fetch(`/api/upload-image-post/${postId?.id + 1}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": file.type,
-          },
-          body: file,
-        })
+  const handleImageUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        try {
+          const postId = await getLastPostId();
+          console.log("Post: " + postId);
+          const res = await fetch(`/api/upload-image-post/${postId?.id + 1}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": file.type,
+            },
+            body: file,
+          });
 
-        if (!res.ok) {
-          throw new Error("Failed to upload image")
+          if (!res.ok) {
+            throw new Error("Failed to upload image");
+          }
+
+          const data = await res.json();
+          const imageUrl = data.url;
+
+          setContentBlocks((prevBlocks) => {
+            const newBlocks = [...prevBlocks];
+            newBlocks.splice(index + 1, 0, {
+              type: "image",
+              content: imageUrl,
+            });
+            return newBlocks;
+          });
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          // You might want to show an error message to the user here
         }
-
-        const data = await res.json()
-        const imageUrl = data.url
-
-        setContentBlocks((prevBlocks) => {
-          const newBlocks = [...prevBlocks]
-          newBlocks.splice(index + 1, 0, { type: "image", content: imageUrl })
-          return newBlocks
-        })
-      } catch (error) {
-        console.error("Error uploading image:", error)
-        // You might want to show an error message to the user here
       }
-    }
-  }, [])
+    },
+    []
+  );
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0])
+      setFile(e.target.files[0]);
     }
-  }
+  };
 
   const uploadFile = async () => {
-    if (!file) return
+    if (!file) return;
 
-    setUploadStatus("uploading")
-    setProgress(0)
+    setUploadStatus("uploading");
+    setProgress(0);
 
     try {
-      const postId = await getLastPostId()
+      const postId = await getLastPostId();
       const {
         data: { presignedUrl, key },
       } = await axios.post(`/api/getPresignedUrl/${postId?.id + 1}`, {
         filename: file.name,
         contentType: file.type,
-      })
+      });
 
       await axios.put(presignedUrl, file, {
         headers: { "Content-Type": file.type },
         onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!)
-          setProgress(percentCompleted)
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total!
+          );
+          setProgress(percentCompleted);
         },
-      })
-      setVideoUrl(key)
-      setUploadStatus("success")
-      setProgress(100)
-      console.log("File uploaded successfully. Object key:", key)
+      });
+      setVideoUrl(key);
+      setUploadStatus("success");
+      setProgress(100);
+      console.log("File uploaded successfully. Object key:", key);
     } catch (error) {
-      console.error("Upload error:", error)
-      setUploadStatus("error")
+      console.error("Upload error:", error);
+      setUploadStatus("error");
     }
-  }
+  };
 
   const handleContentChange = (index: number, value: string) => {
-    const newBlocks = [...contentBlocks]
-    newBlocks[index].content = value
-    setContentBlocks(newBlocks)
-  }
+    const newBlocks = [...contentBlocks];
+    newBlocks[index].content = value;
+    setContentBlocks(newBlocks);
+  };
 
   const addTextBlock = (index: number) => {
-    const newBlocks = [...contentBlocks]
-    newBlocks.splice(index + 1, 0, { type: "text", content: "" })
-    setContentBlocks(newBlocks)
-  }
+    const newBlocks = [...contentBlocks];
+    newBlocks.splice(index + 1, 0, { type: "text", content: "" });
+    setContentBlocks(newBlocks);
+  };
 
   const removeBlock = (index: number) => {
-    const newBlocks = [...contentBlocks]
-    newBlocks.splice(index, 1)
-    setContentBlocks(newBlocks)
-  }
+    const newBlocks = [...contentBlocks];
+    newBlocks.splice(index, 1);
+    setContentBlocks(newBlocks);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log(user)
-    e.preventDefault()
-    setIsPublishing(true)
+    console.log(user);
+    e.preventDefault();
+    setIsPublishing(true);
     try {
       const postData = {
-        title,
+        name,
         description,
         author: user.id,
         contentBlocks,
         video: videoUrl ? videoUrl : null,
         createdAt: new Date().toISOString(),
-      }
+      };
 
-      const jsonString = JSON.stringify(postData, null, 2)
+      const jsonString = JSON.stringify(postData, null, 2);
 
       const DbData = {
-        title,
-        userId: Number(user.id),
+        name,
+        authorId: user.id,
         content: jsonString,
-      }
+      };
 
-      postCreate(DbData)
+      postCreate(DbData);
 
-      router.push("/")
+      router.push("/");
     } catch (error) {
-      console.error("Error publishing post:", error)
+      console.error("Error publishing post:", error);
     } finally {
-      setIsPublishing(false)
+      setIsPublishing(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12">
       <Card className="max-w-2xl mx-auto bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-green-400">Создать новый пост</CardTitle>
+          <CardTitle className="text-2xl font-bold text-green-400">
+            Создать новый пост
+          </CardTitle>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="title" className="text-gray-300">
+              <Label htmlFor="name" className="text-gray-300">
                 Заголовок
               </Label>
               <Input
-                id="title"
-                value={title}
+                id="name"
+                value={name}
                 onChange={(e) => setTitle(e.target.value)}
                 className="mt-1 bg-gray-700 text-white"
                 required
@@ -282,25 +302,33 @@ export default function CreatePost() {
                 </Button>
                 <Button
                   onClick={uploadFile}
-                  disabled={!file || uploadStatus === "uploading" || uploadStatus === "success"}
+                  disabled={
+                    !file ||
+                    uploadStatus === "uploading" ||
+                    uploadStatus === "success"
+                  }
                   className={`flex-1 ${
                     uploadStatus === "uploading"
                       ? "bg-blue-500 hover:bg-blue-600"
                       : uploadStatus === "success"
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-gray-500 hover:bg-gray-600"
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-gray-500 hover:bg-gray-600"
                   } text-white transition-colors duration-200`}
                 >
                   {uploadStatus === "uploading"
                     ? `Загрузка: ${progress}%`
                     : uploadStatus === "success"
-                      ? "Загружено успешно"
-                      : "Загрузить"}
+                    ? "Загружено успешно"
+                    : "Загрузить"}
                 </Button>
               </div>
               {uploadStatus === "success" && (
                 <div className="mt-2 p-2 bg-green-100 border border-green-400 text-green-700 rounded-md flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -313,13 +341,16 @@ export default function CreatePost() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="bg-green-500 hover:bg-green-600 text-white" disabled={isPublishing}>
+            <Button
+              type="submit"
+              className="bg-green-500 hover:bg-green-600 text-white"
+              disabled={isPublishing}
+            >
               {isPublishing ? "Публикация..." : "Опубликовать"}
             </Button>
           </CardFooter>
         </form>
       </Card>
     </div>
-  )
+  );
 }
-

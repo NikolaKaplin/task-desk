@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export const InputImage = (props: {
   onChange: (url: string) => void;
-  userId: number;
+  userId: string;
 }) => {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,21 +39,20 @@ export const InputImage = (props: {
         body: Buffer.from(await file.arrayBuffer()),
       });
 
-      if (res.status !== 200) {
-        throw new Error("Failed to upload image");
+      if (res.status == 200) {
+        toast({
+          title: "Успешно",
+          description: "Аватар успешно обновлен",
+        });
       }
 
       const obj = await res.json();
       if (!obj.url) {
         throw new Error("No URL returned from server");
       }
-
       props.onChange(obj.url);
-      toast({
-        title: "Success",
-        description: "Avatar updated successfully",
-      });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to update avatar",

@@ -1,53 +1,58 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { FormProvider, useForm } from "react-hook-form"
-import { loginSchema, type TFormLoginValues } from "./schema"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { FormInput } from "./form-input"
-import { Button } from "@/components/ui/button"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
+import type React from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { loginSchema, type TFormLoginValues } from "./schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormInput } from "./form-input";
+import { Button } from "@/components/ui/button";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export const LoginForm: React.FC = () => {
-  const router = useRouter()
-  const { toast } = useToast()
+  const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<TFormLoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  })
+  });
 
   const onSubmit = async (data: TFormLoginValues) => {
     try {
       const resp = await signIn("credentials", {
         ...data,
         redirect: false,
-      })
+      });
 
       if (!resp?.ok) {
-        throw Error()
+        throw Error();
       }
 
-      router.push("/")
+      router.push("/");
     } catch (error) {
-      console.error("Error [LOGIN]", error)
+      console.error("Error [LOGIN]", error);
       toast({
         variant: "destructive",
         title: "Ошибка",
         description: "Не удалось войти в аккаунт",
-      })
+      });
     }
-  }
+  };
 
   return (
     <FormProvider {...form}>
       <div className="space-y-4">
-        <FormInput name="email" isMotion={true} label="E-Mail"  />
-        <FormInput name="password" isMotion={true} label="Пароль" type="password" />
+        <FormInput name="email" isMotion={true} label="E-Mail" />
+        <FormInput
+          name="password"
+          isMotion={true}
+          label="Пароль"
+          type="password"
+        />
         <Button
           type="submit"
           disabled={form.formState.isSubmitting}
@@ -58,6 +63,5 @@ export const LoginForm: React.FC = () => {
         </Button>
       </div>
     </FormProvider>
-  )
-}
-
+  );
+};

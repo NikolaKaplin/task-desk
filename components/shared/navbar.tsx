@@ -49,7 +49,6 @@ export const Navbar: React.FC<Props> = ({
   const [indicatorsVersion, setIndicatorsVersion] = React.useState(0); // Moved useState call outside conditional
   const { data: session, status } = useSession();
   let pathName = usePathname();
-  console.log(pathName);
   if (pathName == "/") {
     pathName = "home";
   }

@@ -35,13 +35,11 @@ export default function PostPage() {
   useEffect(() => {
     async function fetchPost() {
       if (postId) {
-        const fetchedPost = await getPostById(Number(postId));
+        const fetchedPost = await getPostById(postId);
         if (fetchedPost) {
           const parsedPost = JSON.parse(fetchedPost.content);
           setPost(parsedPost);
-          const authorData = await getUserInfoById(
-            Number(fetchedPost.authorId)
-          );
+          const authorData = await getUserInfoById(fetchedPost.authorId);
           setAuthor(authorData);
         }
       }
@@ -58,7 +56,7 @@ export default function PostPage() {
       <article className="max-w-4xl mx-auto">
         <header className="mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-green-400 mb-4">
-            {post.title}
+            {post.name}
           </h1>
           <p className="text-xl text-gray-300 mb-6">{post.description}</p>
           <div className="flex items-center">

@@ -46,7 +46,7 @@ const profileFormSchema = z.object({
   content: z.string(),
   projectStatus: z.string(),
   createdAt: z.date(),
-  users: z.array(z.number()),
+  users: z.array(z.string()),
 });
 
 export type Project = {
@@ -68,7 +68,7 @@ type User = {
 };
 
 export function CreateProjectForm() {
-  const [authorId, setAuthorId] = useState(0);
+  const [authorId, setAuthorId] = useState();
   const [isOpen, setIsOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -96,13 +96,13 @@ export function CreateProjectForm() {
 
   const handleStatusSelect = (userId: string) => {
     const currentUsers = form.getValues("users");
-    const id = Number.parseInt(userId, 10);
+    const id = userId;
     if (!currentUsers.includes(id)) {
       form.setValue("users", [...currentUsers, id]);
     }
   };
 
-  const handleStatusRemove = (userId: number) => {
+  const handleStatusRemove = (userId: string) => {
     const currentUsers = form.getValues("users");
     form.setValue(
       "users",

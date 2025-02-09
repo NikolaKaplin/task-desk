@@ -1,122 +1,11 @@
 "use server";
 
 import { prisma } from "@/prisma/prisma-client";
-import { hashSync } from "bcryptjs";
-import { cookies } from "next/headers";
-import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
-import { writeFile } from "fs/promises";
-import path from "path";
-import { ConstantColorFactor } from "three";
-import { equal } from "assert";
-import { Code } from "lucide-react";
-import { InputJsonValue, JsonValue } from "@prisma/client/runtime/library";
-
-export async function registerUser(
-  body: Prisma.UserCreateInput
-): Promise<RegisterResult> {
-  try {
-    const user = await prisma.user.findFirst({
-      where: {
-        email: body.email,
-      },
-    });
-
-    if (user) {
-      return { success: false };
-    } else {
-      const createdUser = await prisma.user.create({
-        data: {
-          firstName: body.firstName,
-          lastName: body.lastName,
-          email: body.email,
-          password: hashSync(body.password, 10),
-          bio: "",
-          devStatus: "",
-        },
-      });
-      const res = await sendApplication(body);
-      console.log(res);
-      return { success: !!createdUser };
-    }
-  } catch (err) {
-    return { success: false };
-  }
-}
-
-export async function Applications() {
-  try {
-    const usersWithRoleUser = await prisma.user.findMany({
-      where: {
-        role: {
-          equals: "UNVERIFIED",
-        },
-      },
-    });
-    return usersWithRoleUser;
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-export async function updateProfile(
-  body: Prisma.UserUncheckedUpdateInput
-): Promise<ProfileEdited> {
-  try {
-    console.log(body);
-    await prisma.user.update({
-      where: {
-        id: body.id,
-      },
-      data: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        bio: body.bio,
-        devStatus: body.devStatus?.toString(),
-      },
-    });
-    revalidatePath("/profile");
-    return { edit: true };
-  } catch (err) {
-    console.error(err);
-    return { edit: false };
-  }
-}
-
-export async function confirmUser(
-  body: Prisma.UserUpdateInput,
-  isDelete: boolean
-) {
-  const user = await prisma.user.findFirst({
-    where: {
-      email: body.email as string,
-    },
-  });
-
-  if (!user) {
-    throw new Error(`User with email ${body.email} not found`);
-  }
-
-  if (isDelete) {
-    await prisma.user.deleteMany({
-      where: {
-        email: body.email as string,
-      },
-    });
-    prisma.$disconnect();
-  } else {
-    await prisma.user.updateMany({
-      where: {
-        email: body.email as string,
-      },
-      data: {
-        role: "USER",
-      },
-    });
-    prisma.$disconnect();
-  }
-}
+import "dotenv/config";
+import { postTable, projectTable, taskTable, userTable } from "@/db/schema";
+import { db } from "@/db";
+import { desc, eq } from "drizzle-orm";
+import { console } from "inspector";
 
 type RegisterResult = {
   success: boolean;
@@ -126,244 +15,11 @@ type ProfileEdited = {
   edit: boolean;
 };
 
-export async function countUnverifiedUsers() {
-  const usersWithRoleUser = await prisma.user.count({
-    where: {
-      role: {
-        equals: "UNVERIFIED",
-      },
-    },
-  });
-  return usersWithRoleUser;
-}
-
-export async function setConfidentiality(id: number, isPublic: boolean) {
-  try {
-    const response = await prisma.user.update({
-      where: {
-        id: id,
-      },
-      data: {
-        isPublic: isPublic,
-      },
-    });
-    if (response) {
-      return { success: true };
-    }
-  } catch (error) {
-    return { success: false };
-  }
-}
-
-export async function setUserAvatar(userId: number, avatar: string) {
-  const response = await prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      avatar: avatar,
-    },
-  });
-  return response;
-}
-
-export async function getUsers() {
-  try {
-    const response = await prisma.user.findMany({
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        avatar: true,
-        bio: true,
-        devStatus: true,
-      },
-    });
-    return response;
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function getUserInfo(firsName: string, lastName: string) {
-  try {
-    const response = await prisma.user.findFirst({
-      where: {
-        firstName: firsName,
-        lastName: lastName,
-      },
-      select: {
-        firstName: true,
-        lastName: true,
-        bio: true,
-        avatar: true,
-        devStatus: true,
-      },
-    });
-    return response;
-  } catch (error) {
-    return error;
-  }
-}
-
 type PostData = {
-  title: string;
+  name: string;
   userId: number;
   content: string;
 };
-
-export async function postCreate(body: PostData): Promise<RegisterResult> {
-  try {
-    const createPost = await prisma.post.create({
-      data: {
-        name: body.title,
-        authorId: body.userId,
-        content: body.content,
-      },
-    });
-    return { success: !!createPost };
-  } catch (error) {
-    return { success: false };
-  }
-}
-
-type Posts = {
-  id: number;
-  name: string;
-  authorId: number;
-  content: string;
-  createdAt: Date;
-};
-export async function getPosts() {
-  try {
-    const response: Posts = await prisma.post.findMany({
-      select: {
-        id: true,
-        name: true,
-        authorId: true,
-        content: true,
-        createdAt: true,
-        postStatus: true,
-      },
-    });
-    return response;
-  } catch (error) { }
-}
-
-export async function getUserInfoById(id: number) {
-  try {
-    const response = await prisma.user.findFirst({
-      where: {
-        id: id,
-      },
-      select: {
-        firstName: true,
-        lastName: true,
-        bio: true,
-        avatar: true,
-        devStatus: true,
-      },
-    });
-    return response;
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function getPostById(id: number) {
-  try {
-    const post = await prisma.post.findFirst({
-      where: {
-        id: id,
-      },
-    });
-    return post;
-  } catch (error) {
-    console.log("Get Post failed");
-  }
-}
-
-export async function getLastPostId() {
-  try {
-    const lastPost = await prisma.post.findFirst({
-      orderBy: {
-        id: "desc",
-      },
-    });
-    return lastPost;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-export async function updatePostStatusById(id: number, isUpdate: boolean) {
-  try {
-    if (isUpdate) {
-      const response = await prisma.post.update({
-        where: {
-          id: id,
-        },
-        data: {
-          postStatus: "APPROVED",
-        },
-      });
-      return response;
-    } else {
-      const response = await prisma.post.delete({
-        where: {
-          id: id,
-        },
-      });
-      return response;
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-export type Project = {
-  name: string;
-  content: InputJsonValue;
-  authorId: number;
-  projectStatus: string;
-  createdAt: Date;
-};
-export async function createProject(data: Project) {
-  try {
-    const projectCreate = await prisma.project.create({
-      data: {
-        name: data.name,
-        content: data.content,
-        authorId: data.authorId,
-        projectStatus: "DEVELOPMENT" || "PRODUCTION",
-        createdAt: data.createdAt,
-      },
-    });
-    if (projectCreate) {
-      return { success: true };
-    }
-  } catch (error) {
-    return { success: false };
-  }
-}
-
-export async function getProjects() {
-  try {
-    const projectsGet = await prisma.project.findMany({
-      select: {
-        id: true,
-        name: true,
-        authorId: true,
-        content: true,
-        createdAt: true,
-        projectStatus: true,
-      },
-    });
-    return projectsGet;
-  } catch (error) {
-    console.log(error);
-  }
-}
 
 type Task = {
   id: number;
@@ -378,53 +34,278 @@ type Task = {
   updatedAt: Date;
   deadline: Date;
 };
-export async function createTask(data: Task) {
-  console.log("penis");
+
+export type User = typeof userTable.$inferSelect;
+export async function registerUser(
+  body: typeof userTable.$inferInsert
+): Promise<RegisterResult> {
   try {
-    const taskCreate = await prisma.task.create({
-      data: {
-        title: data.title,
-        authorId: data.authorId,
-        description: data.description,
-        projectId: data.projectId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        taskStatus: "ISSUED",
-        performers: JSON.stringify(data.performers),
-        deadline: data.deadline,
-      },
-    });
-    if (taskCreate) {
-      return { success: true };
+    const [user] = await db
+      .selectDistinct()
+      .from(userTable)
+      .where(eq(userTable.email, body.email));
+    console.log(user);
+    if (user) {
+      return { success: false };
+    } else {
+      console.log(body);
+      const createdUser = await db.insert(userTable).values(body);
+      await sendApplication(body);
+      return { success: !!createdUser };
     }
   } catch (error) {
-    console.log(error);
+    const createdUser = await db.insert(userTable).values(body);
+    await sendApplication(body);
+    return { success: !!createdUser };
   }
 }
 
-export async function getTasksByProjectId(id: number) {
+export async function Applications() {
+  const usersWithRoleUser = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.role, "UNVERIFIED"));
+  return usersWithRoleUser.map((user) => ({
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+  }));
+}
+
+export type UpdateProfile = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  bio: string;
+  devStatus: string;
+};
+
+export async function updateProfile(
+  body: UpdateProfile
+): Promise<ProfileEdited> {
   try {
-    const tasks = await prisma.task.findMany({
-      where: {
-        projectId: id,
-      },
-      select: {
-        id: true,
-        title: true,
-        authorId: true,
-        description: true,
-        taskStatus: true,
-        createdAt: true,
-        updatedAt: true,
-        image: true,
-        performers: true,
-        deadline: true,
-      },
-    });
-    if (tasks) return tasks;
+    console.log("body:" + body);
+    await db
+      .update(userTable)
+      .set({
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+        bio: body.bio,
+        devStatus: body.devStatus?.toString(),
+      })
+      .where(eq(userTable.id, body.id));
+    return { edit: true };
   } catch (error) {
-    return error;
+    return { edit: false };
   }
+}
+
+export async function confirmUser(body, isDelete: boolean) {
+  const [user] = await db
+    .selectDistinct()
+    .from(userTable)
+    .where(eq(userTable.email, body.email));
+
+  if (user) {
+    if (isDelete) {
+      await db.delete(userTable).where(eq(userTable.email, body.email));
+    } else {
+      await db
+        .update(userTable)
+        .set({
+          role: "USER",
+        })
+        .where(eq(userTable.email, body.email));
+    }
+  }
+}
+
+export async function getUserInfoById(id: string) {
+  const [userInfo] = await db
+    .select({
+      firstName: userTable.firstName,
+      lastName: userTable.lastName,
+      bio: userTable.bio,
+      avatar: userTable.avatarUrl,
+      devStatus: userTable.devStatus,
+    })
+    .from(userTable)
+    .where(eq(userTable.id, id));
+  return userInfo;
+}
+
+export async function countUnverifiedUsers() {
+  const usersWithRoleUser = await db.$count(
+    userTable,
+    eq(userTable.role, "UNVERIFIED")
+  );
+  return usersWithRoleUser;
+}
+
+export async function setConfidentiality(id: string, isPublic: boolean) {
+  const response = await db
+    .update(userTable)
+    .set({
+      isPublic: isPublic,
+    })
+    .where(eq(userTable.id, id));
+  return response;
+}
+
+export async function setUserAvatar(userId: string, avatar: string) {
+  await db
+    .update(userTable)
+    .set({ avatarUrl: avatar })
+    .where(eq(userTable.id, userId));
+}
+
+export async function getUsers() {
+  const users = await db.select().from(userTable);
+  return users.map((user) => ({
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    bio: user.bio,
+    avatar: user.avatarUrl,
+    role: user.role,
+    devStatus: user.devStatus,
+  }));
+}
+
+export async function getUserInfo(firsName: string, lastName: string) {
+  const [userInfo] = await db
+    .select()
+    .from(userTable)
+    .where(
+      eq(userTable.firstName, firsName) && eq(userTable.lastName, lastName)
+    );
+  console.log(userInfo);
+  return userInfo;
+}
+
+export async function postCreate(body: PostData): Promise<RegisterResult> {
+  const createPost = await db.insert(postTable).values(body).$returningId();
+  if (createPost) {
+    return { success: !!createPost };
+  } else {
+    return { success: false };
+  }
+}
+
+export async function getPosts() {
+  const response = await db
+    .select({
+      id: postTable.id,
+      name: postTable.name,
+      authorId: postTable.authorId,
+      postStatus: postTable.postStatus,
+      content: postTable.content,
+      createdAt: postTable.createdAt,
+    })
+    .from(postTable);
+  return response;
+}
+
+export async function getPostById(id: string) {
+  const [post] = await db
+    .selectDistinct()
+    .from(postTable)
+    .where(eq(postTable.id, id));
+  return post;
+}
+
+export async function getLastPostId() {
+  const [lastPost] = await db
+    .select()
+    .from(postTable)
+    .orderBy(desc(postTable.id));
+  return lastPost;
+}
+
+export async function updatePostStatusById(id: string, isUpdate: boolean) {
+  if (isUpdate) {
+    await db
+      .update(postTable)
+      .set({
+        postStatus: "APPROVED",
+      })
+      .where(eq(postTable.id, id));
+  } else {
+    await db.delete(postTable).where(eq(postTable.id, id));
+  }
+}
+
+export async function createProject(data) {
+  const projectCreate = await db
+    .insert(projectTable)
+    .values(data)
+    .$returningId();
+  if (projectCreate) return { success: true };
+  return { success: false };
+}
+
+export async function getProjects() {
+  const projects = await db.select().from(projectTable);
+  return projects.map((project) => ({
+    id: project.id,
+    name: project.name,
+    authorId: project.authorId,
+    content: project.content,
+    createdAt: project.createdAt,
+    projectStatus: project.projectStatus,
+  }));
+}
+
+export async function createTask(data: Task) {
+  const taskCreate = await db.insert(taskTable).values(data).$returningId();
+  if (taskCreate) return { success: true };
+  return { success: false };
+}
+
+export async function getTasksByProjectId(id: string) {
+  const tasks = await db
+    .select()
+    .from(taskTable)
+    .where(eq(taskTable.projectId, id));
+  return tasks;
+}
+
+export async function getProjectById(id: string) {
+  const [project] = await db
+    .select()
+    .from(projectTable)
+    .where(eq(projectTable.id, id));
+  return project;
+}
+
+export async function updateTask(body: any) {
+  await db
+    .update(taskTable)
+    .set({
+      title: body.title,
+      description: body.description,
+      performers: body.performers,
+      deadline: body.deadline,
+      updatedAt: new Date(),
+    })
+    .where(eq(taskTable.id, body.id));
+}
+
+export async function updateTaskStatusById(
+  id: string,
+  status: string,
+  date: Date
+) {
+  await db
+    .update(taskTable)
+    .set({
+      taskStatus: status,
+      updatedAt: date,
+    })
+    .where(eq(taskTable.id, id));
 }
 
 export async function sendApplication(message: any) {
@@ -433,66 +314,14 @@ export async function sendApplication(message: any) {
   *Имя:* ${message.firstName}\n*Фамилия:* ${message.lastName}\n*Email:* ${email}`;
   try {
     const res = await await fetch(
-      `https://api.telegram.org/bot8161546974:AAGY1YsmJEKdw79_js9caNrHwhU-8YcynUQ/sendMessage?chat_id=5791279590&text=${encodeURI(
+      `https://api.telegram.org/bot${
+        process.env.TELEGRAM_BOT_TOKEN
+      }/sendMessage?chat_id=${process.env.CHAT_ID}&text=${encodeURI(
         formApplication
       )}&parse_mode=Markdown`
     );
     if (res) return res;
   } catch (error) {
     console.log(error);
-  }
-}
-
-export async function getProjectById(id: number) {
-  try {
-    const project = await prisma.project.findFirst({
-      where: {
-        id: id,
-      },
-    });
-    if (project) return project;
-  } catch (error) {
-    console.log("Get project error: ", error);
-  }
-}
-
-export async function updateTask(body: any) {
-  try {
-    const taskUpdate = await prisma.task.update({
-      where: {
-        id: Number(body.id),
-      },
-      data: {
-        title: body.title,
-        description: body.description,
-        performers: body.performers,
-        deadline: body.deadline,
-        updatedAt: new Date()
-      }
-    })
-    if (taskUpdate) return
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function upgateTaskStatusById(
-  id: number,
-  status: string,
-  date: Date
-) {
-  try {
-    const upgateTaskStatus = await prisma.task.update({
-      where: {
-        id: id,
-      },
-      data: {
-        taskStatus: status,
-        updatedAt: date,
-      },
-    });
-    if (upgateTaskStatus) return upgateTaskStatus;
-  } catch (error) {
-    console.log("Get project error: ", error);
   }
 }

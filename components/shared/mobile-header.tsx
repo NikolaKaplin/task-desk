@@ -1,13 +1,16 @@
-import { Button } from "../ui/button"
-import { Menu, CodeXml } from "lucide-react"
-import Link from "next/link"
+import { Button } from "../ui/button";
+import { Menu, CodeXml } from "lucide-react";
+import Link from "next/link";
 
 interface MobileHeaderProps {
-  teamName: string
-  onMenuClick: () => void
+  teamName: string;
+  onMenuClick: () => void;
 }
 
-export const MobileHeader: React.FC<MobileHeaderProps> = ({ teamName, onMenuClick }) => {
+export const MobileHeader: React.FC<MobileHeaderProps> = ({
+  teamName,
+  onMenuClick,
+}) => {
   return (
     <header className="bg-gray-800 p-4 flex items-center justify-between lg:hidden">
       <Link href="/" className="flex items-center space-x-2">
@@ -17,14 +20,13 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({ teamName, onMenuClic
         </h1>
       </Link>
       <Button
-      variant={"link"}
-      className=" bg-gray-800 text-white"
+        variant={"link"}
+        className=" bg-gray-800 text-white"
         size="icon"
         onClick={onMenuClick}
       >
         <Menu size={24} />
       </Button>
     </header>
-  )
-}
-
+  );
+};

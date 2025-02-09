@@ -1,28 +1,41 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/hooks/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
-import { setConfidentiality, updateProfile } from "@/app/actions"
-import AvatarUpload from "../../avatar-upload"
-import { softwareDevelopers } from "@/app/constants"
-import { type ProfileFormValues, profileFormSchema } from "./schema"
-import { Textarea } from "@/components/ui/textarea"
-import { CustomSwitch } from "../../custom-switch"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { setConfidentiality, updateProfile } from "@/app/actions";
+import AvatarUpload from "../../avatar-upload";
+import { softwareDevelopers } from "@/app/constants";
+import { type ProfileFormValues, profileFormSchema } from "./schema";
+import { Textarea } from "@/components/ui/textarea";
+import { CustomSwitch } from "../../custom-switch";
 
 export default function ProfileForm({ user }: { user: any }) {
-  const { toast } = useToast()
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [isPublic, setIsPublic] = useState(user.isPublic || false)
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPublic, setIsPublic] = useState(user.isPublic || false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -34,53 +47,57 @@ export default function ProfileForm({ user }: { user: any }) {
       bio: user.bio || "",
       devStatus: Array.isArray(user.devStatus) ? user.devStatus : [],
     },
-  })
+  });
 
   async function onSubmit(data: ProfileFormValues) {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const result = await updateProfile(data)
+      const result = await updateProfile(data);
       if (result.edit) {
         toast({
           title: "Profile updated",
           description: "Your profile has been successfully updated.",
-        })
-        router.refresh()
+        });
+        router.refresh();
       } else {
-        throw new Error("Failed to update profile")
+        throw new Error("Failed to update profile");
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "There was a problem updating your profile.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   const handleStatusSelect = (status: string) => {
-    const currentDevStatus = form.getValues("devStatus")
+    const currentDevStatus = form.getValues("devStatus");
     if (!currentDevStatus.includes(status)) {
-      form.setValue("devStatus", [...currentDevStatus, status], { shouldValidate: true, shouldDirty: true })
+      form.setValue("devStatus", [...currentDevStatus, status], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     }
-  }
+  };
 
   const handleStatusRemove = (status: string) => {
-    const currentDevStatus = form.getValues("devStatus")
+    const currentDevStatus = form.getValues("devStatus");
     form.setValue(
       "devStatus",
       currentDevStatus.filter((s: string) => s !== status),
-      { shouldValidate: true, shouldDirty: true },
-    )
-  }
+      { shouldValidate: true, shouldDirty: true }
+    );
+  };
 
   const handlePublicToggle = (checked: boolean) => {
-    (async() => {
-      return await setConfidentiality(user.id, checked)})()
-    setIsPublic(checked)
-  }
+    (async () => {
+      return await setConfidentiality(user.id, checked);
+    })();
+    setIsPublic(checked);
+  };
 
   return (
     <Form {...form}>
@@ -97,7 +114,10 @@ export default function ProfileForm({ user }: { user: any }) {
                 <FormItem>
                   <FormLabel className="text-gray-300">First Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="bg-gray-700 border-gray-600 text-white" />
+                    <Input
+                      {...field}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -109,7 +129,10 @@ export default function ProfileForm({ user }: { user: any }) {
                 <FormItem>
                   <FormLabel className="text-gray-300">Last Name</FormLabel>
                   <FormControl>
-                    <Input {...field} className="bg-gray-700 border-gray-600 text-white" />
+                    <Input
+                      {...field}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
                   </FormControl>
                 </FormItem>
               )}
@@ -123,7 +146,11 @@ export default function ProfileForm({ user }: { user: any }) {
             <FormItem>
               <FormLabel className="text-gray-300">Email</FormLabel>
               <FormControl>
-                <Input {...field} type="email" className="bg-gray-700 border-gray-600 text-white" />
+                <Input
+                  {...field}
+                  type="email"
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
               </FormControl>
             </FormItem>
           )}
@@ -135,7 +162,10 @@ export default function ProfileForm({ user }: { user: any }) {
             <FormItem>
               <FormLabel className="text-gray-300">Bio</FormLabel>
               <FormControl>
-                <Textarea {...field} className="bg-gray-700 border-gray-600 text-white min-h-[100px]" />
+                <Textarea
+                  {...field}
+                  className="bg-gray-700 border-gray-600 text-white min-h-[100px]"
+                />
               </FormControl>
             </FormItem>
           )}
@@ -154,7 +184,11 @@ export default function ProfileForm({ user }: { user: any }) {
                 </FormControl>
                 <SelectContent className="bg-gray-700 border-gray-600">
                   {softwareDevelopers.map((status) => (
-                    <SelectItem key={status} value={status} className="text-white hover:bg-gray-600">
+                    <SelectItem
+                      key={status}
+                      value={status}
+                      className="text-white hover:bg-gray-600"
+                    >
                       {status}
                     </SelectItem>
                   ))}
@@ -166,7 +200,11 @@ export default function ProfileForm({ user }: { user: any }) {
               <div className="flex flex-wrap gap-2 mt-2">
                 {Array.isArray(field.value) &&
                   field.value.map((status: string) => (
-                    <Badge key={status} variant="secondary" className="bg-gray-600 text-white">
+                    <Badge
+                      key={status}
+                      variant="secondary"
+                      className="bg-gray-600 text-white"
+                    >
                       {status}
                       <Button
                         type="button"
@@ -185,13 +223,22 @@ export default function ProfileForm({ user }: { user: any }) {
           )}
         />
         <div className="flex items-center space-x-3 py-2">
-          <CustomSwitch id="public-profile" checked={isPublic} onCheckedChange={handlePublicToggle} />
-          <FormLabel htmlFor="public-profile" className="text-gray-300 font-medium cursor-pointer select-none">
+          <CustomSwitch
+            id="public-profile"
+            checked={isPublic}
+            onCheckedChange={handlePublicToggle}
+          />
+          <FormLabel
+            htmlFor="public-profile"
+            className="text-gray-300 font-medium cursor-pointer select-none"
+          >
             {isPublic ? "Public Profile" : "Private Profile"}
           </FormLabel>
         </div>
         <FormDescription className="text-gray-400">
-          {isPublic ? "Your profile is visible to everyone." : "Your profile is only visible to you."}
+          {isPublic
+            ? "Your profile is visible to everyone."
+            : "Your profile is only visible to you."}
         </FormDescription>
         <Button
           type="submit"
@@ -202,6 +249,5 @@ export default function ProfileForm({ user }: { user: any }) {
         </Button>
       </form>
     </Form>
-  )
+  );
 }
-

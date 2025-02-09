@@ -1,33 +1,31 @@
-import { prisma } from "@/prisma/prisma-client";
+import { db } from "@/db";
+import { thirdPartyTokensTable } from "@/db/schema";
 import { NextRequest } from "next/server";
+import { eq } from "drizzle-orm";
 
 async function getNewToken() {
-  let token = await prisma.thirdPartyTokens.findFirst({
-    where: {
-      service: "lumalabs-genie",
-    },
-  });
+  let [token] = await db
+    .select({
+      id: thirdPartyTokensTable.id,
+      refreshToken: thirdPartyTokensTable.refreshToken,
+      accessToken: thirdPartyTokensTable.accessToken,
+    })
+    .from(thirdPartyTokensTable)
+    .where(eq(thirdPartyTokensTable.service, "lumalabs-genie"));
   const url = "https://webapp.engineeringlumalabs.com/api/v2/auth/refresh";
   const options = {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ refreshToken: token?.refreshToken }),
+    body: JSON.stringify({ refreshToken: token.refreshToken }),
   };
 
   try {
     const response = await fetch(url, options);
     const data = await response.json();
-    await prisma.thirdPartyTokens.update({
-      where: {
-        id: token?.id,
-        service: "lumalabs-genie",
-      },
-      data: {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      },
-    });
-    console.log(data);
+    await db
+      .update(thirdPartyTokensTable)
+      .set({ accessToken: data.accessToken, refreshToken: data.refreshToken })
+      .where(eq(thirdPartyTokensTable.id, token.id));
     return data.accessToken;
   } catch (error) {
     console.error(error);

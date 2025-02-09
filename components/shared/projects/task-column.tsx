@@ -115,7 +115,7 @@ export default function TaskColumn({
                                   }
                                   alt="Author"
                                 />
-                                <AvatarFallback>A</AvatarFallback>
+                                <AvatarFallback></AvatarFallback>
                               </Avatar>
                               <div className="flex flex-col">
                                 <h3 className="font-semibold text-green-400 text-lg line-clamp-2">
@@ -167,7 +167,7 @@ export default function TaskColumn({
                               {JSON.parse(task.performers).map(
                                 (userId, index) => {
                                   const user = usersArr.find(
-                                    (u) => u.id === Number(userId)
+                                    (u) => u.id === userId
                                   );
                                   return (
                                     <Avatar

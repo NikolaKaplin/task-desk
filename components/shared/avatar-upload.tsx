@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { InputImage } from "./input-image";
 import { getUserSession } from "@/lib/get-session-server";
+import { LoaderCircle } from "lucide-react";
 
 interface AvatarUploadProps {
   currentAvatarUrl: string;
@@ -18,11 +19,11 @@ export default function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
     (async () => {
       const u = await getUserSession();
       setUser(u);
-      setAvatar(u?.avatar);
+      setAvatar(u?.avatarUrl);
       console.log(avatar);
       setIsLoading(false);
     })();
-  }, [avatar]); // Added avatar to the dependency array
+  }, [avatar]);
 
   return (
     <div
@@ -31,17 +32,19 @@ export default function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative">
-        <img
-          src={
-            isLoading
-              ? "https://cdn-user30887.skyeng.ru/uploads/6769b4e6502ea676889877.webp"
-              : avatar
-          }
-          alt="User Avatar"
-          width={150}
-          height={150}
-          className="rounded-full"
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-[150px] w-[150px]">
+            <LoaderCircle className="animate-spin text-indigo-400 " />
+          </div>
+        ) : (
+          <img
+            src={avatar}
+            alt="User Avatar"
+            width={150}
+            height={150}
+            className="rounded-full"
+          />
+        )}
         {isHovered && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full transition-opacity duration-300">
             {user && (
@@ -52,7 +55,6 @@ export default function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
           </div>
         )}
       </div>
-      {isLoading && <div>Загрузка</div>}
     </div>
   );
 }

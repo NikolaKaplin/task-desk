@@ -19,7 +19,7 @@ import {
   getProjectById,
   getTasksByProjectId,
   getUsers,
-  upgateTaskStatusById,
+  updateTaskStatusById,
 } from "@/app/actions";
 import { getUserSession } from "@/lib/get-session-server";
 
@@ -49,14 +49,14 @@ export default function ProjectTasksPage() {
 
   useEffect(() => {
     (async () => {
-      const projectGet = await getProjectById(Number(path));
+      const projectGet = await getProjectById(path);
       if (projectGet) setProject(projectGet);
     })();
   }, [path]);
 
   useEffect(() => {
     (async () => {
-      const tasksGet = await getTasksByProjectId(Number(path));
+      const tasksGet = await getTasksByProjectId(path);
       const tasksGetConverted = tasksGet.map((task) => ({
         ...task,
         id: task.id.toString(),
@@ -87,9 +87,8 @@ export default function ProjectTasksPage() {
 
     if (source.droppableId !== destination.droppableId) {
       const newStatus = destination.droppableId as Task["taskStatus"];
-      const taskId = Number(draggableId);
+      const taskId = draggableId;
 
-      // Оптимистично обновляем состояние
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
           task.id === draggableId ? { ...task, taskStatus: newStatus } : task
@@ -97,7 +96,7 @@ export default function ProjectTasksPage() {
       );
 
       try {
-        await upgateTaskStatusById(taskId, newStatus, new Date());
+        await updateTaskStatusById(taskId, newStatus, new Date());
       } catch (error) {
         console.error("Failed to update task status:", error);
 
@@ -132,14 +131,14 @@ export default function ProjectTasksPage() {
               {project ? (
                 <div className="container mx-auto p-4 h-screen flex flex-col">
                   <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-4">
-                  <Link className=" hover:bg-transparent" href="/projects">
-                        <Button 
-                          variant="ghost"
-                          className=" text-green-500 hover:bg-transparent items-center hover:text-green-400"
-                        >
-                          <ArrowLeft size={48} />
-                        </Button>
-                      </Link>
+                    <Link className=" hover:bg-transparent" href="/projects">
+                      <Button
+                        variant="ghost"
+                        className=" text-green-500 hover:bg-transparent items-center hover:text-green-400"
+                      >
+                        <ArrowLeft size={48} />
+                      </Button>
+                    </Link>
                     <div className="flex items-center hover:bg-transparent">
                       <h1 className="text-xl md:text-2xl lg:text-3xl text-green-500 font-bold">
                         {project.name}
@@ -181,7 +180,7 @@ export default function ProjectTasksPage() {
               ) : null}
               {selectedTask && (
                 <TaskDetails
-                user={user}
+                  user={user}
                   usersArr={usersArr}
                   task={selectedTask}
                   onClose={handleCloseTaskDetails}
