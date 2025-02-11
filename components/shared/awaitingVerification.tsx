@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { getUserSession } from "@/lib/get-session-server";
+import { useToast } from "@/hooks/use-toast";
 
 export function AwaitingVerification() {
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(false);
-
+  const { toast } = useToast();
   useEffect(() => {
     const checkUserStatus = async () => {
       if (isChecking) return;
@@ -18,7 +19,10 @@ export function AwaitingVerification() {
         const user = await getUserSession();
         console.log(user);
         if (user && user.role == "USER") {
-          router.push("/");
+          router.push("/profile");
+          toast({
+            title: "Регистрация прошла успешно, заполните профиль"
+          })
         }
         if (!user) {
           router.push("/login");

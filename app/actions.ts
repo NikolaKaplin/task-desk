@@ -1,6 +1,5 @@
 "use server";
 
-import { prisma } from "@/prisma/prisma-client";
 import "dotenv/config";
 import { postTable, projectTable, taskTable, userTable } from "@/db/schema";
 import { db } from "@/db";
@@ -56,7 +55,7 @@ export async function registerUser(
   } catch (error) {
     const createdUser = await db.insert(userTable).values(body);
     await sendApplication(body);
-    return { success: !!createdUser };
+    return { success: true };
   }
 }
 
@@ -313,7 +312,7 @@ export async function sendApplication(message: any) {
   const formApplication = `
   *Имя:* ${message.firstName}\n*Фамилия:* ${message.lastName}\n*Email:* ${email}`;
   try {
-    const res = await await fetch(
+    const res = await fetch(
       `https://api.telegram.org/bot${
         process.env.TELEGRAM_BOT_TOKEN
       }/sendMessage?chat_id=${process.env.CHAT_ID}&text=${encodeURI(

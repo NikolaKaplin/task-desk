@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start & tsx bot.ts",
     "lint": "next lint",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",

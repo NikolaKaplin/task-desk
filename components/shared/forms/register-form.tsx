@@ -39,16 +39,12 @@ export const RegisterForm: React.FC = () => {
       };
       const result = await registerUser(regData);
       if (result.success) {
-        toast({
-          variant: "default",
-          title: "🤝",
-          description: "Добро пожаловать в Altergemu",
-        });
-        await signIn("credentials", {
+        const res = await signIn("credentials", {
           email: data.email,
           password: regData.passwordHash,
           redirect: false,
         });
+        console.log(res)
         router.push("/login/confirm");
       } else {
         toast({

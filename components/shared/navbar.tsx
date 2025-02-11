@@ -172,7 +172,7 @@ export const Navbar: React.FC<Props> = ({
           ) : null}
         </div>
       </div>
-      <div className="w-64 bg-gray-800 border-gray-700"></div>
+      <div className="w-58 bg-opacity-0"></div>
       <div className="flex-1 overflow-hidden" onClick={closeMobileMenu}>
         <div className="h-screen overflow-y-auto bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <IndicatorsVersionContext.Provider

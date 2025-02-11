@@ -1,14 +1,10 @@
 import NextAuth, { AuthOptions } from "next-auth";
-import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { text } from "stream/consumers";
-import { prisma } from "@/prisma/prisma-client";
 import { compare } from "bcryptjs";
-import Email from "next-auth/providers/email";
 import { db } from "@/db";
 import { userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
-
+import "dotenv/config"
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -30,6 +26,7 @@ export const authOptions: AuthOptions = {
           .selectDistinct()
           .from(userTable)
           .where(eq(userTable.email, values.email));
+
         if (!findUser) {
           return null;
         }
@@ -72,6 +69,7 @@ export const authOptions: AuthOptions = {
           .selectDistinct()
           .from(userTable)
           .where(eq(userTable.email, user.email));
+          console.log(findUser)
         return !!findUser;
       } catch (error) {
         console.log("Error [SIGN IN]");
