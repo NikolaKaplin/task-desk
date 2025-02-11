@@ -6,17 +6,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import Link from "next/link";
 import { ImageIcon, Video } from "lucide-react";
 import { getPosts, getUserInfo, getUserInfoById } from "../actions";
-
-type ContentBlock = {
-  type: "text" | "image";
-  content: string;
-};
 
 type Post = {
   id: number;
@@ -30,7 +23,9 @@ type Post = {
 };
 
 export default async function Home() {
-  const posts: Post[] = (await getPosts()).filter((post) => post.postStatus === "APPROVED");
+  const posts: Post[] = (await getPosts()).filter(
+    (post) => post.postStatus === "APPROVED"
+  );
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <header>
@@ -50,7 +45,7 @@ export default async function Home() {
               <PostCard
                 title={post.name}
                 authorId={post.authorId}
-                video={(JSON.parse(post.content)).video}
+                video={JSON.parse(post.content).video}
                 key={post.id}
                 {...post}
               />
@@ -76,7 +71,7 @@ async function PostCard({
   const firstImageBlock = jsonContent.contentBlocks.find(
     (block) => block.type === "image"
   );
-  console.log(video)
+  console.log(video);
   const excerpt = jsonContent.description.slice(0, 100) + "...";
 
   return (

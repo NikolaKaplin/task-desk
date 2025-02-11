@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ postId: number }> }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   if (!req.headers.get("Content-Type")?.startsWith("image"))
     return new NextResponse(null, { status: 400 });
-  const {postId } = await params;
+  const { postId } = await params;
   const Body = Buffer.from(await req.arrayBuffer());
   const Key = `post/${postId}/${Date.now()}.png`;
 

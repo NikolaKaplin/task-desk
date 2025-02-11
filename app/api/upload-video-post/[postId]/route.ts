@@ -5,16 +5,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ postId: number}> }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   if (!req.headers.get("Content-Type")?.startsWith("video"))
     return new NextResponse(null, { status: 400 });
-  const {postId} = await params;
+  const { postId } = await params;
   const Body = Buffer.from(await req.arrayBuffer());
   const Key = `post/${postId}/${req}.mp4`;
-  console.log("Start sending ==>")
+  console.log("Start sending ==>");
   await s3.send(
-    new PutObjectCommand({  
+    new PutObjectCommand({
       Bucket: "altergemu-team",
       Key,
       Body,

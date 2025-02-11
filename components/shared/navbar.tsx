@@ -77,14 +77,18 @@ export const Navbar: React.FC<Props> = ({
 
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
-      <MobileHeader teamName="Altergemu" onMenuClick={toggleMobileMenu} />
+      <MobileHeader
+        isMobileMenuOpen={isMobileMenuOpen}
+        teamName="Altergemu"
+        onMenuClick={toggleMobileMenu}
+      />
       <div
         className={`fixed rounded-r-3xl inset-y-0 left-0 transform ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 transition duration-300 ease-in-out flex flex-col w-64 bg-gray-800 text-white z-30 shadow-lg`}
       >
         <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-          <div className="text-center p-6 lg:block">
+          <div className="text-center p-6 hidden lg:block">
             <div className="flex items-center justify-center space-x-2">
               <CodeXml size={40} className="text-indigo-400" />
               <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600">
@@ -95,7 +99,7 @@ export const Navbar: React.FC<Props> = ({
               Software & Game Dev
             </div>
           </div>
-          <nav className="space-y-1 px-3">
+          <nav className="space-y-1 py-2 px-3">
             {navItems.map(({ title, icon, path, hiddenFor }, index, item) => (
               <NavbarItem
                 key={index}
@@ -172,7 +176,7 @@ export const Navbar: React.FC<Props> = ({
           ) : null}
         </div>
       </div>
-      <div className="w-58 bg-opacity-0"></div>
+      <div className=" w-[14.5rem] bg-gradient-to-b from-gray-900 to-gray-800"></div>
       <div className="flex-1 overflow-hidden" onClick={closeMobileMenu}>
         <div className="h-screen overflow-y-auto bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <IndicatorsVersionContext.Provider
