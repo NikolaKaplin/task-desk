@@ -10,12 +10,12 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { CreateProjectForm } from "@/components/shared/projects/create-project-form";
 import { getProjects, getUsers } from "@/app/actions";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Users } from "lucide-react";
+import { Briefcase, Users, Plus } from "lucide-react";
+import { CreateProjectForm } from "@/components/shared/projects/create-project-form";
 
 interface Project {
   id: string;
@@ -31,6 +31,36 @@ interface User {
   firstName: string;
   lastName: string;
   avatar: string;
+}
+
+function CreateProjectCard() {
+  const [isDia, setIsDia] = useState(false);
+  const handlerDialog = () => {
+    setIsDia(!isDia);
+  };
+  return (
+    <Card
+      onClick={() => handlerDialog()}
+      className="bg-gray-800 border-gray-700 text-white overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:border-indigo-400 group"
+    >
+      <CreateProjectForm isDialogOpen={isDia} setIsDialogOpen={handlerDialog} />
+      <div className="relative h-[25vh] bg-gray-700 flex items-center justify-center">
+        <div className="absolute inset-0 m-4 border-2 border-dashed border-green-400 rounded-lg group-hover:border-indigo-400 transition-colors duration-300"></div>
+        <Plus className="w-16 h-16 text-green-400 group-hover:text-indigo-400 transition-colors duration-300" />
+      </div>
+      <CardContent className="p-4 flex flex-col justify-between h-[calc(100%-12rem)]">
+        <h3 className="text-xl font-semibold text-green-400 group-hover:text-indigo-400 transition-colors duration-300 mb-2">
+          Создать новый проект
+        </h3>
+        <p className="text-gray-400 flex-grow">
+          Начните новый проект для вашей команды
+        </p>
+        <div className="mt-4 text-green-400 group-hover:text-indigo-400 transition-colors duration-300">
+          Нажмите, чтобы начать
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function ProjectsPage() {
@@ -53,21 +83,34 @@ export default function ProjectsPage() {
   }, []);
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <header className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-3xl font-bold text-green-400">Projects</h1>
-        {users.length > 0 ? (
-          <CreateProjectForm />
-        ) : (
-          <Skeleton className="h-10 w-[140px]" />
-        )}
+    <div className="container min-h-screen mx-auto p-4 space-y-6">
+      <header className="flex flex-col items-center gap-4">
+        <h1 className="text-3xl font-bold text-green-400 text-center">
+          Проекты команды
+        </h1>
       </header>
 
+      <div className="fixed bottom-8 right-8 lg:hidden z-50">
+        <Link href="/projects/create">
+          <Button className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center">
+            <Plus
+              className="min-w-[45px] min-h-[45px]"
+              absoluteStrokeWidth
+              strokeWidth={1}
+            />
+          </Button>
+        </Link>
+      </div>
+
       {isLoading ? (
-        <div>
-        </div>
-      ) : projects.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(3)].map((_, index) => (
+            <Skeleton key={index} className="h-[400px] w-full" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <CreateProjectCard />
           {projects.map((project) => {
             const creator = users.find((u) => u.id === project.authorId);
             const projectUsers = JSON.parse(project.content)
@@ -152,7 +195,7 @@ export default function ProjectsPage() {
                           </div>
                         )}
                       </div>
-                      <span className=" flex gap-2 text-gray-400">
+                      <span className="flex gap-2 text-gray-400">
                         <Users className="w-5 h-5" />
                         {projectUsers.length}
                       </span>
@@ -162,16 +205,6 @@ export default function ProjectsPage() {
               </Link>
             );
           })}
-        </div>
-      ) : (
-        <div className="text-center py-10">
-          <Briefcase className="mx-auto h-12 w-12 text-gray-400" />
-          <h2 className="mt-4 text-lg font-semibold text-white">
-            No projects yet
-          </h2>
-          <p className="mt-2 text-gray-400">
-            Get started by creating a new project.
-          </p>
         </div>
       )}
     </div>

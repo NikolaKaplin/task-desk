@@ -29,7 +29,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextTopLoader />
+        <NextTopLoader showSpinner={false} speed={100} />
         {children}
       </body>
     </html>

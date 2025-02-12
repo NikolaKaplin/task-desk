@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Footer } from "./footer";
 
 interface Props {
   SetNumber?: number;
@@ -176,16 +177,18 @@ export const Navbar: React.FC<Props> = ({
           ) : null}
         </div>
       </div>
-      <div className=" w-64 bg-gradient-to-b from-gray-900 to-gray-800"></div>
       <div className="flex-1 overflow-hidden" onClick={closeMobileMenu}>
-        <div className="h-screen overflow-y-auto bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <div className="h-screen overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 text-gray-900 dark:text-gray-100">
           <IndicatorsVersionContext.Provider
             value={{
               version: indicatorsVersion,
               update: () => setIndicatorsVersion((v) => v + 1),
             }}
           >
-            {children}
+            <div className=" flex flex-col min-h-screen pt-20 lg:pt-4 lg:pl-64">
+              <div className="flex-grow">{children}</div>
+              <Footer />
+            </div>
           </IndicatorsVersionContext.Provider>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { TeamMember } from "@/components/shared/team-member";
 export default async function TeamPage() {
   const teamMembers = await getUsers();
   return (
-    <div className=" min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className=" min-h-screen text-white">
       <header className="py-16 text-center">
         <h1 className="text-5xl font-bold mb-4">
           Познакомьтесь с командой Altergemu!

@@ -16,7 +16,7 @@ type ProfileEdited = {
 
 type PostData = {
   name: string;
-  userId: number;
+  authorId: number;
   content: string;
 };
 

@@ -37,15 +37,14 @@ export const mockUser: User = {
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="bg-gray-800 shadow-xl rounded-lg overflow-hidden border border-gray-700">
           <div className="flex flex-col lg:flex-row">
             <div className="w-full lg:w-1/3 bg-gradient-to-b from-gray-800 to-gray-900 p-8 border-r border-gray-700">
-              <UserInfo />
+              <UserInfo contacts={mockUser.contacts} />
             </div>
             <div className="w-full lg:w-2/3 p-8 space-y-8">
-              <ContactInfo contacts={mockUser.contacts} />
               <TaskCompletion />
             </div>
           </div>

@@ -6,8 +6,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { any } from "zod";
+import ContactInfo from "./ContactInfo";
 
-export default function UserInfo() {
+export default function UserInfo({ contacts }: any) {
   let userPath = usePathname().split("-");
   const decodeAndProcessArray = (arr) => {
     return arr.map((item, index) => {
@@ -61,6 +62,7 @@ export default function UserInfo() {
           <p className="text-center text-gray-400">{user.bio}</p>
         </>
       )}
+      <ContactInfo contacts={contacts} />
     </div>
   );
 }

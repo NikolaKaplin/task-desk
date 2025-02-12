@@ -8,9 +8,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ImageIcon, Video } from "lucide-react";
-import { getPosts, getUserInfo, getUserInfoById } from "../actions";
-import { MdLibraryAdd } from "react-icons/md";
+import { ImageIcon, Plus, Video } from "lucide-react";
+import { getPosts, getUserInfoById } from "../actions";
 
 type Post = {
   id: number;
@@ -27,14 +26,18 @@ export default async function Home() {
   const posts: Post[] = (await getPosts()).filter(
     (post) => post.postStatus === "APPROVED"
   );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen text-white">
       <header>
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-end items-center">
+        <div className="mx-auto py-6 px-4 fixed bottom-6 right-6 lg:hidden z-50">
           <Link href="/post">
-            <Button className="bg-green-500 hover:bg-green-600 text-white">
-              <MdLibraryAdd/>
-              Создать пост
+            <Button className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center">
+              <Plus
+                className="min-w-[45px] min-h-[45px]"
+                absoluteStrokeWidth
+                strokeWidth={1}
+              />
             </Button>
           </Link>
         </div>
@@ -43,6 +46,7 @@ export default async function Home() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CreatePostCard />
             {posts.map((post) => (
               <PostCard
                 title={post.name}
@@ -56,6 +60,32 @@ export default async function Home() {
         </div>
       </main>
     </div>
+  );
+}
+
+function CreatePostCard() {
+  return (
+    <Link href="/post" className="hidden lg:block">
+      <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:border-indigo-400 group">
+        <div className="relative h-[23vh] bg-gray-700 flex items-center justify-center">
+          <div className="m-5 absolute inset-0 border-2 border-dashed border-green-400 rounded-2xl group-hover:border-indigo-400 transition-colors duration-300"></div>
+          <Plus className="w-16 h-16 text-green-400 group-hover:text-indigo-400 transition-colors duration-300" />
+        </div>
+        <CardContent className="p-4 flex flex-col justify-between h-[calc(100%-23vh)]">
+          <h3 className="text-xl font-semibold text-green-400 group-hover:text-indigo-400 transition-colors duration-300 mb-2">
+            Создать новый пост
+          </h3>
+          <p className="text-gray-400 flex-grow">
+            Поделитесь своими мыслями и идеями с сообществом, чтобы мы могли
+            вдохновиться вашими инновационными подходами и вместе создать что-то
+            действительно уникальное и полезное для всех.
+          </p>
+          <div className="mt-4 text-green-400 group-hover:text-indigo-400 transition-colors duration-300">
+            Нажмите, чтобы начать
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
@@ -73,12 +103,11 @@ async function PostCard({
   const firstImageBlock = jsonContent.contentBlocks.find(
     (block) => block.type === "image"
   );
-  console.log(video);
   const excerpt = jsonContent.description.slice(0, 100) + "...";
 
   return (
-    <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden">
-      <div className="relative h-48">
+    <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden relative z-10">
+      <div className="relative h-56">
         {firstImageBlock ? (
           <img
             src={firstImageBlock.content || "/placeholder.svg"}

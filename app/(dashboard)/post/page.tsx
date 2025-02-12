@@ -16,10 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Upload, Video, Plus, X, LoaderCircle } from "lucide-react";
 import Image from "next/image";
 import { getUserSession } from "@/lib/get-session-server";
-import { getLastPostId, postCreate } from "@/app/actions";
 import { number } from "zod";
 import { uploadLargeFiles } from "@/utils/awsLargeUpload";
 import axios from "axios";
+import { postCreate } from "@/app/actions";
 
 type ContentBlock = {
   type: "text" | "image";
@@ -58,8 +58,7 @@ export default function CreatePost() {
       if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
         try {
-          const postId = await getLastPostId();
-          const res = await fetch(`/api/upload-image-post/${postId}`, {
+          const res = await fetch(`/api/upload-image-post/${"penis"}`, {
             method: "POST",
             headers: {
               "Content-Type": file.type,
@@ -104,10 +103,9 @@ export default function CreatePost() {
     setProgress(0);
 
     try {
-      const postId = await getLastPostId();
       const {
         data: { presignedUrl, key },
-      } = await axios.post(`/api/getPresignedUrl/${postId?.id + 1}`, {
+      } = await axios.post(`/api/getPresignedUrl/${"penis"}`, {
         filename: file.name,
         contentType: file.type,
       });
@@ -167,7 +165,7 @@ export default function CreatePost() {
 
       const DbData = {
         name,
-        authorId: user.id,
+        authorId: (await getUserSession())?.id,
         content: jsonString,
       };
 

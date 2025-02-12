@@ -25,6 +25,10 @@ export default function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
     })();
   }, [avatar]);
 
+  const handlerImage = (url: string) => {
+    setQuestionImage(url);
+    setAvatar(url);
+  };
   return (
     <div
       className="relative flex flex-col items-center space-y-4"
@@ -49,7 +53,7 @@ export default function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full transition-opacity duration-300">
             {user && (
               <div className="z-10">
-                <InputImage userId={user.id} onChange={setQuestionImage} />
+                <InputImage userId={user.id} onChange={handlerImage} />
               </div>
             )}
           </div>

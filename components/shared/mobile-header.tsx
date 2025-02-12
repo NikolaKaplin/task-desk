@@ -15,7 +15,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   isMobileMenuOpen,
 }) => {
   return (
-    <header className="bg-gray-800 p-2 flex items-center justify-between lg:hidden">
+    <header className="bg-gray-800 p-2 fixed drop-shadow-xl  z-10 top-0 left-0 right-0 flex items-center justify-between lg:hidden">
       <div className="w-7"></div>
       <Link
         href="/"

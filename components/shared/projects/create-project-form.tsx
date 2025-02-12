@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PlusCircle, X } from "lucide-react";
+import { Plus, PlusCircle, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -67,7 +67,15 @@ type User = {
   avatar?: string;
 };
 
-export function CreateProjectForm() {
+interface CreateProjectFormProps {
+  isDialogOpen: boolean;
+  setIsDialogOpen: () => void;
+}
+
+export function CreateProjectForm({
+  isDialogOpen,
+  setIsDialogOpen,
+}: CreateProjectFormProps) {
   const [authorId, setAuthorId] = useState();
   const [isOpen, setIsOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -156,12 +164,8 @@ export function CreateProjectForm() {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-green-500 hover:bg-green-600 text-white">
-          <PlusCircle className="mr-2 h-4 w-4" /> New Project
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild></DialogTrigger>
       <DialogContent className="bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
           <DialogTitle className="text-green-400">
