@@ -59,8 +59,7 @@ export default function CreatePost() {
         const file = e.target.files[0];
         try {
           const postId = await getLastPostId();
-          console.log("Post: " + postId);
-          const res = await fetch(`/api/upload-image-post/${postId?.id + 1}`, {
+          const res = await fetch(`/api/upload-image-post/${postId}`, {
             method: "POST",
             headers: {
               "Content-Type": file.type,

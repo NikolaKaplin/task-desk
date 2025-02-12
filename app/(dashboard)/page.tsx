@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ImageIcon, Video } from "lucide-react";
 import { getPosts, getUserInfo, getUserInfoById } from "../actions";
+import { MdLibraryAdd } from "react-icons/md";
 
 type Post = {
   id: number;
@@ -29,9 +30,10 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <header>
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex items-center">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-end items-center">
           <Link href="/post">
             <Button className="bg-green-500 hover:bg-green-600 text-white">
+              <MdLibraryAdd/>
               Создать пост
             </Button>
           </Link>

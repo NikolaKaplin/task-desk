@@ -34,12 +34,12 @@ export const RegisterForm: React.FC = () => {
         bio: data.bio,
         email: data.email,
         passwordHash: hashSync(data.password),
-        avatarUrl: "https://banner2.cleanpng.com/20180402/ojw/avhimsq6h.webp",
+        avatarUrl: "https://avatar.iran.liara.run/public/5",
         contacts: "",
       };
       const result = await registerUser(regData);
       if (result.success) {
-        const res = await signIn("credentials", {
+        await signIn("credentials", {
           email: regData.email,
           password: data.password,
           redirect: false,

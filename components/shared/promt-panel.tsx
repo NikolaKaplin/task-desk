@@ -1,42 +1,46 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 
 interface PromptPanelProps {
-  onGenerate: (prompt: string) => void;
+  onGenerate: (prompt: string) => void
 }
 
 export function PromptPanel({ onGenerate }: PromptPanelProps) {
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onGenerate(prompt);
-  };
+    e.preventDefault()
+    onGenerate(prompt)
+  }
 
   return (
-    <div className="w-64 bg-gray-100 p-4 h-full overflow-y-auto rounded-lg">
-      <h2 className="text-lg font-bold mb-4">Генерация 3D модели</h2>
-      <form onSubmit={handleSubmit}>
-        <Textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Опишите 3D модель, которую хотите сгенерировать..."
-          className="w-full mb-4"
-          rows={4}
-        />
-        <Button type="submit" className="w-full">
+    <div className="w-full lg:w-1/3 bg-gray-800 p-4 rounded-lg shadow-lg">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="prompt" className="block text-sm font-medium text-green-400 mb-1">
+            Prompt
+          </label>
+          <Textarea
+            id="prompt"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            className="w-full bg-gray-700 text-green-400 border-gray-600 rounded-md"
+            placeholder="Опишите 3D модель, которую хотите сгенерировать..."
+            rows={4}
+          />
+        </div>
+        <Button
+          type="submit"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+        >
           Сгенерировать
         </Button>
       </form>
-      <div className="mt-4">
-        <h3 className="text-md font-semibold mb-2">Недавние запросы:</h3>
-        <ul className="list-disc pl-5">
-          <li>Футуристический космический корабль</li>
-          <li>Средневековый замок</li>
-          <li>Подводный коралловый риф</li>
-        </ul>
-      </div>
     </div>
-  );
+  )
 }
+

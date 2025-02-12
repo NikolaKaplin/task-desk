@@ -221,7 +221,7 @@ export async function getLastPostId() {
     .select()
     .from(postTable)
     .orderBy(desc(postTable.id));
-  return lastPost;
+  return lastPost.id;
 }
 
 export async function updatePostStatusById(id: string, isUpdate: boolean) {
