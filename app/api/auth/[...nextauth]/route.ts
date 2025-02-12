@@ -22,10 +22,17 @@ export const authOptions: AuthOptions = {
           email: credentials.email,
         };
 
-        const [findUser] = await db
-          .selectDistinct()
-          .from(userTable)
-          .where(eq(userTable.email, values.email));
+        const findUser = await (async() => {
+          try{
+            const [res] = await db
+            .selectDistinct()
+            .from(userTable)
+            .where(eq(userTable.email, values.email));
+            return res;
+          } catch (error) {
+            return null;
+          }
+        })()
 
         if (!findUser) {
           return null;
@@ -65,6 +72,7 @@ export const authOptions: AuthOptions = {
           return false;
         }
 
+        
         const [findUser] = await db
           .selectDistinct()
           .from(userTable)
