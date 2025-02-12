@@ -77,7 +77,6 @@ export const authOptions: AuthOptions = {
           .selectDistinct()
           .from(userTable)
           .where(eq(userTable.email, user.email));
-          console.log(findUser)
         return !!findUser;
       } catch (error) {
         console.log("Error [SIGN IN]");

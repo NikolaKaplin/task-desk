@@ -17,7 +17,6 @@ export function AwaitingVerification() {
 
       try {
         const user = await getUserSession();
-        console.log(user);
         if (user && user.role == "USER") {
           router.push("/profile");
           toast({

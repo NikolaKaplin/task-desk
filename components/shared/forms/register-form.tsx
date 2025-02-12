@@ -38,14 +38,12 @@ export const RegisterForm: React.FC = () => {
         contacts: "",
       };
       const result = await registerUser(regData);
-      console.log(result.success)
       if (result.success) {
         const res = await signIn("credentials", {
           email: regData.email,
           password: data.password,
           redirect: false,
         });
-        console.log(res)
         router.push("/login/confirm");
       } else {
         toast({

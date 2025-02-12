@@ -176,7 +176,7 @@ export const Navbar: React.FC<Props> = ({
           ) : null}
         </div>
       </div>
-      <div className=" w-[14.5rem] bg-gradient-to-b from-gray-900 to-gray-800"></div>
+      <div className=" w-64 bg-gradient-to-b from-gray-900 to-gray-800"></div>
       <div className="flex-1 overflow-hidden" onClick={closeMobileMenu}>
         <div className="h-screen overflow-y-auto bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <IndicatorsVersionContext.Provider

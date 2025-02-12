@@ -15,5 +15,18 @@ export async function getUserSession() {
     .from(userTable)
     .where(eq(userTable.id, session.user.id));
 
-  return user;
+  return   user
+    ? {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        bio: user.bio,
+        devStatus: user.devStatus,
+        isPublic: user.isPublic,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+        contacts: user.contacts,
+      }
+    : undefined;
 }

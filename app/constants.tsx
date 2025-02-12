@@ -12,6 +12,7 @@ import { NavItems } from "./types";
 import { count } from "console";
 import { countUnverifiedUsers } from "./actions";
 import { Task } from "./(dashboard)/projects/[tasks]/page";
+import { HiMiniSquare3Stack3D } from "react-icons/hi2";
 
 export const navItems: NavItems[] = [
   {
@@ -40,9 +41,14 @@ export const navItems: NavItems[] = [
     path: "projects",
   },
   {
-    title: "AI Tools",
+    title: "Chat GPT",
     icon: <Brain />,
-    path: "ai-tools",
+    path: "chat",
+  },
+  {
+    title: "3D Models",
+    icon: <HiMiniSquare3Stack3D/>,
+    path: "models"
   },
   {
     title: "Applications",
