@@ -36,18 +36,17 @@ interface User {
 function CreateProjectCard() {
   const [isDia, setIsDia] = useState(false);
   const handlerDialog = () => {
+    console.log("dialog:" + !isDia)
     setIsDia(!isDia);
   };
   return (
+    <div className=" hidden lg:flex">
+    <CreateProjectForm isDialogOpen={isDia} setIsDialogOpen={handlerDialog} />
     <Card
       onClick={() => handlerDialog()}
       className="bg-gray-800 border-gray-700 text-white overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:border-indigo-400 group"
     >
-      <CreateProjectForm isDialogOpen={isDia} setIsDialogOpen={handlerDialog} />
-      <div className="relative h-[25vh] bg-gray-700 flex items-center justify-center">
-        <div className="absolute inset-0 m-4 border-2 border-dashed border-green-400 rounded-lg group-hover:border-indigo-400 transition-colors duration-300"></div>
-        <Plus className="w-16 h-16 text-green-400 group-hover:text-indigo-400 transition-colors duration-300" />
-      </div>
+      
       <CardContent className="p-4 flex flex-col justify-between h-[calc(100%-12rem)]">
         <h3 className="text-xl font-semibold text-green-400 group-hover:text-indigo-400 transition-colors duration-300 mb-2">
           Создать новый проект
@@ -60,6 +59,7 @@ function CreateProjectCard() {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
 

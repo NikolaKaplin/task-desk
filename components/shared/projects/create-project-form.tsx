@@ -77,7 +77,6 @@ export function CreateProjectForm({
   setIsDialogOpen,
 }: CreateProjectFormProps) {
   const [authorId, setAuthorId] = useState();
-  const [isOpen, setIsOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -153,7 +152,7 @@ export function CreateProjectForm({
         description: "Your project has been successfully created.",
       });
       router.refresh();
-      setIsOpen(false);
+      setIsDialogOpen()
     } else {
       toast({
         title: "Error",
@@ -164,8 +163,7 @@ export function CreateProjectForm({
   }
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild></DialogTrigger>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} >
       <DialogContent className="bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
           <DialogTitle className="text-green-400">
