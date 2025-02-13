@@ -14,7 +14,7 @@ import { getProjects, getUsers } from "@/app/actions";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, Users, Plus } from "lucide-react";
+import { Briefcase, Users, Plus, Play } from "lucide-react";
 import { CreateProjectForm } from "@/components/shared/projects/create-project-form";
 
 interface Project {
@@ -36,29 +36,29 @@ interface User {
 function CreateProjectCard() {
   const [isDia, setIsDia] = useState(false);
   const handlerDialog = () => {
-    console.log("dialog:" + !isDia)
+    console.log("dialog:" + !isDia);
     setIsDia(!isDia);
   };
   return (
-    <div className=" hidden lg:flex">
-    <CreateProjectForm isDialogOpen={isDia} setIsDialogOpen={handlerDialog} />
-    <Card
-      onClick={() => handlerDialog()}
-      className="bg-gray-800 border-gray-700 text-white overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:border-indigo-400 group"
-    >
-      
-      <CardContent className="p-4 flex flex-col justify-between h-[calc(100%-12rem)]">
-        <h3 className="text-xl font-semibold text-green-400 group-hover:text-indigo-400 transition-colors duration-300 mb-2">
-          Создать новый проект
-        </h3>
-        <p className="text-gray-400 flex-grow">
-          Начните новый проект для вашей команды
-        </p>
-        <div className="mt-4 text-green-400 group-hover:text-indigo-400 transition-colors duration-300">
-          Нажмите, чтобы начать
-        </div>
-      </CardContent>
-    </Card>
+    <div className="hidden lg:flex">
+      <Card
+        onClick={() => handlerDialog()}
+        className="bg-gray-800 border-gray-700 text-white overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:text-indigo-400 hover:animate-pulse hover:border-indigo-400 group border-dashed border-4"
+      >
+        <CardContent className="p-4 flex flex-col justify-between h-[calc(100%-12rem)]">
+          <h3 className="text-xl font-semibold text-green-400 group-hover:text-indigo-400 transition-colors duration-300 mb-2">
+            Создать новый проект
+          </h3>
+          <p className="text-gray-400 flex-grow">
+            Запустите свой следующий большой проект прямо сейчас! Начните с
+            чистого листа и создайте что-то невероятное.
+          </p>
+        </CardContent>
+        <CardFooter className="justify-center min-h-full hover:text-indigo-400">
+          <Play strokeWidth={1.75} absoluteStrokeWidth />
+        </CardFooter>
+      </Card>
+      <CreateProjectForm isDialogOpen={isDia} setIsDialogOpen={handlerDialog} />
     </div>
   );
 }
@@ -67,6 +67,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDia, setIsDia] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,6 +83,11 @@ export default function ProjectsPage() {
     fetchData();
   }, []);
 
+  const handlerDialog = () => {
+    console.log("dialog:" + !isDia);
+    setIsDia(!isDia);
+  };
+
   return (
     <div className="container min-h-screen mx-auto p-4 space-y-6">
       <header className="flex flex-col items-center gap-4">
@@ -91,15 +97,20 @@ export default function ProjectsPage() {
       </header>
 
       <div className="fixed bottom-8 right-8 lg:hidden z-50">
-        <Link href="/projects/create">
-          <Button className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center">
-            <Plus
-              className="min-w-[45px] min-h-[45px]"
-              absoluteStrokeWidth
-              strokeWidth={1}
-            />
-          </Button>
-        </Link>
+        <Button
+          onClick={() => handlerDialog()}
+          className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center"
+        >
+          <Plus
+            className="min-w-[45px] min-h-[45px]"
+            absoluteStrokeWidth
+            strokeWidth={1}
+          />
+        </Button>
+        <CreateProjectForm
+          isDialogOpen={isDia}
+          setIsDialogOpen={handlerDialog}
+        />
       </div>
 
       {isLoading ? (

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import {
   DragDropContext,
   Droppable,
@@ -124,6 +124,15 @@ export default function ProjectTasksPage() {
 
   return (
     <div>
+      <div className="fixed bottom-8 right-8 lg:hidden z-50">
+        <Button className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center">
+          <Plus
+            className="min-w-[45px] min-h-[45px]"
+            absoluteStrokeWidth
+            strokeWidth={1}
+          />
+        </Button>
+      </div>
       {user ? (
         <div>
           {tasks ? (
