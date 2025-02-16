@@ -237,6 +237,19 @@ export async function updatePostStatusById(id: string, isUpdate: boolean) {
   }
 }
 
+export async function getProjectstUser(userId: string) {
+  try {
+    const tasks = await db.select().from(projectTable);
+    const result = tasks.filter((project) =>
+      JSON.parse(project.content).users.includes(userId)
+    );
+    if (result.length === 0) return tasks;
+    return result;
+  } catch (error) {
+    return null;
+  }
+}
+
 export async function createProject(data) {
   const projectCreate = await db
     .insert(projectTable)
@@ -270,6 +283,18 @@ export async function getTasksByProjectId(id: string) {
     .from(taskTable)
     .where(eq(taskTable.projectId, id));
   return tasks;
+}
+
+export async function getTasksUser(userId: string) {
+  try {
+    const tasks = await db.select().from(taskTable);
+    const result = tasks.filter((task) =>
+      JSON.parse(task.performers).includes(userId)
+    );
+    return result;
+  } catch (error) {
+    return [];
+  }
 }
 
 export async function getProjectById(id: string) {

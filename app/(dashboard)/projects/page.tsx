@@ -40,7 +40,7 @@ function CreateProjectCard() {
     setIsDia(!isDia);
   };
   return (
-    <div className="hidden lg:flex">
+    <div className="hidden lg:flex hover:cursor-pointer">
       <Card
         onClick={() => handlerDialog()}
         className="bg-gray-800 border-gray-700 text-white overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:text-indigo-400 hover:animate-pulse hover:border-indigo-400 group border-dashed border-4"
@@ -99,12 +99,12 @@ export default function ProjectsPage() {
       <div className="fixed bottom-8 right-8 lg:hidden z-50">
         <Button
           onClick={() => handlerDialog()}
-          className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center"
+          className=" bg-gray-800 hover:bg-transparent text-white h-[80px] w-[80px] rounded-full shadow-lg flex items-center justify-center"
         >
-          <Plus
-            className="min-w-[45px] min-h-[45px]"
-            absoluteStrokeWidth
-            strokeWidth={1}
+          <img
+            src="https://img.icons8.com/?size=96&id=A0MYENUyCEId&format=png"
+            alt=""
+            className="min-w-[80px] min-h-[80px]"
           />
         </Button>
         <CreateProjectForm

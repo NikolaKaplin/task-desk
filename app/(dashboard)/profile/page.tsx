@@ -25,14 +25,8 @@ export default async function ProfilePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <ProfileForm user={user} />
-            </div>
-            <div className="space-y-6">
-              <ContactsBlock user={user} />
-              <TaskStatisticsGraph userId={user.id} />
-            </div>
+          <div className="md:col-span-2">
+            <ProfileForm user={user} />
           </div>
         </CardContent>
       </Card>

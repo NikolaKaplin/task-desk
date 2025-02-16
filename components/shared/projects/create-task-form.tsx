@@ -57,10 +57,14 @@ interface CreateTaskFormProps {
   projectId: string;
   authorId: string;
   users: any;
+  isOpenModal: boolean;
+  onClose: () => void;
 }
 
 export function CreateTaskForm({
   onTaskCreated,
+  onClose,
+  isOpenModal,
   projectId,
   authorId,
   users,
@@ -133,12 +137,8 @@ export function CreateTaskForm({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base">
-          <Plus className=" h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpenModal} onOpenChange={onClose}>
+      <DialogTrigger asChild></DialogTrigger>
       <DialogContent className="bg-gray-800 text-green-400 border-0 sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl md:text-2xl font-bold text-green-500">

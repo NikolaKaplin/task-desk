@@ -1,5 +1,3 @@
-import { Prisma, UserRole } from "@prisma/client";
-
 export type NavItems = {
   title: string;
   path: string;

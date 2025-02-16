@@ -39,7 +39,7 @@ export default function ProjectTasksPage() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const path = usePathname().split("/").pop();
   const [usersArr, setUsersArr] = useState();
-
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
   useEffect(() => {
     (async () => {
       const user = await getUserSession();
@@ -121,15 +121,21 @@ export default function ProjectTasksPage() {
   const handleCloseTaskDetails = () => {
     setSelectedTask(null);
   };
+  const handleCreateTask = () => {
+    setIsCreateTaskModalOpen(!isCreateTaskModalOpen);
+  };
 
   return (
     <div>
       <div className="fixed bottom-8 right-8 lg:hidden z-50">
-        <Button className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center">
-          <Plus
-            className="min-w-[45px] min-h-[45px]"
-            absoluteStrokeWidth
-            strokeWidth={1}
+        <Button
+          onClick={handleCreateTask}
+          className=" bg-gray-800 hover:bg-transparent text-white h-[80px] w-[80px] rounded-full shadow-lg flex items-center justify-center"
+        >
+          <img
+            src="https://img.icons8.com/?size=96&id=A0MYENUyCEId&format=png"
+            alt=""
+            className="min-w-[80px] min-h-[80px]"
           />
         </Button>
       </div>
@@ -139,21 +145,21 @@ export default function ProjectTasksPage() {
             <div className=" min-h-screen">
               {project ? (
                 <div className="container mx-auto p-4 h-screen flex flex-col">
-                  <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-4">
-                    <Link className=" hover:bg-transparent" href="/projects">
-                      <Button
-                        variant="ghost"
-                        className=" text-green-500 hover:bg-transparent items-center hover:text-green-400"
-                      >
-                        <ArrowLeft size={48} />
-                      </Button>
-                    </Link>
+                  <div className="flex flex-col md:flex-row justify-start items-center md:items-center mb-6 gap-4">
+                    <Link
+                      className=" hover:bg-transparent"
+                      href="/projects"
+                    ></Link>
                     <div className="flex items-center hover:bg-transparent">
                       <h1 className="text-xl md:text-2xl lg:text-3xl text-green-500 font-bold">
                         {project.name}
                       </h1>
                     </div>
                     <CreateTaskForm
+                      isOpenModal={isCreateTaskModalOpen}
+                      onClose={() => {
+                        handleCreateTask();
+                      }}
                       users={usersArr}
                       authorId={user?.id}
                       projectId={project.id}
@@ -166,6 +172,8 @@ export default function ProjectTasksPage() {
                         <Droppable droppableId={listId.name} key={listId.name}>
                           {(provided, snapshot) => (
                             <TaskColumn
+                              onCreateTask={handleCreateTask}
+                              projecNameIsHidden={true}
                               title={listId.name
                                 .replace("-", " ")
                                 .toUpperCase()}

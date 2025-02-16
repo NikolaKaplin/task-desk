@@ -91,8 +91,11 @@ export const Navbar: React.FC<Props> = ({
         <div className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
           <div className="text-center p-6 hidden lg:block">
             <div className="flex items-center justify-center space-x-2">
-              <CodeXml size={40} className="text-indigo-400" />
-              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-600">
+              <img
+                src="https://img.icons8.com/?size=64&id=79043&format=png"
+                alt=""
+              />
+              <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-purple-500">
                 Altergemu
               </h1>
             </div>

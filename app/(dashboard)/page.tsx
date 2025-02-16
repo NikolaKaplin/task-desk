@@ -29,19 +29,17 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen text-white">
-      <header>
-        <div className="mx-auto py-6 px-4 fixed bottom-6 right-6 lg:hidden z-50">
-          <Link href="/post">
-            <Button className=" bg-indigo-600 hover:bg-indigo-500 hover:animate-spin text-white h-[55px] w-[55px] rounded-full shadow-lg flex items-center justify-center">
-              <Plus
-                className="min-w-[45px] min-h-[45px]"
-                absoluteStrokeWidth
-                strokeWidth={1}
-              />
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <div className="fixed bottom-8 right-8 lg:hidden z-50">
+        <Link href="/post">
+          <Button className="bg-gray-800 hover:bg-transparent text-white h-[80px] w-[80px] rounded-full shadow-lg flex items-center justify-center">
+            <img
+              src="https://img.icons8.com/?size=96&id=A0MYENUyCEId&format=png"
+              alt=""
+              className="min-w-[80px] min-h-[80px]"
+            />
+          </Button>
+        </Link>
+      </div>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
@@ -106,7 +104,7 @@ async function PostCard({
   const excerpt = jsonContent.description.slice(0, 100) + "...";
 
   return (
-    <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden relative z-10">
+    <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden relative">
       <div className="relative h-56">
         {firstImageBlock ? (
           <img

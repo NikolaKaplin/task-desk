@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { CreateTaskForm } from "./create-task-form";
+import { getTasksByProjectId } from "@/app/actions";
+import { Play } from "lucide-react";
 
 export interface Task {
   id: string;
@@ -28,6 +30,7 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   deadline: Date;
+  projectId: string;
 }
 
 interface TaskColumnProps {
@@ -42,6 +45,8 @@ interface TaskColumnProps {
   usersArr: any;
   user: any;
   project: any;
+  projecNameIsHidden: boolean;
+  onCreateTask: (task: Task) => void;
 }
 
 export default function TaskColumn({
@@ -56,6 +61,8 @@ export default function TaskColumn({
   usersArr,
   user,
   project,
+  projecNameIsHidden,
+  onCreateTask,
 }: TaskColumnProps) {
   return (
     <Card className="w-full md:w-80 flex-shrink-0 flex flex-col h-[calc(100vh-200px)] md:h-full bg-gray-800 border-gray-700">
@@ -118,9 +125,11 @@ export default function TaskColumn({
                                 <AvatarFallback></AvatarFallback>
                               </Avatar>
                               <div className="flex flex-col">
-                                <h3 className="font-semibold text-green-400 text-lg line-clamp-2">
-                                  {task.title}
-                                </h3>
+                                {projecNameIsHidden ? null : (
+                                  <h3 className="font-semibold text-green-400 text-lg line-clamp-2">
+                                    {project.name}
+                                  </h3>
+                                )}
                                 <span className="text-xs text-gray-400">
                                   {format(
                                     new Date(task.createdAt),
@@ -140,7 +149,22 @@ export default function TaskColumn({
                               className="mt-2 rounded-md w-full h-32 object-cover mb-2"
                             />
                           )}
+
                           <div className="flex flex-col text-xs text-gray-400 mt-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-semibold text-green-400">
+                                Проект:
+                              </span>
+                              {projecNameIsHidden ? null : (
+                                <span className="bg-gray-800 rounded px-2 py-1">
+                                  {project !== null
+                                    ? project.find(
+                                        (p) => p.id === task.projectId
+                                      ).name
+                                    : null}
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-semibold text-green-400">
                                 Дедлайн:
@@ -198,6 +222,27 @@ export default function TaskColumn({
               {provided.placeholder}
             </div>
           </CardContent>
+          {title === "ISSUED" ? (
+            <div>
+              {projecNameIsHidden ? (
+                <CardFooter
+                  onClick={onCreateTask}
+                  className="hidden lg:flex transition-colors duration-300 cursor-pointer text-green-400 border-dashed border-2 border-green-400 rounded-b-xl items-center justify-center hover:animate-pulse hover:border-indigo-400 hover:text-indigo-400 shadow-lg hover:shadow-xl"
+                >
+                  <div className=" flex flex-col items-center justify-center ">
+                    <h3 className="text-xl font-semibold text-center">
+                      Создать новую задачу
+                    </h3>
+                    <Play
+                      strokeWidth={1.75}
+                      absoluteStrokeWidth
+                      className="w-6 h-6"
+                    />
+                  </div>
+                </CardFooter>
+              ) : null}
+            </div>
+          ) : null}
         </>
       ) : null}
     </Card>
