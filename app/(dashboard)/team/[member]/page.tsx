@@ -28,10 +28,10 @@ export const mockUser: User = {
     "Опытный разработчик с более чем 10-летним стажем в области веб-разработки. Специализируюсь на создании высокопроизводительных и масштабируемых приложений.",
   contacts: {
     phone: "+7 (999) 123-45-67",
-    email: "ivan.ivanov@example.com",
-    github: "https://github.com/ivanivanov",
-    gitlab: "https://gitlab.com/ivanivanov",
-    telegram: "https://t.me/ivanivanov",
+    email: "test@example.com",
+    github: "https://github.com/test",
+    gitlab: "https://gitlab.com/test",
+    telegram: "https://t.me/test",
   },
 };
 

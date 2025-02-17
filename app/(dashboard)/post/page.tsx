@@ -81,14 +81,20 @@ export default function CreatePost() {
           const data = await res.json();
           const imageUrl = data.url;
 
-          insertBlock(index, "image");
-          handleContentChange(index + 1, imageUrl);
+          setContentBlocks((prevBlocks) => {
+            const newBlocks = [...prevBlocks];
+            newBlocks.splice(index + 1, 0, {
+              type: "image",
+              content: imageUrl,
+            });
+            return newBlocks;
+          });
         } catch (error) {
           console.error("Error uploading image:", error);
         }
       }
     },
-    [contentBlocks]
+    []
   );
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -179,7 +185,7 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="min-h-screen  text-white py-12">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12">
       <Card className="max-w-2xl mx-auto bg-gray-800 border-gray-700 w-full px-4 sm:px-6 md:px-8">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-green-400">
@@ -246,13 +252,22 @@ export default function CreatePost() {
                   >
                     <Plus className="mr-2 h-4 w-4" /> Добавить текст
                   </Button>
-                  <Button
-                    type="button"
-                    onClick={() => imageInputRef.current?.click()}
-                    className="bg-gray-700 hover:bg-gray-600 text-white"
-                  >
-                    <Upload className="mr-2 h-4 w-4" /> Добавить изображение
-                  </Button>
+                  <div>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, index)}
+                      className="hidden"
+                      ref={imageInputRef}
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => imageInputRef.current?.click()}
+                      className="bg-gray-700 hover:bg-gray-600 text-white"
+                    >
+                      <Upload className="mr-2 h-4 w-4" /> Добавить изображение
+                    </Button>
+                  </div>
                   {index > 0 && (
                     <Button
                       type="button"
