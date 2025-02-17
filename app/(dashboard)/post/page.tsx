@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -13,11 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Upload, Video, Plus, X, LoaderCircle } from "lucide-react";
-import Image from "next/image";
+import { Upload, Video, Plus, X } from "lucide-react";
 import { getUserSession } from "@/lib/get-session-server";
-import { number } from "zod";
-import { uploadLargeFiles } from "@/utils/awsLargeUpload";
 import axios from "axios";
 import { postCreate } from "@/app/actions";
 
@@ -53,6 +52,15 @@ export default function CreatePost() {
     })();
   }, []);
 
+  const insertBlock = (index: number, type: "text" | "image") => {
+    const newBlocks = [...contentBlocks];
+    newBlocks.splice(index + 1, 0, {
+      type,
+      content: type === "text" ? "" : "",
+    });
+    setContentBlocks(newBlocks);
+  };
+
   const handleImageUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
       if (e.target.files && e.target.files[0]) {
@@ -73,21 +81,14 @@ export default function CreatePost() {
           const data = await res.json();
           const imageUrl = data.url;
 
-          setContentBlocks((prevBlocks) => {
-            const newBlocks = [...prevBlocks];
-            newBlocks.splice(index + 1, 0, {
-              type: "image",
-              content: imageUrl,
-            });
-            return newBlocks;
-          });
+          insertBlock(index, "image");
+          handleContentChange(index + 1, imageUrl);
         } catch (error) {
           console.error("Error uploading image:", error);
-          // You might want to show an error message to the user here
         }
       }
     },
-    []
+    [contentBlocks]
   );
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,9 +137,7 @@ export default function CreatePost() {
   };
 
   const addTextBlock = (index: number) => {
-    const newBlocks = [...contentBlocks];
-    newBlocks.splice(index + 1, 0, { type: "text", content: "" });
-    setContentBlocks(newBlocks);
+    insertBlock(index, "text");
   };
 
   const removeBlock = (index: number) => {
@@ -180,14 +179,14 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12">
-      <Card className="max-w-2xl mx-auto bg-gray-800 border-gray-700">
+    <div className="min-h-screen  text-white py-12">
+      <Card className="max-w-2xl mx-auto bg-gray-800 border-gray-700 w-full px-4 sm:px-6 md:px-8">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-green-400">
             Создать новый пост
           </CardTitle>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-gray-300">
@@ -197,7 +196,7 @@ export default function CreatePost() {
                 id="name"
                 value={name}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1 bg-gray-700 text-white"
+                className="mt-1 bg-gray-700 text-white w-full"
                 required
               />
             </div>
@@ -209,18 +208,18 @@ export default function CreatePost() {
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 bg-gray-700 text-white"
+                className="mt-1 bg-gray-700 text-white w-full"
                 rows={3}
                 required
               />
             </div>
             {contentBlocks.map((block, index) => (
-              <div key={index} className="space-y-2">
+              <div key={index} className="space-y-4">
                 {block.type === "text" ? (
                   <Textarea
                     value={block.content}
                     onChange={(e) => handleContentChange(index, e.target.value)}
-                    className="mt-1 bg-gray-700 text-white"
+                    className="w-full bg-gray-700 text-white"
                     rows={3}
                   />
                 ) : (
@@ -228,9 +227,7 @@ export default function CreatePost() {
                     <img
                       src={block.content || "/placeholder.svg"}
                       alt="Uploaded image"
-                      width={500}
-                      height={300}
-                      className="rounded-lg"
+                      className="w-full h-auto rounded-lg"
                     />
                     <Button
                       type="button"
@@ -241,7 +238,7 @@ export default function CreatePost() {
                     </Button>
                   </div>
                 )}
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
                     onClick={() => addTextBlock(index)}
@@ -249,22 +246,13 @@ export default function CreatePost() {
                   >
                     <Plus className="mr-2 h-4 w-4" /> Добавить текст
                   </Button>
-                  <div>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, index)}
-                      className="hidden"
-                      ref={imageInputRef}
-                    />
-                    <Button
-                      type="button"
-                      onClick={() => imageInputRef.current?.click()}
-                      className="bg-gray-700 hover:bg-gray-600 text-white"
-                    >
-                      <Upload className="mr-2 h-4 w-4" /> Добавить изображение
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="bg-gray-700 hover:bg-gray-600 text-white"
+                  >
+                    <Upload className="mr-2 h-4 w-4" /> Добавить изображение
+                  </Button>
                   {index > 0 && (
                     <Button
                       type="button"
@@ -277,11 +265,11 @@ export default function CreatePost() {
                 </div>
               </div>
             ))}
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="video" className="text-gray-300">
                 Видео
               </Label>
-              <div className="flex items-center mt-1 space-x-2">
+              <div className="flex flex-col sm:flex-row items-center gap-2">
                 <Input
                   id="video"
                   type="file"
@@ -293,7 +281,7 @@ export default function CreatePost() {
                 <Button
                   type="button"
                   onClick={() => videoInputRef.current?.click()}
-                  className="bg-gray-700 hover:bg-gray-600 text-white"
+                  className="w-full sm:w-auto bg-gray-700 hover:bg-gray-600 text-white"
                 >
                   <Video className="mr-2 h-4 w-4" /> Выбрать видео
                 </Button>
@@ -304,7 +292,7 @@ export default function CreatePost() {
                     uploadStatus === "uploading" ||
                     uploadStatus === "success"
                   }
-                  className={`flex-1 ${
+                  className={`w-full sm:w-auto ${
                     uploadStatus === "uploading"
                       ? "bg-blue-500 hover:bg-blue-600"
                       : uploadStatus === "success"
@@ -340,7 +328,7 @@ export default function CreatePost() {
           <CardFooter>
             <Button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white"
+              className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white"
               disabled={isPublishing}
             >
               {isPublishing ? "Публикация..." : "Опубликовать"}
