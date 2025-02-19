@@ -22,14 +22,17 @@ async function getNewToken() {
   try {
     const response = await fetch(url, options);
     const data = await response.json();
-    await db
+    const res = await db
       .update(thirdPartyTokensTable)
       .set({ accessToken: data.accessToken, refreshToken: data.refreshToken })
-      .where(eq(thirdPartyTokensTable.id, token.id));
-    return data.accessToken;
+      .where(
+        eq(thirdPartyTokensTable.id, token.id) &&
+          eq(thirdPartyTokensTable.service, "lumalabs-genie")
+      );
+    if (res) return data.accessToken;
   } catch (error) {
     console.error(error);
-    return token?.accessToken;
+    console.log("error token");
   }
 }
 
@@ -46,15 +49,6 @@ export async function POST(req: Request) {
     },
     body: `{"input":{"text":"${prompt}","type":"imagine_3d_one","jobParams":{"seed":"${seed}"}},"client":"web"}`,
   };
-
+  console.log(await fetch(urlUids, optionsUids));
   return await fetch(urlUids, optionsUids);
-}
-
-export async function GET(req: NextRequest) {
-  const dataUid = await req.nextUrl.searchParams.get("uid");
-  const url = `https://webapp.engineeringlumalabs.com/api/v3/creations/uuid/${dataUid}`;
-  const options = {
-    method: "GET",
-  };
-  return await fetch(url, options);
 }

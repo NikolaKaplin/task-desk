@@ -1,65 +1,68 @@
-"use client"
+"use client";
 
-import React, { Suspense, useState } from "react"
-import { Canvas, useFrame } from "@react-three/fiber"
-import { OrbitControls, useGLTF, Environment } from "@react-three/drei"
-import { Button } from "@/components/ui/button"
-import type * as THREE from "three"
+import React, { Suspense, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
+import { Button } from "@/components/ui/button";
+import type * as THREE from "three";
 
-import { CircleFadingPlusIcon as CircleFadingArrowUp, Download, LoaderCircle } from "lucide-react"
-import { PromptPanel } from "./promt-panel"
-
+import {
+  CircleFadingPlusIcon as CircleFadingArrowUp,
+  Download,
+  LoaderCircle,
+} from "lucide-react";
+import { PromptPanel } from "./promt-panel";
 
 interface ModelProps {
-  url: string
+  url: string;
 }
 
 function Model({ url }: ModelProps) {
-  const { scene } = useGLTF(url)
-  return <primitive object={scene} />
+  const { scene } = useGLTF(url);
+  return <primitive object={scene} />;
 }
 
 function LoadingSpinner() {
-  const mesh = React.useRef<THREE.Mesh>(null!)
+  const mesh = React.useRef<THREE.Mesh>(null!);
 
   useFrame((state, delta) => {
-    mesh.current.rotation.y += delta
-  })
+    mesh.current.rotation.y += delta;
+  });
 
   return (
     <mesh ref={mesh}>
       <sphereGeometry args={[0.5, 32, 32]} />
       <meshStandardMaterial color="#4ade80" />
     </mesh>
-  )
+  );
 }
 
 export default function ModelViewer() {
   const [modelUrls, setModelUrls] = useState<string[]>([
     "https://cdn-luma.com/blender_convert/114128e1-b8a3-4d62-b6e6-e020c7ec8801/a6d925ab6a96_39312cfca241_iridescent_small_al.glb",
-  ])
-  const [error, setError] = useState<string | null>(null)
-  const [background, setBackground] = useState<string>("sunset")
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [activeModelIndex, setActiveModelIndex] = useState(0)
+  ]);
+  const [error, setError] = useState<string | null>(null);
+  const [background, setBackground] = useState<string>("sunset");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [activeModelIndex, setActiveModelIndex] = useState(0);
 
   const handleDownload = () => {
     if (modelUrls[activeModelIndex]) {
-      const link = document.createElement("a")
-      link.href = modelUrls[activeModelIndex]
-      link.download = `3d-model-${activeModelIndex + 1}.glb`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const link = document.createElement("a");
+      link.href = modelUrls[activeModelIndex];
+      link.download = `3d-model-${activeModelIndex + 1}.glb`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
-  }
+  };
 
   const handleBackgroundChange = (newBackground: string) => {
-    setBackground(newBackground)
-  }
+    setBackground(newBackground);
+  };
 
   const handleGenerate = async (prompt: string) => {
-    setIsGenerating(true)
+    setIsGenerating(true);
     try {
       const response = await fetch("/api/get3dModels", {
         method: "POST",
@@ -67,35 +70,40 @@ export default function ModelViewer() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ prompt }),
-      })
-      const dataUids = await response.json()
+      });
+      const dataUids = await response.json();
       const promises = dataUids.response.map(async (uid: string) => {
         return new Promise<string>((resolve, reject) => {
           const timeout = setInterval(async () => {
-            const result = await fetch(`https://webapp.engineeringlumalabs.com/api/v3/creations/uuid/${uid}`).then(
-              (response) => response.json(),
-            )
+            const result = await fetch(
+              `https://webapp.engineeringlumalabs.com/api/v3/creations/uuid/${uid}`
+            ).then((response) => response.json());
             if (result.response.status === "completed") {
-              const model = result.response.output.filter((item: any) => item.metadata.file_extension === ".glb")[1]
-                .file_url
-              resolve(model)
-              clearInterval(timeout)
+              const model = result.response.output.filter(
+                (item: any) => item.metadata.file_extension === ".glb"
+              )[1].file_url;
+              resolve(model);
+              clearInterval(timeout);
             }
-          }, 1000)
-        })
-      })
-      const models = await Promise.all(promises)
-      setModelUrls(models)
+          }, 1000);
+        });
+      });
+      const models = await Promise.all(promises);
+      setModelUrls(models);
     } catch (error) {
-      console.error("Error generating models:", error)
-      setError(`Failed to generate models: ${error instanceof Error ? error.message : String(error)}`)
+      console.error("Error generating models:", error);
+      setError(
+        `Failed to generate models: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   if (error) {
-    return <div className="text-red-500">{error}</div>
+    return <div className="text-red-500">{error}</div>;
   }
 
   return (
@@ -108,7 +116,9 @@ export default function ModelViewer() {
             <hemisphereLight intensity={0.5} />
             <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
             <pointLight position={[-10, -10, -10]} />
-            {modelUrls[activeModelIndex] && <Model url={modelUrls[activeModelIndex]} />}
+            {modelUrls[activeModelIndex] && (
+              <Model url={modelUrls[activeModelIndex]} />
+            )}
             <OrbitControls />
             <Environment preset={background as any} background />
           </Suspense>
@@ -145,7 +155,9 @@ export default function ModelViewer() {
                 key={index}
                 onClick={() => setActiveModelIndex(index)}
                 className={`${
-                  activeModelIndex === index ? "bg-indigo-600 text-white" : "bg-gray-700 text-green-400"
+                  activeModelIndex === index
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-700 text-green-400"
                 } hover:bg-indigo-700 hover:text-white font-bold py-1 px-2 sm:py-2 sm:px-4 rounded-full text-xs sm:text-sm lg:text-base`}
               >
                 {index + 1}
@@ -171,6 +183,5 @@ export default function ModelViewer() {
         )}
       </div>
     </div>
-  )
+  );
 }
-

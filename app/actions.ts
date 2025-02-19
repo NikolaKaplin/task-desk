@@ -220,7 +220,7 @@ export async function getLastPostId() {
   const [lastPost] = await db
     .select()
     .from(postTable)
-    .orderBy(desc(postTable.id));
+    .orderBy(desc(postTable.createdAt));
   return lastPost.id;
 }
 

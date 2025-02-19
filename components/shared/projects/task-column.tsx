@@ -113,7 +113,7 @@ export default function TaskColumn({
                       <Card className="bg-gray-700 border-gray-600 cursor-pointer hover:bg-gray-600 transition-colors">
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-start space-x-3 flex-grow">
+                            <div className="flex items-start justify-between space-x-3 flex-grow">
                               <Avatar className="w-10 h-10">
                                 <AvatarImage
                                   src={
@@ -124,12 +124,10 @@ export default function TaskColumn({
                                 />
                                 <AvatarFallback></AvatarFallback>
                               </Avatar>
+                              <h3 className="font-semibold text-green-400 line-clamp-2">
+                                {task.title}
+                              </h3>
                               <div className="flex flex-col">
-                                {projecNameIsHidden ? null : (
-                                  <h3 className="font-semibold text-green-400 text-lg line-clamp-2">
-                                    {project.name}
-                                  </h3>
-                                )}
                                 <span className="text-xs text-gray-400">
                                   {format(
                                     new Date(task.createdAt),
@@ -152,17 +150,19 @@ export default function TaskColumn({
 
                           <div className="flex flex-col text-xs text-gray-400 mt-2">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="font-semibold text-green-400">
-                                Проект:
-                              </span>
                               {projecNameIsHidden ? null : (
-                                <span className="bg-gray-800 rounded px-2 py-1">
-                                  {project !== null
-                                    ? project.find(
-                                        (p) => p.id === task.projectId
-                                      ).name
-                                    : null}
-                                </span>
+                                <>
+                                  <span className="font-semibold text-green-400">
+                                    Проект:
+                                  </span>
+                                  <span className="bg-gray-800 rounded px-2 py-1">
+                                    {project !== null
+                                      ? project.find(
+                                          (p) => p.id === task.projectId
+                                        ).name
+                                      : null}
+                                  </span>
+                                </>
                               )}
                             </div>
                             <div className="flex items-center justify-between mb-1">

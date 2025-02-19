@@ -85,7 +85,7 @@ export const postTable = mysqlTable("post", {
 });
 
 export const thirdPartyTokensTable = mysqlTable("third_party_tokens", {
-  id: varchar("id", { length: 25 }).primaryKey().$default(cuid),
+  id: varchar("id", { length: 25 }).primaryKey(),
   service: varchar("service", { length: 256 }).notNull(),
   accessToken: varchar("accessToken", { length: 256 }).notNull(),
   refreshToken: varchar("refreshToken", { length: 256 }).notNull(),

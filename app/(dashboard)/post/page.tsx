@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -15,10 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Upload, Video, Plus, X } from "lucide-react";
+import { Upload, Video, Plus, X, LoaderCircle } from "lucide-react";
+import Image from "next/image";
 import { getUserSession } from "@/lib/get-session-server";
+import { getLastPostId, postCreate } from "@/app/actions";
+import { number } from "zod";
+import { uploadLargeFiles } from "@/utils/awsLargeUpload";
 import axios from "axios";
-import { postCreate } from "@/app/actions";
 
 type ContentBlock = {
   type: "text" | "image";
@@ -52,21 +53,14 @@ export default function CreatePost() {
     })();
   }, []);
 
-  const insertBlock = (index: number, type: "text" | "image") => {
-    const newBlocks = [...contentBlocks];
-    newBlocks.splice(index + 1, 0, {
-      type,
-      content: type === "text" ? "" : "",
-    });
-    setContentBlocks(newBlocks);
-  };
-
   const handleImageUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
       if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
         try {
-          const res = await fetch(`/api/upload-image-post/${"penis"}`, {
+          const postId = await getLastPostId();
+          console.log("Post: " + postId);
+          const res = await fetch(`/api/upload-image-post/${postId}`, {
             method: "POST",
             headers: {
               "Content-Type": file.type,
@@ -91,6 +85,7 @@ export default function CreatePost() {
           });
         } catch (error) {
           console.error("Error uploading image:", error);
+          // You might want to show an error message to the user here
         }
       }
     },
@@ -110,9 +105,10 @@ export default function CreatePost() {
     setProgress(0);
 
     try {
+      const postId = await getLastPostId();
       const {
         data: { presignedUrl, key },
-      } = await axios.post(`/api/getPresignedUrl/${"penis"}`, {
+      } = await axios.post(`/api/getPresignedUrl/${postId}`, {
         filename: file.name,
         contentType: file.type,
       });
@@ -143,7 +139,9 @@ export default function CreatePost() {
   };
 
   const addTextBlock = (index: number) => {
-    insertBlock(index, "text");
+    const newBlocks = [...contentBlocks];
+    newBlocks.splice(index + 1, 0, { type: "text", content: "" });
+    setContentBlocks(newBlocks);
   };
 
   const removeBlock = (index: number) => {
@@ -170,7 +168,7 @@ export default function CreatePost() {
 
       const DbData = {
         name,
-        authorId: (await getUserSession())?.id,
+        authorId: user.id,
         content: jsonString,
       };
 
@@ -186,13 +184,13 @@ export default function CreatePost() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12">
-      <Card className="max-w-2xl mx-auto bg-gray-800 border-gray-700 w-full px-4 sm:px-6 md:px-8">
+      <Card className="max-w-2xl mx-auto bg-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-green-400">
             Создать новый пост
           </CardTitle>
         </CardHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-gray-300">
@@ -202,7 +200,7 @@ export default function CreatePost() {
                 id="name"
                 value={name}
                 onChange={(e) => setTitle(e.target.value)}
-                className="mt-1 bg-gray-700 text-white w-full"
+                className="mt-1 bg-gray-700 text-white"
                 required
               />
             </div>
@@ -214,18 +212,18 @@ export default function CreatePost() {
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="mt-1 bg-gray-700 text-white w-full"
+                className="mt-1 bg-gray-700 text-white"
                 rows={3}
                 required
               />
             </div>
             {contentBlocks.map((block, index) => (
-              <div key={index} className="space-y-4">
+              <div key={index} className="space-y-2">
                 {block.type === "text" ? (
                   <Textarea
                     value={block.content}
                     onChange={(e) => handleContentChange(index, e.target.value)}
-                    className="w-full bg-gray-700 text-white"
+                    className="mt-1 bg-gray-700 text-white"
                     rows={3}
                   />
                 ) : (
@@ -233,7 +231,9 @@ export default function CreatePost() {
                     <img
                       src={block.content || "/placeholder.svg"}
                       alt="Uploaded image"
-                      className="w-full h-auto rounded-lg"
+                      width={500}
+                      height={300}
+                      className="rounded-lg"
                     />
                     <Button
                       type="button"
@@ -244,7 +244,7 @@ export default function CreatePost() {
                     </Button>
                   </div>
                 )}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex space-x-2">
                   <Button
                     type="button"
                     onClick={() => addTextBlock(index)}
@@ -280,11 +280,11 @@ export default function CreatePost() {
                 </div>
               </div>
             ))}
-            <div className="space-y-2">
+            <div>
               <Label htmlFor="video" className="text-gray-300">
                 Видео
               </Label>
-              <div className="flex flex-col sm:flex-row items-center gap-2">
+              <div className="flex items-center mt-1 space-x-2">
                 <Input
                   id="video"
                   type="file"
@@ -296,7 +296,7 @@ export default function CreatePost() {
                 <Button
                   type="button"
                   onClick={() => videoInputRef.current?.click()}
-                  className="w-full sm:w-auto bg-gray-700 hover:bg-gray-600 text-white"
+                  className="bg-gray-700 hover:bg-gray-600 text-white"
                 >
                   <Video className="mr-2 h-4 w-4" /> Выбрать видео
                 </Button>
@@ -307,7 +307,7 @@ export default function CreatePost() {
                     uploadStatus === "uploading" ||
                     uploadStatus === "success"
                   }
-                  className={`w-full sm:w-auto ${
+                  className={`flex-1 ${
                     uploadStatus === "uploading"
                       ? "bg-blue-500 hover:bg-blue-600"
                       : uploadStatus === "success"
@@ -343,7 +343,7 @@ export default function CreatePost() {
           <CardFooter>
             <Button
               type="submit"
-              className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white"
+              className="bg-green-500 hover:bg-green-600 text-white"
               disabled={isPublishing}
             >
               {isPublishing ? "Публикация..." : "Опубликовать"}
