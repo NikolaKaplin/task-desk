@@ -1,27 +1,30 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface PromptPanelProps {
-  onGenerate: (prompt: string) => void
+  onGenerate: (prompt: string) => void;
 }
 
 export function PromptPanel({ onGenerate }: PromptPanelProps) {
-  const [prompt, setPrompt] = useState("")
+  const [prompt, setPrompt] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onGenerate(prompt)
-  }
+    e.preventDefault();
+    onGenerate(prompt);
+  };
 
   return (
-    <div className="w-full lg:w-1/3 bg-gray-800 p-4 rounded-lg shadow-lg">
+    <div className=" bg-gray-800 p-4 rounded-lg shadow-lg">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="prompt" className="block text-sm font-medium text-green-400 mb-1">
+          <label
+            htmlFor="prompt"
+            className="block text-sm font-medium text-green-400 mb-1"
+          >
             Prompt
           </label>
           <Textarea
@@ -41,6 +44,5 @@ export function PromptPanel({ onGenerate }: PromptPanelProps) {
         </Button>
       </form>
     </div>
-  )
+  );
 }
-
