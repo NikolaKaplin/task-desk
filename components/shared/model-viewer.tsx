@@ -72,18 +72,34 @@ export default function ModelViewer() {
         body: JSON.stringify({ prompt }),
       });
       const dataUids = await response.json();
+      const MAX_ATTEMPTS = 180;
       const promises = dataUids.response.map(async (uid: string) => {
         return new Promise<string>((resolve, reject) => {
+          let attempts = 0;
           const timeout = setInterval(async () => {
-            const result = await fetch(
-              `https://webapp.engineeringlumalabs.com/api/v3/creations/uuid/${uid}`
-            ).then((response) => response.json());
-            if (result.response.status === "completed") {
-              const model = result.response.output.filter(
-                (item: any) => item.metadata.file_extension === ".glb"
-              )[1].file_url;
-              resolve(model);
+            try {
+              const response = await fetch(`/api/get3dModels/${uid}`);
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              const result = await response.json();
+              if (result.response.status === "completed") {
+                const model = result.response.output.find(
+                  (item: any) => item.metadata.file_extension === ".glb"
+                )?.file_url;
+                if (model) {
+                  resolve(model);
+                } else {
+                  reject(new Error("GLB model not found"));
+                }
+                clearInterval(timeout);
+              } else if (++attempts >= MAX_ATTEMPTS) {
+                clearInterval(timeout);
+                reject(new Error("Max attempts reached"));
+              }
+            } catch (error) {
               clearInterval(timeout);
+              reject(error);
             }
           }, 1000);
         });
