@@ -54,8 +54,7 @@ export default function ProjectTasksPage() {
     (async () => {
       const user = await getUserSession();
       const tasksGet = await getTasksUser(user.id);
-      const projects = await getProjectstUser(user.id);
-      console.log(projects);
+      const projects = await getProjects();
       setProjects(projects);
       const tasksGetConverted = tasksGet.map((task) => ({
         ...task,

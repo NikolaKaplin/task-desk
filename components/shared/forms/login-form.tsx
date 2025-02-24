@@ -27,6 +27,7 @@ export const LoginForm: React.FC = () => {
         ...data,
         redirect: false,
       });
+      console.log(resp?.status);
 
       if (!resp?.ok) {
         throw Error();
@@ -36,8 +37,10 @@ export const LoginForm: React.FC = () => {
     } catch (error) {
       console.error("Error [LOGIN]", error);
       toast({
+        duration: 10000,
+        className: "bg-red-600",
         variant: "destructive",
-        title: "Ошибка",
+        title: "Неверный логин или пароль",
         description: "Не удалось войти в аккаунт",
       });
     }
