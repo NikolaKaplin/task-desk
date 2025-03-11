@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Applications, getPosts, getUsers } from "../../actions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Clock, AlertTriangle } from "lucide-react";
-import Link from "next/link";
+import { useEffect, useState } from "react"
+import { Applications, getPosts, getUsers } from "../../actions"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Users, FileText, Clock, AlertTriangle } from "lucide-react"
+import Link from "next/link"
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -12,38 +12,38 @@ export default function AdminDashboard() {
     pendingApplications: 0,
     totalPosts: 0,
     pendingPosts: 0,
-  });
+  })
 
   useEffect(() => {
     async function fetchStats() {
-      const [users, applications, posts] = await Promise.all([
-        getUsers(),
-        Applications(),
-        getPosts(),
-      ]);
+      const [users, applications, posts] = await Promise.all([getUsers(), Applications(), getPosts()])
 
-      const pendingPosts = posts.filter(
-        (post) => post.postStatus !== "APPROVED"
-      );
+      const pendingPosts = posts.filter((post) => post.postStatus !== "APPROVED")
 
       setStats({
         totalUsers: users.length,
         pendingApplications: applications.length,
         totalPosts: posts.length,
         pendingPosts: pendingPosts.length,
-      });
+      })
     }
 
-    fetchStats();
-  }, []);
+    fetchStats()
+  }, [])
 
   return (
     <div className="max-w-[1800px] mx-auto">
-      <h1 className="text-3xl font-bold text-white mb-8">Админский дашборд</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Обзор системы</h1>
+        <p className="text-gray-400">
+          Панель управления с ключевыми показателями и быстрым доступом к основным функциям
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Пользователи"
+          href="/admin/users"
           value={stats.totalUsers}
           icon={<Users className="h-8 w-8 text-blue-400" />}
           color="blue"
@@ -75,9 +75,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
         <Card className="bg-gray-800 border-gray-700 text-white">
           <CardHeader>
-            <CardTitle className="text-green-400">
-              Управление заявками пользователей
-            </CardTitle>
+            <CardTitle className="text-green-400">Управление заявками пользователей</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-300 mb-4">
@@ -85,8 +83,7 @@ export default function AdminDashboard() {
               {stats.pendingApplications > 0 && (
                 <span className="text-green-400 font-medium">
                   {" "}
-                  В настоящее время ожидают рассмотрения{" "}
-                  {stats.pendingApplications} заявок.
+                  В настоящее время ожидают рассмотрения {stats.pendingApplications} заявок.
                 </span>
               )}
             </p>
@@ -106,8 +103,7 @@ export default function AdminDashboard() {
               {stats.pendingPosts > 0 && (
                 <span className="text-yellow-400 font-medium">
                   {" "}
-                  В настоящее время ожидают модерации {stats.pendingPosts}{" "}
-                  постов.
+                  В настоящее время ожидают модерации {stats.pendingPosts} постов.
                 </span>
               )}
             </p>
@@ -118,7 +114,7 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </div>
-  );
+  )
 }
 
 function StatCard({ title, value, icon, color, href, alert = false }) {
@@ -127,7 +123,7 @@ function StatCard({ title, value, icon, color, href, alert = false }) {
     green: "bg-green-400/10 border-green-400/20",
     purple: "bg-purple-400/10 border-purple-400/20",
     yellow: "bg-yellow-400/10 border-yellow-400/20",
-  };
+  }
 
   const Content = (
     <Card className={`${colorClasses[color]} border text-white`}>
@@ -138,19 +134,17 @@ function StatCard({ title, value, icon, color, href, alert = false }) {
         </div>
         <div className="relative">
           {icon}
-          {alert && (
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-          )}
+          {alert && <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>}
         </div>
       </CardContent>
     </Card>
-  );
+  )
 
   if (href) {
-    return <Link href={href}>{Content}</Link>;
+    return <Link href={href}>{Content}</Link>
   }
 
-  return Content;
+  return Content
 }
 
 function Button({ children, color = "blue", ...props }) {
@@ -159,7 +153,7 @@ function Button({ children, color = "blue", ...props }) {
     green: "bg-green-600 hover:bg-green-700",
     yellow: "bg-yellow-600 hover:bg-yellow-700",
     red: "bg-red-600 hover:bg-red-700",
-  };
+  }
 
   return (
     <button
@@ -168,5 +162,6 @@ function Button({ children, color = "blue", ...props }) {
     >
       {children}
     </button>
-  );
+  )
 }
+

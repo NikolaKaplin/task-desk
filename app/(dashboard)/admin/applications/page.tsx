@@ -1,80 +1,78 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Check, X, Search, ArrowLeft, ArrowRight } from "lucide-react";
-import { Applications } from "../../../actions";
-import { ButtonApprove } from "@/components/shared/buttonApprove";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react"
+import { Check, X, Search, ArrowLeft, ArrowRight } from "lucide-react"
+import { Applications } from "../../../actions"
+import { ButtonApprove } from "@/components/shared/buttonApprove"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState([]);
-  const [filteredApplications, setFilteredApplications] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const applicationsPerPage = 10;
+  const [applications, setApplications] = useState([])
+  const [filteredApplications, setFilteredApplications] = useState([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const applicationsPerPage = 10
 
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
-      const fetchedApplications = await Applications();
-      setApplications(fetchedApplications);
-      setFilteredApplications(fetchedApplications);
-      setLoading(false);
+      setLoading(true)
+      const fetchedApplications = await Applications()
+      setApplications(fetchedApplications)
+      setFilteredApplications(fetchedApplications)
+      setLoading(false)
     }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredApplications(applications);
+      setFilteredApplications(applications)
     } else {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase()
       const filtered = applications.filter(
         (app) =>
           app.firstName.toLowerCase().includes(query) ||
           app.lastName.toLowerCase().includes(query) ||
-          app.email.toLowerCase().includes(query)
-      );
-      setFilteredApplications(filtered);
-      setCurrentPage(1); // Reset to first page on new search
+          app.email.toLowerCase().includes(query),
+      )
+      setFilteredApplications(filtered)
+      setCurrentPage(1) // Reset to first page on new search
     }
-  }, [searchQuery, applications]);
+  }, [searchQuery, applications])
 
   // Pagination logic
-  const indexOfLastApplication = currentPage * applicationsPerPage;
-  const indexOfFirstApplication = indexOfLastApplication - applicationsPerPage;
-  const currentApplications = filteredApplications.slice(
-    indexOfFirstApplication,
-    indexOfLastApplication
-  );
-  const totalPages = Math.ceil(
-    filteredApplications.length / applicationsPerPage
-  );
+  const indexOfLastApplication = currentPage * applicationsPerPage
+  const indexOfFirstApplication = indexOfLastApplication - applicationsPerPage
+  const currentApplications = filteredApplications.slice(indexOfFirstApplication, indexOfLastApplication)
+  const totalPages = Math.ceil(filteredApplications.length / applicationsPerPage)
 
   // Handle application removal from list after action
   const handleApplicationAction = (applicationId) => {
-    setApplications(applications.filter((app) => app.id !== applicationId));
-  };
+    setApplications(applications.filter((app) => app.id !== applicationId))
+  }
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="max-w-[1800px] mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <h1 className="text-3xl font-bold text-green-400">
-          Заявки на регистрацию
-        </h1>
+        <div>
+          <h1 className="text-3xl font-bold text-green-400 mb-2">Заявки на регистрацию</h1>
+          <p className="text-gray-400 text-sm">
+            Управление заявками пользователей, ожидающих подтверждения регистрации
+          </p>
+        </div>
         <div className="relative w-full sm:w-64 md:w-80">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
@@ -96,11 +94,7 @@ export default function ApplicationsPage() {
         <>
           <div className="grid gap-4">
             {currentApplications.map((application) => (
-              <ApplicationCard
-                key={application.id}
-                application={application}
-                onAction={handleApplicationAction}
-              />
+              <ApplicationCard key={application.id} application={application} onAction={handleApplicationAction} />
             ))}
           </div>
 
@@ -108,8 +102,7 @@ export default function ApplicationsPage() {
           {totalPages > 1 && (
             <div className="flex justify-between items-center mt-8">
               <div className="text-sm text-gray-400">
-                Показано {indexOfFirstApplication + 1}-
-                {Math.min(indexOfLastApplication, filteredApplications.length)}{" "}
+                Показано {indexOfFirstApplication + 1}-{Math.min(indexOfLastApplication, filteredApplications.length)}{" "}
                 из {filteredApplications.length} заявок
               </div>
               <div className="flex gap-2">
@@ -148,14 +141,12 @@ export default function ApplicationsPage() {
         </>
       )}
     </div>
-  );
+  )
 }
 
 function ApplicationCard({ application, onAction }) {
-  const formattedDate = new Date(application.updatedAt).toLocaleString("ru-RU");
-  const daysSinceCreation = Math.floor(
-    (new Date() - new Date(application.createdAt)) / (1000 * 60 * 60 * 24)
-  );
+  const formattedDate = new Date(application.updatedAt).toLocaleString("ru-RU")
+  const daysSinceCreation = Math.floor((new Date() - new Date(application.createdAt)) / (1000 * 60 * 60 * 24))
 
   return (
     <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden">
@@ -181,10 +172,7 @@ function ApplicationCard({ application, onAction }) {
 
             <div className="flex items-center gap-3">
               {daysSinceCreation > 3 && (
-                <Badge
-                  variant="outline"
-                  className="bg-red-400/10 text-red-400 border-red-400/20"
-                >
+                <Badge variant="outline" className="bg-red-400/10 text-red-400 border-red-400/20">
                   Ожидает {daysSinceCreation} дн.
                 </Badge>
               )}
@@ -206,13 +194,12 @@ function ApplicationCard({ application, onAction }) {
 
         {application.message && (
           <div className="px-6 py-4 bg-gray-900 border-t border-gray-700">
-            <div className="text-sm text-gray-400 mb-1">
-              Сообщение от пользователя:
-            </div>
+            <div className="text-sm text-gray-400 mb-1">Сообщение от пользователя:</div>
             <div className="text-gray-300">{application.message}</div>
           </div>
         )}
       </CardContent>
     </Card>
-  );
+  )
 }
+

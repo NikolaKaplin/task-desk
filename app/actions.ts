@@ -171,6 +171,7 @@ export async function getUsers() {
     avatar: user.avatarUrl,
     role: user.role,
     devStatus: user.devStatus,
+    createdAt: user.createdAt
   }));
 }
 
@@ -348,4 +349,8 @@ export async function sendApplication(message: any) {
   } catch (error) {
     console.log(error);
   }
+}
+
+export async function setAdminRights(userId: string, role: string) {
+  await db.update(userTable).set({role: role}).where(eq(userTable.id, userId))
 }
