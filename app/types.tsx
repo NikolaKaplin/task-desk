@@ -1,9 +1,17 @@
+import { StringChunk } from "drizzle-orm";
+
 export type NavItems = {
   title: string;
   path: string;
   icon?: JSX.Element;
   submenu?: boolean;
   subMenuItems?: NavItems[];
-  hiddenFor?: UserRole[];
+  hiddenFor?: string[];
   indicatorHandler?: () => Promise<number>;
+};
+export type TutorItems = {
+  title: string;
+  description: string;
+  image: string;
+  isLastSlide?: boolean;
 };

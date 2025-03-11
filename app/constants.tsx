@@ -8,8 +8,7 @@ import {
   UserRoundCog,
   UsersRound,
 } from "lucide-react";
-import { NavItems } from "./types";
-import { count } from "console";
+import { NavItems, TutorItems } from "./types";
 import { countUnverifiedUsers } from "./actions";
 import { Task } from "./(dashboard)/projects/[tasks]/page";
 import { HiMiniSquare3Stack3D } from "react-icons/hi2";
@@ -47,8 +46,8 @@ export const navItems: NavItems[] = [
   },
   {
     title: "3D Models",
-    icon: <HiMiniSquare3Stack3D/>,
-    path: "models"
+    icon: <HiMiniSquare3Stack3D />,
+    path: "models",
   },
   {
     title: "Applications",
@@ -176,5 +175,45 @@ export const listIds = [
     name: "DONE",
     description: "Полностью выполнено",
     colors: ["bg-purple-300", "border-purple-800"],
+  },
+] as const;
+
+export const tutorialSlides: TutorItems[] = [
+  {
+    title: "Паша",
+    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
+    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+  },
+  {
+    title: "Паша",
+    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
+    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+  },
+  {
+    title: "Паша",
+    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
+    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+  },
+  {
+    title: "Паша",
+    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
+    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+  },
+  {
+    title: "Паша",
+    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
+    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+  },
+  {
+    title: "Паша",
+    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
+    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+  },
+  {
+    title: "Добро пожаловать в Altergemu!",
+    description:
+      "Вы готовы начать свое путешествие в мире новых возможностей с Пашей",
+    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+    isLastSlide: true,
   },
 ] as const;

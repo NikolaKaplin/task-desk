@@ -2,14 +2,13 @@
 
 import { getUserSession } from "@/lib/get-session-server";
 
-import { User } from "@prisma/client";
 import React from "react";
 
 export type ClientSafeUser = {
-  id: User["id"];
-  firstName: User["firstName"];
-  lastName: User["lastName"];
-  role: User["role"];
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: string;
 };
 
 const Context = React.createContext<ClientSafeUser | undefined>(undefined);

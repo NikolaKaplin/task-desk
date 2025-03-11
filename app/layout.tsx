@@ -18,6 +18,8 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Altergemu",
   description: "Altergemu developers company",
+  keywords:
+    "Altergemu, разработка программного обеспечения, IT-услуги, разработка игр",
 };
 
 export default async function RootLayout({

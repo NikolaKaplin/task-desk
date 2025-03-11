@@ -1,15 +1,13 @@
 "use client";
 
-import { UserRole } from "@prisma/client";
 import { useUser } from "./user-provider";
-import { useEffect } from "react";
 
 export function RoleHidden(props: {
   children: React.ReactNode;
-  roles?: UserRole[];
-  role?: UserRole;
+  roles?: string[];
+  role?: string;
 }) {
-  const roles: UserRole[] = props.roles ?? (props.role ? [props.role] : []);
+  const roles: string[] = props.roles ?? (props.role ? [props.role] : []);
   if (roles.length == 0) return props.children;
   const user = useUser();
 

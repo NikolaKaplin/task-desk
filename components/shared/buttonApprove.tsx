@@ -2,14 +2,13 @@
 import { confirmUser } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Prisma } from "@prisma/client";
 import { X } from "lucide-react";
 import { redirect, useRouter } from "next/navigation";
 import React from "react";
 import { useIndicatorsVersionUpdater } from "./navbar";
 
 interface Props {
-  a: Prisma.UserUpdateInput;
+  a: string;
   isDelete: boolean;
   className?: string;
   icon?: JSX.Element;

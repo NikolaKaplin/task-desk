@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const Footer: React.FC = () => {
   return (
-    <footer className=" py-8 text-gray-300">
+    <footer className="py-8 text-gray-300">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center justify-center space-y-4">
           <h3 className="text-lg font-semibold">Join Our Community</h3>
@@ -38,6 +38,7 @@ export const Footer: React.FC = () => {
           <div className="mt-4 text-xs">
             © {new Date().getFullYear()} Altergemu - All Rights Reserved
           </div>
+          <div className="text-xs text-gray-500">Version 1.0.0</div>
           <p className="text-xs text-gray-500">Made with ❤️ by Rizo</p>
         </div>
       </div>

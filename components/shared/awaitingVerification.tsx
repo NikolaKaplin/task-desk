@@ -18,10 +18,11 @@ export function AwaitingVerification() {
       try {
         const user = await getUserSession();
         if (user && user.role == "USER") {
-          router.push("/profile");
+          router.push("/login/tutorial");
           toast({
-            title: "Регистрация прошла успешно, заполните профиль"
-          })
+            title:
+              "Регистрация прошла успешно, ознакомьтесь с функционалом сайта и заполните профиль",
+          });
         }
         if (!user) {
           router.push("/login");
