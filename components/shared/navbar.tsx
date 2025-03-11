@@ -99,9 +99,7 @@ export const Navbar: React.FC<Props> = ({
                 Altergemu
               </h1>
             </div>
-            <div className="mt-2 text-sm text-gray-400">
-              Software & Game Dev
-            </div>
+            <div className="mt-2 text-sm text-gray-400">Web & Game Dev</div>
           </div>
           <nav className="space-y-1 py-2 px-3">
             {navItems.map(({ title, icon, path, hiddenFor }, index, item) => (

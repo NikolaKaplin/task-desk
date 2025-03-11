@@ -5,11 +5,23 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tutorialSlides } from "@/app/constants";
+import { getUserSession } from "@/lib/get-session-server";
 
 export default function TutorialPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      const user = await getUserSession();
+      if (user && user.role != "UNVERIFIED") {
+        return;
+      } else {
+        router.push("/login");
+      }
+    })();
+  }, [router]);
 
   const totalSlides = 7;
 
