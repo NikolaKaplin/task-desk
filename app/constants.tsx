@@ -50,9 +50,9 @@ export const navItems: NavItems[] = [
     path: "models",
   },
   {
-    title: "Applications",
+    title: "Admin",
     icon: <ShieldCheck />,
-    path: "applications",
+    path: "admin",
     hiddenFor: ["UNVERIFIED", "USER"],
     indicatorHandler: countUnverifiedUsers,
   },

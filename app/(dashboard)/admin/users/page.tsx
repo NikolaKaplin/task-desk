@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Search, ArrowLeft, ArrowRight, UserCog, Shield, Mail } from "lucide-react"
-import { getUsers } from "../../../actions"
+import { getUsers, setAdminRights } from "../../../actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -16,14 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function UsersPage() {
@@ -33,6 +26,8 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedRole, setSelectedRole] = useState("all")
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const usersPerPage = 10
 
   useEffect(() => {
@@ -70,6 +65,17 @@ export default function UsersPage() {
     setCurrentPage(1) // Reset to first page on filter change
   }, [searchQuery, users, selectedRole])
 
+  const setAdmin = async (userId, role) => {
+    await setAdminRights(userId, role)
+    // Update local state after API call
+    setUsers(users.map((user) => (user.id === userId ? { ...user, role } : user)))
+
+    // If we're viewing this user in the dialog, update that too
+    if (selectedUser && selectedUser.id === userId) {
+      setSelectedUser({ ...selectedUser, role })
+    }
+  }
+
   // Pagination logic
   const indexOfLastUser = currentPage * usersPerPage
   const indexOfFirstUser = indexOfLastUser - usersPerPage
@@ -82,10 +88,15 @@ export default function UsersPage() {
     return acc
   }, {})
 
+  const openUserProfile = (user) => {
+    setSelectedUser(user)
+    setDialogOpen(true)
+  }
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
@@ -157,11 +168,7 @@ export default function UsersPage() {
                 </Badge>
               )}
             </CardTitle>
-            <Button
-              size="sm"
-              onClick={() => setSelectedRole("all")}
-              className={selectedRole === "all" ? "hidden" : ""}
-            >
+            <Button size="sm" onClick={() => setSelectedRole("all")} className={selectedRole === "all" ? "hidden" : ""}>
               Сбросить фильтр
             </Button>
           </div>
@@ -220,91 +227,20 @@ export default function UsersPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Dialog>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="sm">
-                              Действия
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700 text-white">
-                            <DropdownMenuLabel>Управление пользователем</DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-gray-700" />
-                            <DialogTrigger asChild>
-                              <DropdownMenuItem>Просмотр профиля</DropdownMenuItem>
-                            </DialogTrigger>
-                            <DropdownMenuItem>
-                              {user.role === "ADMIN" ? "Снять права админа" : "Сделать админом"}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-gray-700" />
-                            <DropdownMenuItem className="text-red-400">Заблокировать</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <DialogContent className="bg-gray-800 border-gray-700 text-white">
-                          <DialogHeader>
-                            <DialogTitle className="text-xl text-blue-400">Профиль пользователя</DialogTitle>
-                            <DialogDescription className="text-gray-400">
-                              Детальная информация о пользователе
-                            </DialogDescription>
-                          </DialogHeader>
-
-                          <div className="mt-4 flex flex-col items-center">
-                            <Avatar className="h-24 w-24 mb-4">
-                              <AvatarImage src={user.avatar || ""} alt={user.firstName} />
-                              <AvatarFallback className="bg-blue-500/20 text-blue-400 text-2xl">
-                                {user.firstName?.[0]}
-                                {user.lastName?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-
-                            <h2 className="text-xl font-bold">
-                              {user.firstName} {user.lastName}
-                            </h2>
-                            <p className="text-gray-400">{user.email}</p>
-
-                            <div className="flex gap-2 mt-2">
-                              <Badge className={user.role === "ADMIN" ? "bg-purple-500" : "bg-green-500"}>
-                                {user.role === "ADMIN" ? "Администратор" : "Пользователь"}
-                              </Badge>
-                              {user.role !== "UNVERIFIED" ? (
-                                <Badge variant="outline" className="bg-green-400/10 text-green-400 border-green-400/20">
-                                  Подтвержден
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-yellow-400/10 text-yellow-400 border-yellow-400/20"
-                                >
-                                  Не подтвержден
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 mt-6">
-                            <div>
-                              <p className="text-sm text-gray-400">ID пользователя</p>
-                              <p className="text-sm font-mono bg-gray-900 p-2 rounded mt-1 overflow-x-auto">
-                                {user.id}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-400">Дата регистрации</p>
-                              <p className="font-medium">{new Date(user.createdAt).toLocaleString("ru-RU")}</p>
-                            </div>
-                          </div>
-
-                          <div className="flex justify-between mt-6">
-                            <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-500/10">
-                              Заблокировать
-                            </Button>
-                            <Button className="bg-blue-600 hover:bg-blue-700">
-                              {user.role === "ADMIN" ? "Снять права админа" : "Сделать админом"}
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm">Действия</Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700 text-white">
+                          <DropdownMenuLabel>Управление пользователем</DropdownMenuLabel>
+                          <DropdownMenuSeparator className="bg-gray-700" />
+                          <DropdownMenuItem onClick={() => openUserProfile(user)}>Просмотр профиля</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setAdmin(user.id, user.role === "USER" ? "ADMIN" : "USER")}>
+                            {user.role === "ADMIN" ? "Снять права админа" : "Сделать админом"}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-gray-700" />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -329,12 +265,7 @@ export default function UsersPage() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 {Array.from({ length: totalPages }).map((_, index) => (
-                  <Button
-                    key={index}
-                    size="sm"
-                    onClick={() => setCurrentPage(index + 1)}
-                    className="h-8 w-8 p-0"
-                  >
+                  <Button key={index} size="sm" onClick={() => setCurrentPage(index + 1)} className="h-8 w-8 p-0">
                     {index + 1}
                   </Button>
                 ))}
@@ -351,6 +282,72 @@ export default function UsersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* User Profile Dialog - Separated from the dropdown to fix the issue */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+          {selectedUser && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl text-blue-400">Профиль пользователя</DialogTitle>
+                <DialogDescription className="text-gray-400">Детальная информация о пользователе</DialogDescription>
+              </DialogHeader>
+
+              <div className="mt-4 flex flex-col items-center">
+                <Avatar className="h-24 w-24 mb-4">
+                  <AvatarImage src={selectedUser.avatar || ""} alt={selectedUser.firstName} />
+                  <AvatarFallback className="bg-blue-500/20 text-blue-400 text-2xl">
+                    {selectedUser.firstName?.[0]}
+                    {selectedUser.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+
+                <h2 className="text-xl font-bold">
+                  {selectedUser.firstName} {selectedUser.lastName}
+                </h2>
+                <p className="text-gray-400">{selectedUser.email}</p>
+
+                <div className="flex gap-2 mt-2">
+                  <Badge className={selectedUser.role === "ADMIN" ? "bg-purple-500" : "bg-green-500"}>
+                    {selectedUser.role === "ADMIN" ? "Администратор" : "Пользователь"}
+                  </Badge>
+                  {selectedUser.role !== "UNVERIFIED" ? (
+                    <Badge variant="outline" className="bg-green-400/10 text-green-400 border-green-400/20">
+                      Подтвержден
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-yellow-400/10 text-yellow-400 border-yellow-400/20">
+                      Не подтвержден
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div>
+                  <p className="text-sm text-gray-400">ID пользователя</p>
+                  <p className="text-sm font-mono bg-gray-900 p-2 rounded mt-1 overflow-x-auto">{selectedUser.id}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Дата регистрации</p>
+                  <p className="font-medium">{new Date(selectedUser.createdAt).toLocaleString("ru-RU")}</p>
+                </div>
+              </div>
+
+              <div className="flex justify-between mt-6">
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    setAdmin(selectedUser.id, selectedUser.role === "USER" ? "ADMIN" : "USER")
+                  }}
+                >
+                  {selectedUser.role === "ADMIN" ? "Снять права админа" : "Сделать админом"}
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

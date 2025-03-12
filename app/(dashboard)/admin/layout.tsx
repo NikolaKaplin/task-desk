@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname, notFound } from "next/navigation"
 import Link from "next/link"
-import { Users, FileText, LayoutDashboard, LogOut, UserCog } from "lucide-react"
+import { Users, FileText, LayoutDashboard, LogOut, UserCog, FolderKanban } from "lucide-react"
 import { getUserSession } from "@/lib/get-session-server"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,7 +33,9 @@ export default function AdminLayout({
       const sessionUser = await getUserSession()
       if (sessionUser?.role !== "ADMIN") {
         router.push("/")
-        return
+        return {
+          notFound: true
+        }
       }
       setUser(sessionUser)
       setLoading(false)
@@ -79,6 +81,12 @@ export default function AdminLayout({
                           <FileText className="h-4 w-4 mr-2" />
                           <span className="hidden sm:inline">Модерация постов</span>
                           <span className="sm:hidden">Посты</span>
+                        </>
+                      ) : pathname.includes("/projects") ? (
+                        <>
+                          <FolderKanban className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Модерация проектов</span>
+                          <span className="sm:hidden">Проекты</span>
                         </>
                       ) : pathname.includes("/users") ? (
                         <>

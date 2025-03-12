@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Applications, getPosts, getUsers } from "../../actions"
+import { Applications, getPosts, getProjects, getUsers } from "../../actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FileText, Clock, AlertTriangle } from "lucide-react"
+import { Users, FileText, Clock, AlertTriangle, FolderKanban } from "lucide-react"
 import Link from "next/link"
 
 export default function AdminDashboard() {
@@ -12,11 +12,12 @@ export default function AdminDashboard() {
     pendingApplications: 0,
     totalPosts: 0,
     pendingPosts: 0,
+    totalProjects: 0,
   })
 
   useEffect(() => {
     async function fetchStats() {
-      const [users, applications, posts] = await Promise.all([getUsers(), Applications(), getPosts()])
+      const [users, applications, posts, projects] = await Promise.all([getUsers(), Applications(), getPosts(), getProjects()])
 
       const pendingPosts = posts.filter((post) => post.postStatus !== "APPROVED")
 
@@ -25,6 +26,7 @@ export default function AdminDashboard() {
         pendingApplications: applications.length,
         totalPosts: posts.length,
         pendingPosts: pendingPosts.length,
+        totalProjects: projects.length
       })
     }
 
@@ -57,6 +59,7 @@ export default function AdminDashboard() {
           alert={stats.pendingApplications > 0}
         />
         <StatCard
+          href='/admin/posts'
           title="Всего постов"
           value={stats.totalPosts}
           icon={<FileText className="h-8 w-8 text-purple-400" />}
@@ -69,6 +72,16 @@ export default function AdminDashboard() {
           color="yellow"
           href="/admin/posts"
           alert={stats.pendingPosts > 0}
+        />
+        <StatCard
+
+        
+          title="Модерация проектов"
+          value={stats.totalProjects}
+          icon={<FolderKanban className="h-8 w-8 text-yellow-400" />}
+          color="yellow"
+          href="/admin/projects"
+          alert={stats.totalProjects > 0}
         />
       </div>
 

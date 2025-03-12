@@ -171,7 +171,8 @@ export async function getUsers() {
     avatar: user.avatarUrl,
     role: user.role,
     devStatus: user.devStatus,
-    createdAt: user.createdAt
+    createdAt: user.createdAt,
+    email: user.email
   }));
 }
 
