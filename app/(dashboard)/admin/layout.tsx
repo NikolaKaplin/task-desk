@@ -59,7 +59,7 @@ export default function AdminLayout({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">
+                <BreadcrumbLink className="hover:text-white" href="/admin">
                   <LayoutDashboard className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Админ-панель</span>
                   <span className="sm:hidden">Панель</span>
@@ -69,7 +69,7 @@ export default function AdminLayout({
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>
+                    <BreadcrumbPage className="text-white">
                       {pathname.includes("/applications") ? (
                         <>
                           <Users className="h-4 w-4 mr-2" />

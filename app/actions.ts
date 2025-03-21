@@ -122,6 +122,10 @@ export async function confirmUser(body, isDelete: boolean) {
   }
 }
 
+export async function deleteUser(email) {
+  await db.delete(userTable).where(eq(userTable.email, email));
+}
+
 export async function getUserInfoById(id: string) {
   const [userInfo] = await db
     .select({
@@ -172,7 +176,7 @@ export async function getUsers() {
     role: user.role,
     devStatus: user.devStatus,
     createdAt: user.createdAt,
-    email: user.email
+    email: user.email,
   }));
 }
 
@@ -194,6 +198,10 @@ export async function postCreate(body: PostData): Promise<RegisterResult> {
   } else {
     return { success: false };
   }
+}
+
+export async function deletePost(id) {
+  await db.delete(postTable).where(eq(postTable.id, id));
 }
 
 export async function getPosts() {
@@ -252,6 +260,9 @@ export async function getProjectstUser(userId: string) {
   }
 }
 
+export async function deleteProject(id) {
+  await db.delete(projectTable).where(eq(projectTable.id, id));
+}
 export async function createProject(data) {
   const projectCreate = await db
     .insert(projectTable)
@@ -277,6 +288,10 @@ export async function createTask(data: Task) {
   const taskCreate = await db.insert(taskTable).values(data).$returningId();
   if (taskCreate) return { success: true };
   return { success: false };
+}
+
+export async function deleteTask(id) {
+  await db.delete(taskTable).where(eq(taskTable.id, id));
 }
 
 export async function getTasksByProjectId(id: string) {
@@ -353,5 +368,8 @@ export async function sendApplication(message: any) {
 }
 
 export async function setAdminRights(userId: string, role: string) {
-  await db.update(userTable).set({role: role}).where(eq(userTable.id, userId))
+  await db
+    .update(userTable)
+    .set({ role: role })
+    .where(eq(userTable.id, userId));
 }

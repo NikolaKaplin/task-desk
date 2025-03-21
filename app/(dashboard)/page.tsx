@@ -8,24 +8,38 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ImageIcon, Plus, Video } from "lucide-react";
+import { ImageIcon, Plus, Video, Edit } from "lucide-react";
 import { getPosts, getUserInfoById } from "../actions";
+import { getUserSession } from "@/lib/get-session-server";
 
 type Post = {
   id: number;
-  title: string;
   name: string;
   authorId: number;
   content: string;
   createdAt: Date;
-  video: string;
   postStatus: string;
 };
+
+interface EditorJSBlock {
+  id: string;
+  type: string;
+  data: any;
+}
+
+interface EditorJSContent {
+  time: number;
+  blocks: EditorJSBlock[];
+  version: string;
+}
 
 export default async function Home() {
   const posts: Post[] = (await getPosts()).filter(
     (post) => post.postStatus === "APPROVED"
   );
+
+  // Get current user for edit permission check
+  const currentUser = await getUserSession();
 
   return (
     <div className="min-h-screen text-white">
@@ -46,13 +60,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <CreatePostCard />
             {posts.map((post) => (
-              <PostCard
-                title={post.name}
-                authorId={post.authorId}
-                video={JSON.parse(post.content).video}
-                key={post.id}
-                {...post}
-              />
+              <PostCard key={post.id} post={post} currentUser={currentUser} />
             ))}
           </div>
         </div>
@@ -88,35 +96,77 @@ function CreatePostCard() {
 }
 
 async function PostCard({
-  id,
-  title,
-  authorId,
-  createdAt,
-  content,
-  video,
-  postStatus,
-}: Post) {
+  post,
+  currentUser,
+}: {
+  post: Post;
+  currentUser: any;
+}) {
+  const { id, name, authorId, createdAt, content } = post;
   const authorInfo = await getUserInfoById(authorId);
-  const jsonContent = JSON.parse(content);
-  const firstImageBlock = jsonContent.contentBlocks.find(
-    (block) => block.type === "image"
-  );
-  const excerpt = jsonContent.description.slice(0, 100) + "...";
+
+  // Parse the content JSON
+  const parsedContent = JSON.parse(content);
+
+  // Get description from the parsed content
+  const description = parsedContent.description || "";
+  const excerpt =
+    description.length > 100 ? description.slice(0, 100) + "..." : description;
+
+  // Check for video
+  const hasVideo =
+    parsedContent.video !== null && parsedContent.video !== undefined;
+
+  // Find the first image in EditorJS blocks
+  let firstImage = null;
+  if (parsedContent.content && parsedContent.content.blocks) {
+    // New EditorJS format
+    const imageBlock = parsedContent.content.blocks.find(
+      (block: EditorJSBlock) => block.type === "image"
+    );
+
+    if (imageBlock) {
+      firstImage = imageBlock.data.file?.url || imageBlock.data.url;
+    }
+  } else if (parsedContent.contentBlocks) {
+    // Legacy format for backward compatibility
+    const imageBlock = parsedContent.contentBlocks.find(
+      (block: any) => block.type === "image"
+    );
+
+    if (imageBlock) {
+      firstImage = imageBlock.content;
+    }
+  }
+
+  // Check if user can edit this post (author or admin)
+  const canEdit =
+    currentUser &&
+    (currentUser.id === authorId || currentUser.role === "ADMIN");
 
   return (
     <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden relative">
       <div className="relative h-56">
-        {firstImageBlock ? (
+        {firstImage ? (
           <img
-            src={firstImageBlock.content || "/placeholder.svg"}
-            alt={title}
-            layout="fill"
-            objectFit="cover"
+            src={firstImage || "/placeholder.svg"}
+            alt={name}
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gray-700">
             <ImageIcon className="w-12 h-12 text-gray-500" />
           </div>
+        )}
+
+        {/* Edit button for authors and admins */}
+        {canEdit && (
+          <Link
+            href={`/post/edit/${id}`}
+            className="absolute top-2 right-2 bg-gray-800 bg-opacity-70 p-2 rounded-full hover:bg-opacity-100 transition-all"
+          >
+            <Edit className="w-5 h-5 text-green-400" />
+          </Link>
         )}
       </div>
       <CardHeader>
@@ -126,9 +176,10 @@ async function PostCard({
             <AvatarFallback>{authorInfo.firstName.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
-            <CardTitle className="text-green-400">{title}</CardTitle>
+            <CardTitle className="text-green-400">{name}</CardTitle>
             <p className="text-sm text-gray-400">
-              {authorInfo.firstName} • {createdAt.toDateString()}
+              {authorInfo.firstName} •{" "}
+              {new Date(createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -144,8 +195,8 @@ async function PostCard({
           Читать далее
         </Link>
         <div className="flex space-x-2">
-          {firstImageBlock && <ImageIcon className="w-5 h-5 text-gray-400" />}
-          {video !== null ? <Video className="w-5 h-5 text-gray-400" /> : null}
+          {firstImage && <ImageIcon className="w-5 h-5 text-gray-400" />}
+          {hasVideo && <Video className="w-5 h-5 text-gray-400" />}
         </div>
       </CardFooter>
     </Card>

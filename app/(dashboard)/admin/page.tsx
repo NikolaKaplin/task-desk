@@ -78,8 +78,8 @@ export default function AdminDashboard() {
         
           title="Модерация проектов"
           value={stats.totalProjects}
-          icon={<FolderKanban className="h-8 w-8 text-yellow-400" />}
-          color="yellow"
+          icon={<FolderKanban className="h-8 w-8 text-rose-400" />}
+          color="rose"
           href="/admin/projects"
           alert={stats.totalProjects > 0}
         />
@@ -132,6 +132,7 @@ export default function AdminDashboard() {
 
 function StatCard({ title, value, icon, color, href, alert = false }) {
   const colorClasses = {
+    rose: "bg-rose-600/10 border-rose-600/20",
     blue: "bg-blue-400/10 border-blue-400/20",
     green: "bg-green-400/10 border-green-400/20",
     purple: "bg-purple-400/10 border-purple-400/20",

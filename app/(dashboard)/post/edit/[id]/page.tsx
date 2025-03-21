@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -17,13 +17,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Video, LoaderCircle } from "lucide-react";
 import { getUserSession } from "@/lib/get-session-server";
-import { getLastPostId, postCreate } from "@/app/actions";
+import { getPostById, updatePost } from "@/app/actions";
 import axios from "axios";
 
 type EditorJS = any;
 
-export default function CreatePost() {
+export default function EditPost() {
   const [user, setUser] = useState(null);
+  const [post, setPost] = useState(null);
   const [progress, setProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<
     "idle" | "uploading" | "success" | "error"
@@ -33,11 +34,15 @@ export default function CreatePost() {
   const [description, setDescription] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
   const [editorInitialized, setEditorInitialized] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const editorInstanceRef = useRef<any>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const [videoUrl, setVideoUrl] = useState("");
+  const params = useParams();
+  const postId = params.id;
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -77,14 +82,59 @@ export default function CreatePost() {
     };
   }, []);
 
+  // Fetch post data
   useEffect(() => {
+    async function fetchPostData() {
+      if (!postId) return;
+
+      try {
+        setIsLoading(true);
+        const fetchedPost = await getPostById(postId as string);
+
+        if (!fetchedPost) {
+          setError("Пост не найден");
+          return;
+        }
+
+        const parsedContent = JSON.parse(fetchedPost.content);
+        setPost(fetchedPost);
+        setTitle(parsedContent.name || "");
+        setDescription(parsedContent.description || "");
+
+        if (parsedContent.video) {
+          setVideoUrl(parsedContent.video);
+        }
+
+        const currentUser = await getUserSession();
+        setUser(currentUser);
+
+        if (
+          currentUser.id !== fetchedPost.authorId &&
+          currentUser.role !== "ADMIN"
+        ) {
+          setError("У вас нет прав на редактирование этого поста");
+          router.push("/");
+        }
+      } catch (err) {
+        console.error("Error fetching post:", err);
+        setError("Ошибка при загрузке поста");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPostData();
+  }, [postId, router]);
+
+  useEffect(() => {
+    if (isLoading || !post) return;
+
     let editor: any = null;
 
     const initEditor = async () => {
       try {
         const EditorJS = (await import("@editorjs/editorjs")).default;
         const Header = (await import("@editorjs/header")).default;
-        const List = (await import("@editorjs/list")).default;
         const NestedList = (await import("@editorjs/nested-list")).default;
         const Paragraph = (await import("@editorjs/paragraph")).default;
         const ImageTool = (await import("@editorjs/image")).default;
@@ -95,7 +145,8 @@ export default function CreatePost() {
         const Code = (await import("@editorjs/code")).default;
         const InlineCode = (await import("@editorjs/inline-code")).default;
 
-        // Create editor instance
+        const parsedContent = JSON.parse(post.content);
+
         editor = new EditorJS({
           holder: "editorjs",
           tools: {
@@ -124,7 +175,6 @@ export default function CreatePost() {
                 uploader: {
                   uploadByFile: async (file: File) => {
                     try {
-                      const postId = await getLastPostId();
                       const res = await fetch(
                         `/api/upload-image-post/${postId}`,
                         {
@@ -164,7 +214,7 @@ export default function CreatePost() {
               class: Quote,
               inlineToolbar: true,
               config: {
-                quotePlaceholder: "Введите цитату",
+                quotePlaceholder: "Введите цита��у",
                 captionPlaceholder: "Автор цитаты",
               },
             },
@@ -196,6 +246,7 @@ export default function CreatePost() {
               shortcut: "CMD+SHIFT+C",
             },
           },
+          data: parsedContent.content || { blocks: [] }, // Load existing content
           placeholder: "Начните писать ваш пост здесь...",
           autofocus: true,
           onReady: () => {
@@ -211,6 +262,7 @@ export default function CreatePost() {
     };
 
     initEditor();
+
     return () => {
       if (editorInstanceRef.current) {
         try {
@@ -228,16 +280,7 @@ export default function CreatePost() {
         }
       }
     };
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const user = await getUserSession();
-      if (user) {
-        setUser(user);
-      }
-    })();
-  }, []);
+  }, [isLoading, post, postId]);
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -252,7 +295,6 @@ export default function CreatePost() {
     setProgress(0);
 
     try {
-      const postId = await getLastPostId();
       const {
         data: { presignedUrl, key },
       } = await axios.post(`/api/getPresignedUrl/${postId}`, {
@@ -301,27 +343,49 @@ export default function CreatePost() {
 
       const jsonString = JSON.stringify(postData, null, 2);
 
-      const DbData = {
+      const updateData = {
+        id: postId,
         name,
-        authorId: user.id,
         content: jsonString,
       };
 
-      await postCreate(DbData);
-      router.push("/");
+      await updatePost(updateData);
+      router.push(`/post/${postId}`);
     } catch (error) {
-      console.error("Error publishing post:", error);
+      console.error("Error updating post:", error);
     } finally {
       setIsPublishing(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 flex items-center justify-center">
+        <LoaderCircle className="w-12 h-12 animate-spin text-green-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 flex flex-col items-center justify-center">
+        <div className="text-red-400 text-xl mb-4">{error}</div>
+        <Button
+          onClick={() => router.push("/")}
+          className="bg-green-500 hover:bg-green-600"
+        >
+          Вернуться на главную
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12">
       <Card className="max-w-4xl mx-auto bg-gray-800 border-gray-700">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-green-400">
-            Создать новый пост
+            Редактировать пост
           </CardTitle>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -364,6 +428,17 @@ export default function CreatePost() {
               <Label htmlFor="video" className="text-gray-300">
                 Видео
               </Label>
+              {videoUrl && (
+                <div className="mb-4 p-2 bg-gray-700 rounded-md">
+                  <p className="text-sm text-gray-300 mb-2">Текущее видео:</p>
+                  <div className="aspect-video rounded-md overflow-hidden">
+                    <video controls className="w-full h-full">
+                      <source src={videoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center mt-1 space-x-2">
                 <Input
                   id="video"
@@ -378,7 +453,8 @@ export default function CreatePost() {
                   onClick={() => videoInputRef.current?.click()}
                   className="bg-gray-700 hover:bg-gray-600 text-white"
                 >
-                  <Video className="mr-2 h-4 w-4" /> Выбрать видео
+                  <Video className="mr-2 h-4 w-4" />{" "}
+                  {videoUrl ? "Заменить видео" : "Выбрать видео"}
                 </Button>
                 <Button
                   type="button"
@@ -421,7 +497,14 @@ export default function CreatePost() {
               )}
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex justify-between">
+            <Button
+              type="button"
+              onClick={() => router.back()}
+              className="bg-gray-700 hover:bg-gray-600 text-white"
+            >
+              Отмена
+            </Button>
             <Button
               type="submit"
               className="bg-green-500 hover:bg-green-600 text-white"
@@ -430,10 +513,10 @@ export default function CreatePost() {
               {isPublishing ? (
                 <>
                   <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                  Публикация...
+                  Сохранение...
                 </>
               ) : (
-                "Опубликовать"
+                "Сохранить изменения"
               )}
             </Button>
           </CardFooter>
