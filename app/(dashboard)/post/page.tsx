@@ -15,15 +15,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Video, LoaderCircle } from "lucide-react";
+import { Video, LoaderCircle, ShieldCheck } from "lucide-react";
 import { getUserSession } from "@/lib/get-session-server";
 import { getLastPostId, postCreate } from "@/app/actions";
 import axios from "axios";
-
-type EditorJS = any;
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function CreatePost() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [progress, setProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<
     "idle" | "uploading" | "success" | "error"
@@ -33,42 +38,66 @@ export default function CreatePost() {
   const [description, setDescription] = useState("");
   const [isPublishing, setIsPublishing] = useState(false);
   const [editorInitialized, setEditorInitialized] = useState(false);
+  const [postStatus, setPostStatus] = useState<
+    "EXPECTATION" | "APPROVED" | "RN"
+  >("EXPECTATION");
 
   const editorInstanceRef = useRef<any>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [videoUrl, setVideoUrl] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
-      .codex-editor, .ce-block, .ce-paragraph, .ce-header, .cdx-quote, .cdx-checklist__item-text, .cdx-list__item, .ce-code__textarea, .cdx-input, .cdx-attaches__title, .cdx-attaches__description, .cdx-attaches__size, .cdx-warning__title, .cdx-warning__message {
-        color: white !important;
-      }
-      .codex-editor ::placeholder {
-        color: rgba(255, 255, 255, 0.5) !important;
-      }
-      .ce-toolbar__plus, .ce-toolbar__settings-btn {
-        color: white !important;
-        background-color: rgba(50, 50, 50, 0.7) !important;
-      }
-      .ce-popover {
-        background-color: #2d3748 !important;
-        border-color: #4a5568 !important;
-      }
-      .ce-popover__item-icon, .ce-popover__item-label {
-        color: white !important;
-      }
-      .ce-popover__item:hover {
-        background-color: #4a5568 !important;
-      }
-      .cdx-marker {
-        background: rgba(45, 170, 219, 0.3) !important;
-      }
-      .cdx-checklist__item--checked .cdx-checklist__item-text {
-        text-decoration: line-through;
-        color: rgba(255, 255, 255, 0.5) !important;
-      }
+.ce-block--selected .ce-block__content,
+.ce-inline-toolbar,
+.codex-editor--narrow .ce-toolbox,
+.ce-conversion-toolbar,
+.ce-settings,
+.ce-settings__button,
+.ce-toolbar__settings-btn,
+.cdx-button,
+.ce-popover,
+.ce-toolbar__plus:hover {
+  background: #007991;
+  color: inherit;
+}
+
+.ce-inline-tool,
+.ce-conversion-toolbar__label,
+.ce-toolbox__button,
+.cdx-settings-button,
+.ce-toolbar__plus {
+  color: inherit;
+}
+
+::selection {
+  background: #439a86;
+}
+
+.cdx-settings-button:hover,
+.ce-settings__button:hover,
+.ce-toolbox__button--active,
+.ce-toolbox__button:hover,
+.cdx-button:hover,
+.ce-inline-toolbar__dropdown:hover,
+.ce-inline-tool:hover,
+.ce-popover__item:hover,
+.ce-toolbar__settings-btn:hover {
+  background-color: #439a86;
+  color: inherit;
+}
+
+.cdx-notify--error {
+  background: #fb5d5d !important;
+}
+
+.cdx-notify__cross::after,
+.cdx-notify__cross::before {
+  background: white;
+}
     `;
     document.head.appendChild(style);
 
@@ -95,7 +124,6 @@ export default function CreatePost() {
         const Code = (await import("@editorjs/code")).default;
         const InlineCode = (await import("@editorjs/inline-code")).default;
 
-        // Create editor instance
         editor = new EditorJS({
           holder: "editorjs",
           tools: {
@@ -235,6 +263,8 @@ export default function CreatePost() {
       const user = await getUserSession();
       if (user) {
         setUser(user);
+        // Check if user is admin
+        setIsAdmin(user.role === "ADMIN");
       }
     })();
   }, []);
@@ -297,6 +327,7 @@ export default function CreatePost() {
         content: editorData,
         video: videoUrl ? videoUrl : null,
         createdAt: new Date().toISOString(),
+        status: isAdmin ? postStatus : "EXPECTATION",
       };
 
       const jsonString = JSON.stringify(postData, null, 2);
@@ -305,6 +336,7 @@ export default function CreatePost() {
         name,
         authorId: user.id,
         content: jsonString,
+        postStatus: isAdmin ? postStatus : "EXPECTATION",
       };
 
       await postCreate(DbData);
@@ -315,6 +347,12 @@ export default function CreatePost() {
       setIsPublishing(false);
     }
   };
+
+  const statusOptions = [
+    { value: "EXPECTATION", label: "На рассмотрении" },
+    { value: "APPROVED", label: "Одобрено" },
+    { value: "RN", label: "Новая версия" },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12">
@@ -351,6 +389,53 @@ export default function CreatePost() {
                 required
               />
             </div>
+
+            {isAdmin && (
+              <div className="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck className="h-5 w-5 text-green-400" />
+                  <Label className="text-green-400 font-medium">
+                    Настройки администратора
+                  </Label>
+                </div>
+                <div>
+                  <Label
+                    htmlFor="postStatus"
+                    className="text-gray-300 mb-2 block"
+                  >
+                    Статус публикации
+                  </Label>
+                  <Select
+                    value={postStatus}
+                    onValueChange={(value: "EXPECTATION" | "APPROVED" | "RN") =>
+                      setPostStatus(value)
+                    }
+                  >
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white w-full">
+                      <SelectValue placeholder="Выберите статус" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-700 border-gray-600">
+                      {statusOptions.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className="text-white hover:bg-gray-600"
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="mt-2 text-sm text-gray-400">
+                    {postStatus === "EXPECTATION" &&
+                      "Пост будет ожидать проверки модератором"}
+                    {postStatus === "APPROVED" &&
+                      "Пост будет сразу опубликован"}
+                    {postStatus === "RN" && "Новая версия сайта"}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <Label className="text-gray-300 mb-2 block">Содержание</Label>

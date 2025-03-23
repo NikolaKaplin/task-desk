@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus } from "lucide-react";
 import {
   DragDropContext,
   Droppable,
@@ -160,6 +159,7 @@ export default function ProjectTasksPage() {
                       onClose={() => {
                         handleCreateTask();
                       }}
+                      usersInProject={JSON.parse(project.content).users}
                       users={usersArr}
                       authorId={user?.id}
                       projectId={project.id}
@@ -198,6 +198,7 @@ export default function ProjectTasksPage() {
               {selectedTask && (
                 <TaskDetails
                   user={user}
+                  project={project}
                   usersArr={usersArr}
                   task={selectedTask}
                   onClose={handleCloseTaskDetails}

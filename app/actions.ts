@@ -94,6 +94,7 @@ export async function updateProfile(
         email: body.email,
         bio: body.bio,
         devStatus: body.devStatus?.toString(),
+        contacts: body.contacts,
       })
       .where(eq(userTable.id, body.id));
     return { edit: true };
@@ -177,6 +178,7 @@ export async function getUsers() {
     devStatus: user.devStatus,
     createdAt: user.createdAt,
     email: user.email,
+    contacts: user.contacts,
   }));
 }
 
@@ -198,6 +200,13 @@ export async function postCreate(body: PostData): Promise<RegisterResult> {
   } else {
     return { success: false };
   }
+}
+
+export async function updatePost(postData) {
+  const postUpdate = await db
+    .update(postTable)
+    .set({ name: postData.name, content: postData.content })
+    .where(eq(postTable.id, postData.id));
 }
 
 export async function deletePost(id) {

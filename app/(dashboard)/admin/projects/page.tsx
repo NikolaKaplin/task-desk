@@ -11,15 +11,8 @@ import {
   Clock,
   Eye,
   ListTodo,
-  Trash2,
 } from "lucide-react";
-import {
-  getProjects,
-  getTasksByProjectId,
-  getUsers,
-  deleteProject,
-  deleteTask,
-} from "../../../actions";
+import { getProjects, getTasksByProjectId, getUsers } from "../../../actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,18 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 const updateProjectStatus = async (projectId, status) => {
   console.log(`Updating project ${projectId} status to ${status}`);
@@ -63,11 +45,6 @@ export default function ProjectsPage() {
   const [projectTasks, setProjectTasks] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loadingTasks, setLoadingTasks] = useState(false);
-  const [projectToDelete, setProjectToDelete] = useState(null);
-  const [taskToDelete, setTaskToDelete] = useState(null);
-  const [deleteProjectDialogOpen, setDeleteProjectDialogOpen] = useState(false);
-  const [deleteTaskDialogOpen, setDeleteTaskDialogOpen] = useState(false);
-
   const projectsPerPage = 6;
 
   useEffect(() => {
@@ -93,6 +70,7 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     let filtered = [...projects];
+
     if (searchQuery.trim() !== "") {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -103,7 +81,7 @@ export default function ProjectsPage() {
     }
 
     setFilteredProjects(filtered);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   }, [searchQuery, projects, activeTab]);
 
   const indexOfLastProject = currentPage * projectsPerPage;
@@ -125,6 +103,7 @@ export default function ProjectsPage() {
         )
       );
 
+      // If we're viewing this project in the dialog, update that too
       if (selectedProject && selectedProject.id === projectId) {
         setSelectedProject({ ...selectedProject, projectStatus: "APPROVED" });
       }
@@ -136,6 +115,7 @@ export default function ProjectsPage() {
   const handleReject = async (projectId) => {
     try {
       await updateProjectStatus(projectId, "REJECTED");
+      // Update local state
       setProjects(
         projects.map((project) =>
           project.id === projectId
@@ -143,6 +123,7 @@ export default function ProjectsPage() {
             : project
         )
       );
+
       if (selectedProject && selectedProject.id === projectId) {
         setSelectedProject({ ...selectedProject, projectStatus: "REJECTED" });
       }
@@ -154,6 +135,7 @@ export default function ProjectsPage() {
   const openProjectDetails = async (project) => {
     setSelectedProject(project);
     setDialogOpen(true);
+
     setLoadingTasks(true);
     try {
       const tasks = await getTasksByProjectId(project.id);
@@ -185,29 +167,6 @@ export default function ProjectsPage() {
     ).length;
 
     return Math.round((completedTasks / projectTasks.length) * 100);
-  };
-
-  const handleDeleteProject = async (projectId) => {
-    try {
-      await deleteProject(projectId);
-      setProjects(projects.filter((project) => project.id !== projectId));
-      setFilteredProjects(
-        filteredProjects.filter((project) => project.id !== projectId)
-      );
-      if (selectedProject && selectedProject.id === projectId) {
-        setDialogOpen(false);
-      }
-    } catch (error) {
-      console.error("Error deleting project:", error);
-    }
-  };
-  const handleDeleteTask = async (taskId) => {
-    try {
-      await deleteTask(taskId);
-      setProjectTasks(projectTasks.filter((task) => task.id !== taskId));
-    } catch (error) {
-      console.error("Error deleting task:", error);
-    }
   };
 
   if (loading) {
@@ -283,14 +242,11 @@ export default function ProjectsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentProjects.map((project) => (
               <ProjectCard
+                users={users}
                 key={project.id}
                 project={project}
                 author={getAuthor(project.authorId)}
-                onApprove={handleApprove}
-                onReject={handleReject}
                 onViewDetails={openProjectDetails}
-                setProjectToDelete={setProjectToDelete}
-                setDeleteProjectDialogOpen={setDeleteProjectDialogOpen}
               />
             ))}
           </div>
@@ -339,6 +295,7 @@ export default function ProjectsPage() {
         </>
       )}
 
+      {/* Project Details Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-4xl max-h-[90vh] overflow-auto">
           {selectedProject && (
@@ -405,10 +362,30 @@ export default function ProjectsPage() {
                 </div>
 
                 <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-2">Описание проекта</h3>
-                  <p className="text-gray-300 whitespace-pre-wrap">
-                    {selectedProject.content}
-                  </p>
+                  <h3 className="text-lg font-medium mb-2">Исполнители</h3>
+                  <div className="flex -space-x-3 overflow-hidden">
+                    {users
+                      .filter((user) =>
+                        JSON.parse(selectedProject.content).users.includes(
+                          user.id
+                        )
+                      )
+                      .slice(0, 3)
+                      .map((user) => (
+                        <Avatar
+                          key={user.id}
+                          className="inline-block border-2 border-gray-800"
+                        >
+                          <AvatarImage
+                            src={user.avatar || "/placeholder.svg"}
+                            alt={`${user.firstName} ${user.lastName}`}
+                          />
+                          <AvatarFallback>
+                            {user.firstName.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                      ))}
+                  </div>
                 </div>
 
                 <div className="mb-6">
@@ -438,12 +415,6 @@ export default function ProjectsPage() {
                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">
                               Статус
                             </th>
-                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">
-                              Приоритет
-                            </th>
-                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-400">
-                              Действия
-                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -452,65 +423,30 @@ export default function ProjectsPage() {
                               key={task.id}
                               className="border-b border-gray-700 last:border-0"
                             >
-                              <td className="px-4 py-3 text-sm">
-                                {task.title}
-                              </td>
-                              <td className="px-4 py-3">
-                                {task.status === "COMPLETED" ||
-                                task.status === "DONE" ? (
-                                  <Badge className="bg-green-500">
-                                    Выполнено
-                                  </Badge>
-                                ) : task.status === "IN_PROGRESS" ? (
-                                  <Badge className="bg-blue-500">
-                                    В процессе
-                                  </Badge>
-                                ) : (
-                                  <Badge className="bg-yellow-500">
-                                    Ожидает
-                                  </Badge>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-sm">
-                                {task.priority === "HIGH" ? (
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-red-400/10 text-red-400 border-red-400/20"
-                                  >
-                                    Высокий
-                                  </Badge>
-                                ) : task.priority === "MEDIUM" ? (
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-yellow-400/10 text-yellow-400 border-yellow-400/20"
-                                  >
-                                    Средний
-                                  </Badge>
-                                ) : (
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-blue-400/10 text-blue-400 border-blue-400/20"
-                                  >
-                                    Низкий
-                                  </Badge>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-right">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                                  onClick={() => {
-                                    setTaskToDelete(task);
-                                    setDeleteTaskDialogOpen(true);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  <span className="sr-only">
-                                    Удалить задачу
-                                  </span>
-                                </Button>
-                              </td>
+                              <Link href={`/projects/${task.projectId}`}>
+                                <td className="px-4 py-3 text-sm">
+                                  {task.title}
+                                </td>
+                                <td className=" px-4 py-3">
+                                  {task.taskStatus === "DONE" ? (
+                                    <Badge className="bg-purple-500 hover:cursor-default  hover:bg-purple-500">
+                                      Выполнено
+                                    </Badge>
+                                  ) : task.taskStatus === "PROCESSING" ? (
+                                    <Badge className="bg-yellow-500 hover:bg-yellow-500 hover:cursor-default">
+                                      В работе
+                                    </Badge>
+                                  ) : task.taskStatus === "ISSUED" ? (
+                                    <Badge className="bg-green-500 hover:bg-green-500 hover:cursor-default">
+                                      Ожидает
+                                    </Badge>
+                                  ) : (
+                                    <Badge className="bg-red-500 hover:bg-red-500 hover:cursor-default">
+                                      Ревью
+                                    </Badge>
+                                  )}
+                                </td>
+                              </Link>
                             </tr>
                           ))}
                         </tbody>
@@ -518,148 +454,24 @@ export default function ProjectsPage() {
                     </div>
                   )}
                 </div>
-
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-2">
-                    Прогресс выполнения
-                  </h3>
-                  <Progress
-                    value={calculateProgress(selectedProject.id)}
-                    className="h-2"
-                  />
-                  <div className="flex justify-between mt-1 text-xs text-gray-400">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3 mt-6">
-                  <Button
-                    variant="outline"
-                    className="border-red-500 text-red-500 hover:bg-red-500/10"
-                    onClick={() => {
-                      handleReject(selectedProject.id);
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    Отклонить
-                  </Button>
-                  <Button
-                    className="bg-green-600 hover:bg-green-700"
-                    onClick={() => {
-                      handleApprove(selectedProject.id);
-                    }}
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    Одобрить
-                  </Button>
-                </div>
               </div>
             </>
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Диалог подтверждения удаления проекта */}
-      <AlertDialog
-        open={deleteProjectDialogOpen}
-        onOpenChange={setDeleteProjectDialogOpen}
-      >
-        <AlertDialogContent className="bg-gray-800 border-gray-700 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Удаление проекта</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
-              {projectToDelete && (
-                <>
-                  Вы собираетесь удалить проект{" "}
-                  <span className="font-medium text-white">
-                    {projectToDelete.name}
-                  </span>
-                  . Это действие нельзя отменить, и все данные проекта, включая
-                  задачи, будут безвозвратно удалены.
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 text-white hover:bg-gray-600">
-              Отмена
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              onClick={() => {
-                if (projectToDelete) {
-                  handleDeleteProject(projectToDelete.id);
-                }
-                setDeleteProjectDialogOpen(false);
-              }}
-            >
-              Удалить
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Диалог подтверждения удаления задачи */}
-      <AlertDialog
-        open={deleteTaskDialogOpen}
-        onOpenChange={setDeleteTaskDialogOpen}
-      >
-        <AlertDialogContent className="bg-gray-800 border-gray-700 text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Удаление задачи</AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
-              {taskToDelete && (
-                <>
-                  Вы собираетесь удалить задачу{" "}
-                  <span className="font-medium text-white">
-                    {taskToDelete.title}
-                  </span>
-                  . Это действие нельзя отменить.
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-700 text-white hover:bg-gray-600">
-              Отмена
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              onClick={() => {
-                if (taskToDelete) {
-                  handleDeleteTask(taskToDelete.id);
-                }
-                setDeleteTaskDialogOpen(false);
-              }}
-            >
-              Удалить
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
 
-function ProjectCard({
-  project,
-  author,
-  onApprove,
-  onReject,
-  onViewDetails,
-  setProjectToDelete,
-  setDeleteProjectDialogOpen,
-}) {
+function ProjectCard({ project, author, onViewDetails, users }) {
   const formattedDate = new Date(project.createdAt).toLocaleDateString("ru-RU");
   const daysSinceCreation = Math.floor(
     (new Date() - new Date(project.createdAt)) / (1000 * 60 * 60 * 24)
   );
-  const projectUsers = JSON.parse(project.content)
-              .users.map((userId: number) => users.find((u) => u.id === userId))
-              .filter(Boolean);
-
+  const usersInProject = JSON.parse(project.content).users;
+  const projectAvatars = users.filter((user) =>
+    usersInProject.includes(user.id)
+  );
   return (
     <Card className="bg-gray-800 border-gray-700 text-white h-full flex flex-col">
       <CardContent className="p-6 flex flex-col flex-1">
@@ -686,11 +498,6 @@ function ProjectCard({
           )}
         </div>
 
-        <div className="mb-4 flex-1">
-          <p className="text-gray-300 line-clamp-3">{JSON.parse(project.content)
-            }</p>
-        </div>
-
         <div className="flex items-center gap-3 mb-4">
           <Avatar className="h-8 w-8">
             <AvatarImage src={author.avatar || ""} alt={author.firstName} />
@@ -709,44 +516,26 @@ function ProjectCard({
 
         <div className="flex items-center justify-between mt-auto">
           <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
+            size="default"
+            className="gap-2 bg-inherit hover:bg-inherit"
             onClick={() => onViewDetails(project)}
           >
             <Eye className="h-4 w-4" />
             Детали
           </Button>
-
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-red-500 text-red-500 hover:bg-red-500/10"
-              onClick={() => {
-                setProjectToDelete(project);
-                setDeleteProjectDialogOpen(true);
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-red-500 text-red-500 hover:bg-red-500/10"
-              onClick={() => onReject(project.id)}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Отклонить
-            </Button>
-            <Button
-              size="sm"
-              className="bg-green-600 hover:bg-green-700"
-              onClick={() => onApprove(project.id)}
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Одобрить
-            </Button>
+          <div className="flex -space-x-3 overflow-hidden">
+            {projectAvatars.slice(0, 3).map((user) => (
+              <Avatar
+                key={user.id}
+                className="inline-block border-2 border-gray-800"
+              >
+                <AvatarImage
+                  src={user.avatar || "/placeholder.svg"}
+                  alt={`${user.firstName} ${user.lastName}`}
+                />
+                <AvatarFallback>{user.firstName.charAt(0)}</AvatarFallback>
+              </Avatar>
+            ))}
           </div>
         </div>
 

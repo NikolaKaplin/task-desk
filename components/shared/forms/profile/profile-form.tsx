@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -37,6 +37,25 @@ export default function ProfileForm({ user }: { user: any }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isPublic, setIsPublic] = useState(user.isPublic || false);
 
+  let telegramUsername = "";
+  try {
+    if (user.contacts) {
+      const contactsObj = JSON.parse(user.contacts);
+      telegramUsername = contactsObj.telegram || "";
+    }
+  } catch (error) {
+    console.error("Error parsing contacts:", error);
+  }
+
+  const parseDevStatus = () => {
+    if (Array.isArray(user.devStatus)) {
+      return user.devStatus;
+    } else if (typeof user.devStatus === "string" && user.devStatus.trim()) {
+      return user.devStatus.split(",").map((status: string) => status.trim());
+    }
+    return [];
+  };
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -45,14 +64,24 @@ export default function ProfileForm({ user }: { user: any }) {
       lastName: user.lastName || "",
       email: user.email || "",
       bio: user.bio || "",
-      devStatus: Array.isArray(user.devStatus) ? user.devStatus : [],
+      devStatus: parseDevStatus(),
+      telegramUsername: telegramUsername,
     },
   });
 
   async function onSubmit(data: ProfileFormValues) {
     setIsLoading(true);
     try {
-      const result = await updateProfile(data);
+      const contacts = JSON.stringify({
+        telegram: data.telegramUsername,
+      });
+
+      const updatedData = {
+        ...data,
+        contacts,
+      };
+
+      const result = await updateProfile(updatedData);
       if (result.edit) {
         toast({
           title: "Profile updated",
@@ -152,6 +181,25 @@ export default function ProfileForm({ user }: { user: any }) {
                   className="bg-gray-700 border-gray-600 text-white"
                 />
               </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="telegramUsername"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-gray-300">Telegram Username</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="username (without @)"
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </FormControl>
+              <FormDescription className="text-gray-400">
+                Enter your Telegram username without the @ symbol
+              </FormDescription>
             </FormItem>
           )}
         />

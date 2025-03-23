@@ -17,6 +17,7 @@ export const profileFormSchema = z.object({
   devStatus: z.array(z.string()).min(1, {
     message: "Please select at least one developer status.",
   }),
+  telegramUsername: z.string().optional(),
 });
 
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;

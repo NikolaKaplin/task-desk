@@ -24,7 +24,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Task } from "./task-column";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { X, Calendar, Clock, Users, Edit2 } from "lucide-react";
+import {
+  X,
+  Calendar,
+  Clock,
+  Users,
+  Edit2,
+  Copy,
+  Clipboard,
+  Grid2x2Check,
+  ClipboardCheck,
+} from "lucide-react";
 import { updateTask } from "@/app/actions";
 
 interface TaskDetailsProps {
@@ -33,6 +43,7 @@ interface TaskDetailsProps {
   usersArr: any[];
   onSave: (updatedTask: Task) => void;
   user: any;
+  project: any;
 }
 
 export default function TaskDetails({
@@ -40,9 +51,11 @@ export default function TaskDetails({
   onClose,
   usersArr,
   user,
+  project,
 }: TaskDetailsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState(task);
+  const [copied, setCopied] = useState(false);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -79,7 +92,13 @@ export default function TaskDetails({
       );
     }
   };
-
+  let performers;
+  if (project) {
+    performers = JSON.parse(project.content).users;
+    if (usersArr) {
+      performers = usersArr.filter((user) => performers.includes(user.id));
+    }
+  }
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="bg-gray-800 text-green-400 border-0 sm:max-w-[550px] max-h-[90vh] overflow-hidden">
@@ -158,24 +177,25 @@ export default function TaskDetails({
                     <SelectValue placeholder="Select performers" />
                   </SelectTrigger>
                   <SelectContent className="bg-gray-700 text-green-400 max-h-[200px]">
-                    {usersArr.map((user) => (
-                      <SelectItem
-                        key={user.id}
-                        value={user.id.toString()}
-                        className="text-white hover:bg-gray-600"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={user.avatar} />
-                            <AvatarFallback>
-                              {user.firstName[0]}
-                              {user.lastName[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          {user.firstName} {user.lastName}
-                        </div>
-                      </SelectItem>
-                    ))}
+                    {performers &&
+                      performers.map((user) => (
+                        <SelectItem
+                          key={user.id}
+                          value={user.id.toString()}
+                          className="text-white hover:bg-gray-600"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={user.avatar} />
+                              <AvatarFallback>
+                                {user.firstName[0]}
+                                {user.lastName[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            {user.firstName} {user.lastName}
+                          </div>
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -232,11 +252,33 @@ export default function TaskDetails({
                 </div>
               )}
               <div>
-                <h3 className="text-lg font-semibold mb-2 text-green-500 flex items-center">
-                  <Clock className="mr-2 h-5 w-5" /> Deadline
+                <h3 className="text-lg font-semibold justify-between mb-2 text-green-500 flex items-center">
+                  <p className="flex">
+                    <Clock className="mr-2 h-5 w-5" /> Deadline
+                  </p>
+                  <p className="flex gap-2">
+                    <Grid2x2Check /> Индетефикатор
+                  </p>
                 </h3>
-                <p className="text-sm text-gray-300">
+                <p className="flex justify-between text-sm text-gray-300">
                   {format(new Date(task.deadline), "dd MMM yyyy HH:mm")}
+                  <div className="flex gap-3">
+                    <span>{task.id}</span>
+                    {copied ? (
+                      <ClipboardCheck />
+                    ) : (
+                      <Clipboard
+                        className="hover:cursor-pointer"
+                        onClick={() => {
+                          navigator.clipboard.writeText(task.id);
+                          setCopied(true);
+                          setTimeout(() => {
+                            setCopied(false);
+                          }, 2000);
+                        }}
+                      />
+                    )}
+                  </div>
                 </p>
               </div>
               <div>

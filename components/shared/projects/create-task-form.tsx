@@ -57,6 +57,7 @@ interface CreateTaskFormProps {
   projectId: string;
   authorId: string;
   users: any;
+  usersInProject: any;
   isOpenModal: boolean;
   onClose: () => void;
 }
@@ -65,6 +66,7 @@ export function CreateTaskForm({
   onTaskCreated,
   onClose,
   isOpenModal,
+  usersInProject,
   projectId,
   authorId,
   users,
@@ -136,6 +138,11 @@ export function CreateTaskForm({
     }
   }
 
+  let performers = undefined;
+  if (users) {
+    performers = users.filter((user) => usersInProject.includes(user.id));
+  }
+
   return (
     <Dialog open={isOpenModal} onOpenChange={onClose}>
       <DialogTrigger asChild></DialogTrigger>
@@ -203,20 +210,21 @@ export function CreateTaskForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-gray-700 text-green-400">
-                      {users.map((user) => (
-                        <SelectItem
-                          key={user.id}
-                          value={user.id.toString()}
-                          className="text-white hover:bg-gray-600"
-                        >
-                          <div className="flex items-center gap-4">
-                            {user.firstName} {user.lastName}{" "}
-                            <Avatar>
-                              <AvatarImage src={user.avatar} />
-                            </Avatar>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {performers &&
+                        performers.map((user) => (
+                          <SelectItem
+                            key={user.id}
+                            value={user.id.toString()}
+                            className="text-white hover:bg-gray-600"
+                          >
+                            <div className="flex items-center gap-4">
+                              {user.firstName} {user.lastName}{" "}
+                              <Avatar>
+                                <AvatarImage src={user.avatar} />
+                              </Avatar>
+                            </div>
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormDescription className="text-gray-400 text-xs md:text-sm">

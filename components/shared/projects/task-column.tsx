@@ -14,10 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { CreateTaskForm } from "./create-task-form";
-import { getTasksByProjectId } from "@/app/actions";
-import { Play } from "lucide-react";
+import { Copy, Play } from "lucide-react";
 
 export interface Task {
   id: string;
@@ -164,6 +161,14 @@ export default function TaskColumn({
                                   </span>
                                 </>
                               )}
+                            </div>
+                            <div className="flex z-50 items-center justify-between mb-1">
+                              <span className="font-semibold text-green-400">
+                                Индетефикатор:
+                              </span>
+                              <span className="flex gap-3 bg-gray-800 rounded px-2 py-1">
+                                <p>{task.id.slice(0, 15)}...</p>
+                              </span>
                             </div>
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-semibold text-green-400">

@@ -14,7 +14,7 @@ export const Footer: React.FC = () => {
           </p>
           <div className="flex space-x-4">
             <SocialIcon
-              href="https://t.me/rizoheisenbergg"
+              href="https://t.me/altergemu"
               icon={
                 <FaTelegram className="text-[#0088cc] hover:text-white transition duration-200" />
               }
@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
               label="Discord"
             />
             <SocialIcon
-              href="https://youtube.com/yourchannel"
+              href="https://youtube.com/altergemu"
               icon={
                 <FaYoutube className="text-[#ff0000] hover:text-white transition duration-200" />
               }
@@ -38,7 +38,12 @@ export const Footer: React.FC = () => {
           <div className="mt-4 text-xs">
             © {new Date().getFullYear()} Altergemu - All Rights Reserved
           </div>
-          <div className="text-xs text-gray-500">Version 1.0.0</div>
+          <Link
+            href={"/release-notes"}
+            className="text-xs text-gray-500 hover:underline hover:cursor-pointer"
+          >
+            Version 1.0.0
+          </Link>
           <p className="text-xs text-gray-500">Made with ❤️ by Rizo</p>
         </div>
       </div>

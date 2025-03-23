@@ -20,8 +20,6 @@ import { getUserSession } from "@/lib/get-session-server";
 import { getPostById, updatePost } from "@/app/actions";
 import axios from "axios";
 
-type EditorJS = any;
-
 export default function EditPost() {
   const [user, setUser] = useState(null);
   const [post, setPost] = useState(null);

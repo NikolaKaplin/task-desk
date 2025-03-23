@@ -7,8 +7,6 @@ import {
 } from "@/components/ui/card";
 import { getUserSession } from "@/lib/get-session-server";
 import ProfileForm from "@/components/shared/forms/profile/profile-form";
-import ContactsBlock from "@/components/shared/forms/profile/contacts-blocks";
-import TaskStatisticsGraph from "@/components/shared/forms/profile/task-statistics-graph";
 
 export default async function ProfilePage() {
   const user = await getUserSession();

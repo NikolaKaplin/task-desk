@@ -68,7 +68,7 @@ export const taskTable = mysqlTable("task", {
     .notNull(),
 });
 
-type postStatus = "EXPECTATION" | "APPROVED";
+type postStatus = "EXPECTATION" | "APPROVED" | "RN";
 
 export const postTable = mysqlTable("post", {
   id: varchar("id", { length: 25 }).primaryKey().$default(cuid),
