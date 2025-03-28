@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Users, Plus, Play } from "lucide-react";
 import { CreateProjectForm } from "@/components/shared/projects/create-project-form";
+import { getUserSession } from "@/lib/get-session-server";
+import { useToast } from "@/hooks/use-toast";
 
 interface Project {
   id: string;
@@ -68,16 +70,19 @@ export default function ProjectsPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDia, setIsDia] = useState(false);
-
+  const [user, setUser] = useState();
+  const { toast } = useToast();
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const [projectsData, usersData] = await Promise.all([
+      const [projectsData, usersData, user] = await Promise.all([
         getProjects(),
         getUsers(),
+        getUserSession(),
       ]);
       if (projectsData) setProjects(projectsData);
       if (usersData) setUsers(usersData);
+      if (user) setUser(user);
       setIsLoading(false);
     };
     fetchData();
@@ -129,9 +134,16 @@ export default function ProjectsPage() {
               .filter(Boolean);
             const excerpt =
               JSON.parse(project.content).description.slice(0, 100) + "...";
+              const handleBlock = () => {
+                toast({
+                  variant: 'destructive',
+                  title:
+                    "Вы не состоите в данном проекте",
+                });
+              }
 
             return (
-              <Link
+              <>{user ? <>{(JSON.parse(project.content).users).includes(user.id) ? <Link
                 href={`/projects/${project.id}`}
                 key={project.id}
                 className="group"
@@ -213,7 +225,89 @@ export default function ProjectsPage() {
                     </div>
                   </CardFooter>
                 </Card>
-              </Link>
+              </Link> : <div onClick={() => handleBlock()}
+                key={project.id}
+                className="group hover:cursor-pointer"
+              >
+                <Card className="bg-gray-800 border-gray-700 text-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <div className="relative h-48 bg-gray-700 flex items-center justify-center">
+                    <Briefcase className="w-12 h-12 text-gray-500" />
+                  </div>
+                  <CardHeader>
+                    <div className="flex items-center space-x-4">
+                      <Avatar>
+                        <AvatarImage
+                          src={creator?.avatar}
+                          alt={creator?.firstName}
+                        />
+                        <AvatarFallback>
+                          {creator?.firstName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-green-400">
+                          {project.name}
+                        </CardTitle>
+                        <p className="text-sm text-gray-400">
+                          {creator?.firstName} •{" "}
+                          {new Date(project.createdAt).toDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-300">{excerpt}</p>
+                    <Badge
+                      variant={
+                        project.projectStatus === "DEVELOPMENT"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="mt-2"
+                    >
+                      {project.projectStatus === "DEVELOPMENT"
+                        ? "В разработке"
+                        : "Поддержка"}
+                    </Badge>
+                  </CardContent>
+                  <CardFooter className="flex justify-between items-center">
+                    <Button
+                      variant="link"
+                      className="text-green-400 hover:text-green-300 transition-colors p-0"
+                    >
+                      View Tasks
+                    </Button>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex -space-x-3 overflow-hidden">
+                        {projectUsers.slice(0, 3).map((user) => (
+                          <Avatar
+                            key={user.id}
+                            className="inline-block border-2 border-gray-800"
+                          >
+                            <AvatarImage
+                              src={user.avatar || "/placeholder.svg"}
+                              alt={`${user.firstName} ${user.lastName}`}
+                            />
+                            <AvatarFallback>
+                              {user.firstName.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                        {projectUsers.length > 3 && (
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-800 text-xs text-gray-300">
+                            +{projectUsers.length - 3}
+                          </div>
+                        )}
+                      </div>
+                      <span className="flex gap-2 text-gray-400">
+                        <Users className="w-5 h-5" />
+                        {projectUsers.length}
+                      </span>
+                    </div>
+                  </CardFooter>
+                </Card>
+              </div> }</> : null  }
+              </>
             );
           })}
         </div>

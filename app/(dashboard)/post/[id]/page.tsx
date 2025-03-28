@@ -7,6 +7,7 @@ import { getPostById, getUserInfoById } from "@/app/actions";
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditorJSBlock {
   id: string;
@@ -41,7 +42,7 @@ export default function PostPage() {
   const [author, setAuthor] = useState<Author | null>(null);
   const pathname = usePathname();
   const postId = pathname?.split("/").pop();
-
+  const {toast} = useToast()
   useEffect(() => {
     async function fetchPost() {
       if (postId) {
@@ -62,7 +63,7 @@ export default function PostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen  text-white py-12 px-4 sm:px-6 lg:px-8">
       <article className="max-w-4xl mx-auto">
         <header className="mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-green-400 mb-4">
