@@ -1,17 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const models = [
-  { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
-  { id: "gpt-4", name: "GPT-4" },
-  { id: "claude-v1", name: "Claude v1" },
-  { id: "claude-instant-v1", name: "Claude Instant v1" },
-]
+  { id: "gpt-3.5-turbo" },
+  { id: "gpt-4" },
+  { id: "claude-v1" },
+  { id: "claude-instant-v1" },
+];
 
 export default function ModelSelector() {
-  const [selectedModel, setSelectedModel] = useState(models[0].id)
+  const [selectedModel, setSelectedModel] = useState(models[0].id);
 
   return (
     <div className="mb-2 sm:mb-4">
@@ -26,12 +32,11 @@ export default function ModelSelector() {
               value={model.id}
               className="text-green-400 hover:bg-gray-600 text-sm sm:text-base"
             >
-              {model.name}
+              {model.id}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
     </div>
-  )
+  );
 }
-

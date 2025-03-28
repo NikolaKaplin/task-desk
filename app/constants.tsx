@@ -223,3 +223,10 @@ export const tutorialSlides: TutorItems[] = [
     isLastSlide: true,
   },
 ] as const;
+
+export const models = [
+  { id: "llama_70b" },
+  { id: "llama_8b" },
+  { id: "mixtral" },
+  { id: "gemma" },
+];

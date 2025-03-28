@@ -13,7 +13,6 @@ export default function Home() {
         </span>
       </h1>
       <div className="w-full max-w-3xl">
-        <ModelSelector />
         <Chat />
       </div>
     </main>
