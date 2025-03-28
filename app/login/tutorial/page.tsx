@@ -147,12 +147,12 @@ export default function TutorialPage() {
                         <Sparkles className="h-4 w-4 sm:h-8 sm:w-8 text-yellow-400" />
                       </div>
                     </div>
-                    <div className="relative w-full max-w-xs sm:max-w-lg md:max-w-3xl h-[30vh] sm:h-[40vh] md:h-[50vh] rounded-lg overflow-hidden shadow-xl mb-4 sm:mb-8 transform transition-transform hover:scale-105 duration-500">
+                    <div className="relative w-full max-w-xs sm:max-w-lg md:max-w-3xl h-auto aspect-video rounded-lg overflow-hidden shadow-xl mb-4 sm:mb-8 transform transition-transform hover:scale-105 duration-500">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10"></div>
                       <img
                         src={slide.image || "/placeholder.svg"}
                         alt={slide.title}
-                        className="object-cover w-full h-full"
+                        className="object-contain w-full h-full"
                       />
                       <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 z-20">
                         <p className="text-base sm:text-xl md:text-2xl text-white font-medium">
@@ -174,11 +174,11 @@ export default function TutorialPage() {
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center px-4 py-6 sm:py-0 gap-4 sm:gap-8">
                     <div className="min-w-full flex justify-center">
-                      <div className="relative w-full max-w-xs sm:max-w-lg md:max-w-2xl h-[30vh] sm:h-[40vh] md:h-[50vh] rounded-lg overflow-hidden shadow-xl">
+                      <div className="relative w-full max-w-xs sm:max-w-lg md:max-w-2xl h-auto aspect-video rounded-lg overflow-hidden shadow-xl">
                         <img
                           src={slide.image || "/placeholder.svg"}
                           alt={slide.title}
-                          className="object-cover w-full h-full"
+                          className="object-contain w-full h-full"
                         />
                       </div>
                     </div>

@@ -180,40 +180,46 @@ export const listIds = [
 
 export const tutorialSlides: TutorItems[] = [
   {
-    title: "Паша",
-    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
-    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+    title: "Приветствуем вас на нашем сайте",
+    description:
+      "Наша команда специализируется на веб разработке, а так же разработке игр на игровом движке UE5",
+    image: "https://storage.yandexcloud.net/altergemu-team/tutorial/page1.webp",
   },
   {
-    title: "Паша",
-    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
-    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+    title: "Первым делом заполните свой профиль",
+    description:
+      "Просьба использовать свои имя и фамилию, ники иногда бывает тяжело зпоминать или выговаривать, это так же относится к нашему Discord серверу. Так же поставьте аватар, заполните информацию о себе и выберите вашу специализацию. Активируйте Public profile если хотите отображаться на нашем публичном сайте-визитке.",
+    image: "https://storage.yandexcloud.net/altergemu-team/tutorial/page2.png",
   },
   {
-    title: "Паша",
-    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
-    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+    title: "Создавайте командные проекты",
+    description:
+      "При помощи простого и понятного индерфейса вы можете создавать проекты и назначать исполнителей.",
+    image: "https://storage.yandexcloud.net/altergemu-team/tutorial/page3.png",
   },
   {
-    title: "Паша",
-    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
-    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+    title: "Управляйте задачами легко и быстро",
+    description:
+      "Вы можете создавать новые задачи, назначать испольнителей, дедлайны, подробное описание, а так же перетягивать их между колонками чтобы менять их статус выполнения.",
+    image: "https://storage.yandexcloud.net/altergemu-team/tutorial/page4.png",
   },
   {
-    title: "Паша",
-    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
-    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+    title: "Используйте возможности ИИ по полной",
+    description:
+      "С нами в вашем распоряжении 4 текстовых модели, а так же одна, которая может генерировать простые 3д модели для заднего фона, что может облегчить вам работу.",
+    image: "https://storage.yandexcloud.net/altergemu-team/tutorial/page5.png",
   },
   {
-    title: "Паша",
-    description: "Дуров Дуров Дуров Дуров Дуров Дуров Дуров",
-    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+    title: "Будьте ответственны",
+    description:
+      "Каждую пятницу практически всгда в 19:00 проводится созвон, где мы обсуждаем успехи каждого из участников, процесс выполнения задач, какие либо вопросы или проблемы, связанные с выполнением задач.",
+    image: "https://storage.yandexcloud.net/altergemu-team/tutorial/page6.jpg",
   },
   {
     title: "Добро пожаловать в Altergemu!",
     description:
-      "Вы готовы начать свое путешествие в мире новых возможностей с Пашей",
-    image: "https://s13.stc.yc.kpcdn.net/share/i/12/13994165/wr-960.webp",
+      "Вы готовы прокачать свои навыки и производить прекрасные продукты на свет.",
+    image: "https://storage.yandexcloud.net/altergemu-team/tutorial/page1.webp",
     isLastSlide: true,
   },
 ] as const;
