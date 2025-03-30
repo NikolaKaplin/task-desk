@@ -240,6 +240,7 @@ export async function getLastPostId() {
     .select()
     .from(postTable)
     .orderBy(desc(postTable.createdAt));
+  if (!lastPost) return "cjld2cjxh0000qzrgf831i7rn";
   return lastPost.id;
 }
 
